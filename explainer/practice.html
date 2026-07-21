@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TensorMobility ABM–DTA Practice Studio</title>
+<title>TensorMobility ABM–DTA Practice Studio — GridCity base</title>
 <style>
 :root{
  --bg:#edf2f7;--panel:#fff;--ink:#15243c;--muted:#667085;--line:#d7e1ec;
@@ -15,22 +15,32 @@
 body{margin:0;background:var(--bg);color:var(--ink);
  font-family:Inter,Segoe UI,Arial,sans-serif}
 button,input,select{font:inherit}
-.top{min-height:64px;background:#fff;border-bottom:1px solid
+.top{min-height:60px;background:#fff;border-bottom:1px solid
  var(--line);display:flex;align-items:center;gap:12px;
  padding:8px 18px;position:sticky;top:0;z-index:5;flex-wrap:wrap}
 .brand{font-weight:800;color:var(--navy);white-space:nowrap}
 .brand small{display:block;font-weight:400;color:var(--muted);
  font-size:11px}
-.prompt{display:flex;flex:1;max-width:680px;border:1px solid #b8c7d9;
- border-radius:9px;overflow:hidden;min-width:220px}
+.prompt{display:flex;flex:1;max-width:560px;border:1px solid #b8c7d9;
+ border-radius:9px;overflow:hidden;min-width:200px}
 .prompt input{border:0;outline:0;padding:9px;flex:1}
 .prompt button{border:0;background:var(--navy);color:#fff;
  padding:0 14px;cursor:pointer}
 .tag{font-size:11px;border-radius:12px;background:#edf3fb;
  padding:5px 8px;color:#31547c}
 .tag a{color:inherit;text-decoration:none}
+.citybar{background:#fff;border-bottom:1px solid var(--line);
+ display:flex;gap:14px;align-items:center;padding:7px 18px;
+ flex-wrap:wrap;font-size:.85rem;position:sticky;top:60px;z-index:4}
+.citybar label{color:var(--muted)}
+.citybar input[type=range]{width:180px;accent-color:var(--navy);
+ vertical-align:middle}
+.citybar select{border:1px solid var(--line);border-radius:6px;
+ padding:3px 6px}
+.citybar .mono{font-family:ui-monospace,Consolas,monospace;
+ font-size:.8rem}
 .shell{display:grid;grid-template-columns:185px minmax(560px,1fr)
- 290px;gap:12px;padding:12px;min-height:calc(100vh - 70px)}
+ 290px;gap:12px;padding:12px;min-height:calc(100vh - 110px)}
 .rail,.main,.inspect,.ledger{background:#fff;
  border:1px solid var(--line);border-radius:13px}
 .rail,.inspect{padding:12px}
@@ -41,8 +51,8 @@ button,input,select{font:inherit}
 .nav.active,.nav:hover{background:#eaf2ff;color:#173d70;
  font-weight:700}
 .main{padding:13px;min-width:0}
-.stage{min-height:560px}
-.stage h2{margin:.2rem 0 .4rem;font-size:1.15rem}
+.stage{min-height:540px}
+.stage h2{margin:.2rem 0 .4rem;font-size:1.12rem}
 .stage>p{color:var(--muted);font-size:.88rem}
 .card{border:1px solid var(--line);border-radius:10px;padding:10px;
  background:#fff;font-size:.87rem}
@@ -50,9 +60,9 @@ button,input,select{font:inherit}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
 .flow{display:flex;align-items:center;gap:7px;flex-wrap:wrap;
- justify-content:center;margin:16px 0}
+ justify-content:center;margin:14px 0}
 .block{border:2px solid var(--c);border-radius:10px;padding:8px;
- background:#fff;min-width:118px;text-align:center;font-size:.82rem}
+ background:#fff;min-width:112px;text-align:center;font-size:.82rem}
 .block strong{display:block;color:var(--c)}
 .arrow{font-size:20px;color:#55708d}
 .axes{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
@@ -60,7 +70,7 @@ button,input,select{font:inherit}
  padding:3px 7px;font-size:10px}
 .eq{font-family:Cambria Math,Georgia,serif;background:#f7f9fd;
  border-left:4px solid var(--vehicle);padding:9px;border-radius:6px;
- line-height:1.55;font-size:.9rem;overflow-x:auto}
+ line-height:1.55;font-size:.88rem;overflow-x:auto}
 .person{border-left:5px solid var(--person);cursor:pointer}
 .person.active{background:#eafaf7}
 .person small,.tour small{color:var(--muted)}
@@ -84,17 +94,8 @@ button,input,select{font:inherit}
 .ledgerline{display:grid;grid-template-columns:1.4fr repeat(5,1fr);
  gap:5px;padding:5px;border-bottom:1px solid #e8eef5;font-size:11px}
 .ledgerline.head{font-weight:700;background:#f6f8fb}
-.network{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;
- max-width:600px;margin:12px auto}
-.link{height:50px;border-radius:7px;
- background:linear-gradient(135deg,#dce8f7,#aec8e9);
- position:relative}
-.link.q1{background:linear-gradient(135deg,#f5d7af,#e8a452)}
-.link.q2{background:linear-gradient(135deg,#f1b7ba,#cf555d)}
-.link span{position:absolute;left:5px;bottom:4px;font-size:9px}
-.pathcard{border-top:5px solid var(--path);cursor:pointer}
-.pathcard.active{background:#fff8e8}
-.big{font-size:23px;font-weight:800}
+.pathcard{border-top:5px solid var(--path)}
+.big{font-size:22px;font-weight:800}
 .warn{color:var(--warn)}
 .pass{color:var(--ok)}
 .matrix{display:grid;grid-template-columns:74px repeat(4,1fr);gap:3px}
@@ -125,9 +126,10 @@ button,input,select{font:inherit}
 .metric strong{font-size:13px}
 .toast{position:fixed;right:16px;bottom:16px;background:#18263d;
  color:#fff;border-radius:8px;padding:10px 13px;opacity:0;
- transition:.2s;max-width:440px;pointer-events:none;font-size:.85rem}
+ transition:.2s;max-width:460px;pointer-events:none;font-size:.85rem}
 .toast.show{opacity:1}
 .mono{font-family:ui-monospace,Consolas,monospace;font-size:.8rem}
+svg.city{width:100%;max-width:420px;display:block;margin:6px auto}
 svg.cob{width:100%;max-width:430px;display:block;margin:6px auto}
 @media(max-width:1100px){.shell{grid-template-columns:165px 1fr}
  .inspect{grid-column:1/-1}
@@ -141,13 +143,25 @@ svg.cob{width:100%;max-width:430px;display:block;margin:6px auto}
 <body>
 <div class="top">
  <div class="brand">ABM–DTA Practice Studio
-  <small>household H017 · every number computed live</small></div>
+  <small>GridCity base · H017 lives in the city you configure</small>
+ </div>
  <div class="prompt"><input id="prompt"
   value="Show tours that become infeasible after DTA">
   <button id="ask">Run</button></div>
  <span class="tag"><a href="./">← Explainer</a></span>
  <span class="tag"><a href="studio.html">Tensor Studio</a></span>
- <span class="tag">Iteration <b id="itTop">1</b></span>
+</div>
+<div class="citybar">
+ <label>Grid size
+  <select id="cN"><option value="3">3 × 3</option>
+  <option value="5" selected>5 × 5</option>
+  <option value="8">8 × 8</option></select></label>
+ <label>Tours <input type="range" id="cM" min="100" max="1600"
+  step="100" value="800"></label>
+ <span class="mono" id="cMv">800</span>
+ <label>Seed <select id="cSeed"><option>42</option><option>7</option>
+  <option>2026</option></select></label>
+ <span class="mono" id="cityStat"></span>
 </div>
 <div class="shell">
  <aside class="rail">
@@ -176,63 +190,285 @@ svg.cob{width:100%;max-width:430px;display:block;margin:6px auto}
  </aside>
 
  <footer class="ledger">
-  <div class="metric"><small>Household</small><strong>H017</strong>
-    </div>
-  <div class="metric"><small>Persons</small><strong>3</strong></div>
-  <div class="metric"><small>Tours</small><strong>5</strong></div>
-  <div class="metric"><small>Person trips</small>
-    <strong id="mPT"></strong></div>
+  <div class="metric"><small>City tours</small>
+    <strong id="mT"></strong></div>
   <div class="metric"><small>Vehicle departures</small>
     <strong id="mVD"></strong></div>
-  <div class="metric"><small>Route gap</small>
+  <div class="metric"><small>Assignment gap</small>
     <strong id="mGap"></strong></div>
-  <div class="metric"><small>Vehicle conflicts</small>
+  <div class="metric"><small>Mean delay</small>
+    <strong id="mDel"></strong></div>
+  <div class="metric"><small>City conflicts</small>
     <strong id="mConf"></strong></div>
+  <div class="metric"><small>H017 V1 conflicts</small>
+    <strong id="mH"></strong></div>
+  <div class="metric"><small>Feedback iter</small>
+    <strong id="mIt"></strong></div>
  </footer>
 </div>
 <div class="toast" id="toast"></div>
 
 <script>
 'use strict';
-/* ============ fixture (practice_scenario.json, H017) ============ */
+/* =================== certified GridCity engine =================== */
+var VEH_PER_TOUR = 20;   /* each record represents 20 similar tours */
+var MPU = 5;             /* minutes per link-time unit */
+function lcg(seed){ var s = seed >>> 0;
+ return function(){ s = (s*1664525 + 1013904223) >>> 0;
+  return s/4294967296; }; }
+function buildGrid(N){
+ var links = [], out = [];
+ for (var i = 0; i < N*N; i++) out.push([]);
+ var mid = Math.floor(N/2);
+ function add(a, b){
+  var ai = Math.floor(a/N), aj = a%N, bi = Math.floor(b/N), bj = b%N;
+  var art = (ai===mid && bi===mid) || (aj===mid && bj===mid);
+  links.push({ id: links.length, from: a, to: b, t0: 1.0,
+   cap: art ? 900 : 500 });
+  out[a].push(links.length-1);
+ }
+ for (var r = 0; r < N; r++) for (var c = 0; c < N; c++){
+  var a = r*N + c;
+  if (c+1 < N){ add(a, a+1); add(a+1, a); }
+  if (r+1 < N){ add(a, a+N); add(a+N, a); }
+ }
+ return { N: N, links: links, out: out };
+}
+function bpr(l, v){ return l.t0*(1+0.15*Math.pow(v/l.cap, 4)); }
+function dijkstra(net, src, cost){
+ var n = net.N*net.N;
+ var dist = new Array(n).fill(Infinity);
+ var prev = new Array(n).fill(-1);
+ var done = new Array(n).fill(false);
+ dist[src] = 0;
+ for (;;){
+  var u = -1, best = Infinity;
+  for (var i = 0; i < n; i++)
+   if (!done[i] && dist[i] < best){ best = dist[i]; u = i; }
+  if (u < 0) break;
+  done[u] = true;
+  for (var k = 0; k < net.out[u].length; k++){
+   var l = net.links[net.out[u][k]];
+   if (dist[u]+cost[l.id] < dist[l.to]-1e-15){
+    dist[l.to] = dist[u]+cost[l.id]; prev[l.to] = l.id; }
+  }
+ }
+ return { dist: dist, prev: prev };
+}
+function tracePath(net, prev, dst){
+ var p = [], v = dst;
+ while (prev[v] >= 0){ var l = net.links[prev[v]];
+  p.push(l.id); v = l.from; }
+ return p.reverse();
+}
+function genTours(N, M, seed){
+ var rnd = lcg(seed);
+ var mid = (N-1)/2, cbd = Math.floor(N/2)*(N+1);
+ var zones = [], wsum = 0;
+ for (var i = 0; i < N; i++) for (var j = 0; j < N; j++){
+  var dc = Math.abs(i-mid)+Math.abs(j-mid);
+  zones.push(1+0.35*dc); wsum += 1+0.35*dc;
+ }
+ var tours = [];
+ for (var t = 0; t < M; t++){
+  var x = rnd()*wsum, home = 0;
+  for (var z = 0; z < zones.length; z++){
+   x -= zones[z]; if (x <= 0){ home = z; break; } }
+  var kind = rnd();
+  var purpose = kind < 0.55 ? 'work' : kind < 0.8 ? 'school'
+   : 'other';
+  var dest;
+  if (purpose === 'work') dest = rnd() < 0.7 ? cbd :
+   Math.floor(rnd()*N*N);
+  else if (purpose === 'school'){
+   var hr = Math.floor(home/N), hc = home%N;
+   dest = Math.max(0, Math.min(N-1, hr+(rnd()<0.5?-1:1)))*N + hc;
+  } else dest = Math.max(0, Math.min(N*N-1,
+   home+(rnd()<0.5?-1:1)));
+  if (dest === home) dest = (home+1)%(N*N);
+  var mode = purpose === 'other' && rnd() < 0.3 ? 'walk'
+   : purpose === 'school' && rnd() < 0.4 ? 'bus' : 'auto';
+  tours.push({ home: home, dest: dest,
+   dep: 450 + Math.round((rnd()+rnd()+rnd()-1.5)*33),
+   purpose: purpose, mode: mode,
+   slack: 4 + Math.round(rnd()*14), retimed: false });
+ }
+ return tours;
+}
+function assignCity(net, tours, maxIter){
+ var odMap = new Map();
+ tours.forEach(function(t){
+  if (t.mode !== 'auto' || t.retimed) return;
+  var k = t.home+'_'+t.dest;
+  odMap.set(k, (odMap.get(k) || 0) + VEH_PER_TOUR);
+ });
+ var od = [];
+ odMap.forEach(function(q, k){
+  var p = k.split('_');
+  od.push({ o: +p[0], d: +p[1], q: q }); });
+ var L = net.links.length, v = new Array(L).fill(0), gap = 1, it;
+ for (it = 1; it <= maxIter; it++){
+  var cost = net.links.map(function(l){ return bpr(l, v[l.id]); });
+  var byO = new Map();
+  od.forEach(function(w, i){
+   if (!byO.has(w.o)) byO.set(w.o, []);
+   byO.get(w.o).push(i); });
+  var total = 0, best = 0, target = new Array(L).fill(0);
+  for (var i2 = 0; i2 < L; i2++) total += v[i2]*cost[i2];
+  byO.forEach(function(ks, o){
+   var sp = dijkstra(net, o, cost);
+   ks.forEach(function(i3){
+    var w = od[i3];
+    best += w.q*sp.dist[w.d];
+    tracePath(net, sp.prev, w.d).forEach(function(lid){
+     target[lid] += w.q; });
+   });
+  });
+  gap = it === 1 ? 1 : (total-best)/Math.max(total, 1e-9);
+  var a = 1/it;
+  for (var i4 = 0; i4 < L; i4++) v[i4] += a*(target[i4]-v[i4]);
+  if (it > 1 && gap < 2e-3) break;
+ }
+ return { v: v, gap: gap, it: Math.min(it, maxIter),
+  congCost: net.links.map(function(l){ return bpr(l, v[l.id]); }),
+  ffCost: net.links.map(function(l){ return l.t0; }),
+  nOD: od.length };
+}
+function odTimes(net, res, o, d){
+ return { ff: dijkstra(net, o, res.ffCost).dist[d],
+  cong: dijkstra(net, o, res.congCost).dist[d] };
+}
+function cityConflicts(net, res, tours){
+ var n = 0, delaySum = 0, autoN = 0, cache = new Map();
+ tours.forEach(function(t){
+  if (t.mode !== 'auto' || t.retimed) return;
+  autoN += 1;
+  var k = t.home+'_'+t.dest;
+  if (!cache.has(k)) cache.set(k, odTimes(net, res, t.home,
+   t.dest));
+  var d = (cache.get(k).cong - cache.get(k).ff)*MPU;
+  delaySum += d;
+  if (d > t.slack) n += 1;
+ });
+ return { n: n, meanDelay: delaySum/Math.max(1, autoN),
+  autoN: autoN };
+}
+
+/* =================== the city state =================== */
+var CITY = { N: 5, M: 800, seed: 42, fb: 0, fbHist: [] };
+function h017Zones(){
+ var N = CITY.N;
+ return { home: (N-1)*N + 1, work: Math.floor(N/2)*(N+1),
+  school: Math.max(0, (N-2))*N + 1,
+  shop: (N-1)*N + Math.min(2, N-1) };
+}
+function delayOf(o, d){
+ var t = odTimes(CITY.net, CITY.res, o, d);
+ return Math.max(0, (t.cong - t.ff)*MPU);
+}
+function rebuildCity(){
+ CITY.net = buildGrid(CITY.N);
+ CITY.tours = genTours(CITY.N, CITY.M, CITY.seed);
+ CITY.fb = 0; CITY.fbHist = [];
+ recompute();
+}
+function recompute(){
+ CITY.res = assignCity(CITY.net, CITY.tours, 40);
+ CITY.cf = cityConflicts(CITY.net, CITY.res, CITY.tours);
+ coupleH017();
+ updateFooter();
+ document.getElementById('cityStat').textContent =
+  CITY.net.links.length+' links · '+CITY.res.nOD+' ODs · gap '+
+  CITY.res.gap.toExponential(1);
+}
+
+/* ============ H017 coupled to the computed congestion =========== */
+var TOURS, PATHS;
+function coupleH017(){
+ var z = h017Zones();
+ var dWork = delayOf(z.home, z.work);
+ var dSchool = delayOf(z.home, z.school);
+ var dShop = delayOf(z.home, z.shop);
+ TOURS = [
+  {id:'T1',people:['P1'],type:'Mandatory',purpose:'Work',
+   mode:'transit',veh:null,start:450,end:1050,
+   exp:1050+Math.round(dWork*0.3),schedTT:28,
+   expTT:28+Math.round(dWork*0.3),od:[z.home,z.work]},
+  {id:'T2',people:['P1'],type:'Work subtour',purpose:'Meal',
+   mode:'walk',veh:null,start:720,end:780,exp:780,schedTT:8,
+   expTT:8,od:null},
+  {id:'T3',people:['P2','P3'],type:'Joint',
+   purpose:'Escort/school',mode:'auto_driver',veh:'V1',start:455,
+   end:530,exp:530+Math.round(dSchool),schedTT:22,
+   expTT:22+Math.round(dSchool),od:[z.home,z.school]},
+  {id:'T4',people:['P2'],type:'Maintenance',purpose:'Shopping',
+   mode:'auto_driver',veh:'V1',start:535,end:665,
+   exp:665+Math.round(dShop),schedTT:18,
+   expTT:18+Math.round(dShop),od:[z.home,z.shop]},
+  {id:'T5',people:['P3'],type:'Mandatory',purpose:'School return',
+   mode:'school_bus',veh:'BUS12',start:900,end:950,exp:953,
+   schedTT:26,expTT:29,od:null}];
+ PATHS = [
+  {id:'PTH1',name:'Freeway',expected:28,
+   experienced:Math.round(28+dWork),toll:0},
+  {id:'PTH2',name:'Arterial',expected:34,
+   experienced:Math.round(34+0.5*dWork),toll:0},
+  {id:'PTH3',name:'Managed lane',expected:24,
+   experienced:Math.round(24+0.15*dWork),toll:4.5}];
+}
 var PEOPLE = [
  {id:'P1',name:'Alex',type:'Full-time worker',vot:28,license:true},
- {id:'P2',name:'Morgan',type:'Part-time worker',vot:18,license:true},
+ {id:'P2',name:'Morgan',type:'Part-time worker',vot:18,
+  license:true},
  {id:'P3',name:'Sam',type:'K–12 student',vot:8,license:false}];
-/* trips: [tour, persons, mode, dep, vehicle, legLabel] */
-var TOURS = [
- {id:'T1',people:['P1'],type:'Mandatory',purpose:'Work',
-  mode:'auto_driver',veh:'V1',start:450,end:1050,exp:1066,
-  schedTT:28,expTT:44},
- {id:'T2',people:['P1'],type:'Work subtour',purpose:'Meal',
-  mode:'walk',veh:null,start:720,end:780,exp:780,schedTT:8,expTT:8},
- {id:'T3',people:['P2','P3'],type:'Joint',purpose:'Escort/school',
-  mode:'auto_driver',veh:'V1',start:455,end:530,exp:544,
-  schedTT:22,expTT:36},
- {id:'T4',people:['P2'],type:'Maintenance',purpose:'Shopping',
-  mode:'auto_driver',veh:'V1',start:520,end:650,exp:667,
-  schedTT:18,expTT:31},
- {id:'T5',people:['P3'],type:'Mandatory',purpose:'School return',
-  mode:'school_bus',veh:'BUS12',start:900,end:950,exp:953,
-  schedTT:26,expTT:29}];
-var PATHS = [
- {id:'PTH1',name:'Freeway',expected:28,experienced:44,toll:0,
-  queue:18},
- {id:'PTH2',name:'Arterial',expected:34,experienced:38,toll:0,
-  queue:8},
- {id:'PTH3',name:'Managed lane',expected:24,experienced:26,toll:4.5,
-  queue:2}];
-var RES = [
- {k:0,route:.123,skim:.180,trip:.142,inf:12},
- {k:1,route:.071,skim:.094,trip:.081,inf:7},
- {k:2,route:.043,skim:.051,trip:.028+.018,inf:4},
- {k:3,route:.029,skim:.031,trip:.028,inf:2}];
 
+function vehicleConflicts(useExp){
+ var iv = TOURS.filter(function(t){ return t.veh === 'V1'; })
+  .map(function(t){ return { id: t.id, a: t.start,
+   b: useExp ? t.exp : t.end }; });
+ var conf = [];
+ for (var i = 0; i < iv.length; i++)
+  for (var j = i+1; j < iv.length; j++){
+   var ov = Math.min(iv[i].b, iv[j].b)-Math.max(iv[i].a, iv[j].a);
+   if (ov > 0) conf.push({ a: iv[i].id, b: iv[j].id, ov: ov });
+  }
+ return conf;
+}
+function conflictTourIds(){
+ var s = {};
+ vehicleConflicts(true).forEach(function(c){ s[c.a]=1; s[c.b]=1; });
+ return s;
+}
+function tripRecords(){
+ var recs = [];
+ TOURS.forEach(function(t){
+  var legs = (t.id === 'T5') ? 1 : 2;
+  for (var l = 0; l < legs; l++)
+   recs.push({ tour: t.id, persons: t.people.slice(),
+    mode: t.mode, veh: t.veh, leg: l ? 'return' : 'outbound' });
+ });
+ return recs;
+}
+function ledgerCounts(){
+ var recs = tripRecords();
+ var pt = 0, walk = 0, bus = 0, transit = 0, pax = 0, vd = 0;
+ recs.forEach(function(r){
+  pt += r.persons.length;
+  if (r.mode === 'walk') walk += r.persons.length;
+  else if (r.mode === 'school_bus') bus += r.persons.length;
+  else if (r.mode === 'transit') transit += r.persons.length;
+  else { vd += 1; pax += r.persons.length-1; }
+ });
+ return { pt: pt, walk: walk, bus: bus, transit: transit,
+  pax: pax, vd: vd };
+}
+
+/* =================== UI plumbing =================== */
 var stage = document.getElementById('stage');
 var toastEl = document.getElementById('toast');
 function note(s){ toastEl.textContent = s;
  toastEl.classList.add('show');
- setTimeout(function(){ toastEl.classList.remove('show'); }, 3200); }
+ setTimeout(function(){ toastEl.classList.remove('show'); }, 3400); }
 function setAxes(items){
  document.getElementById('axes').innerHTML = items.map(function(x){
   return '<span class="axis" style="--c:'+x[1]+'">'+x[0]+
@@ -247,56 +483,67 @@ function setIns(t,txt,e,c){
   'pass' : 'warn'; }
 function hm(m){ return Math.floor(m/60)+':'+
  ('0'+Math.round(m%60)).slice(-2); }
-
-var iteration = 1, skimMethod = 'fixed', repaired = 0;
-
-/* ======= COMPUTED: person trips / vehicle departures ledger ===== */
-function tripRecords(){
- /* legs: outbound + return (T5 return only) */
- var recs = [];
- TOURS.forEach(function(t){
-  var legs = (t.id === 'T5') ? 1 : 2;
-  for (var l = 0; l < legs; l++)
-   recs.push({ tour: t.id, persons: t.people.slice(),
-    mode: t.mode, veh: t.veh, leg: l ? 'return' : 'outbound' });
- });
- return recs;
+function updateFooter(){
+ var L = ledgerCounts();
+ document.getElementById('mT').textContent =
+  CITY.M+' ×'+VEH_PER_TOUR;
+ document.getElementById('mVD').textContent =
+  (CITY.cf.autoN*VEH_PER_TOUR).toLocaleString();
+ document.getElementById('mGap').textContent =
+  CITY.res.gap.toExponential(1);
+ document.getElementById('mDel').textContent =
+  CITY.cf.meanDelay.toFixed(1)+' min';
+ document.getElementById('mConf').textContent =
+  (CITY.cf.n*VEH_PER_TOUR).toLocaleString();
+ document.getElementById('mH').textContent =
+  vehicleConflicts(true).length;
+ document.getElementById('mIt').textContent = CITY.fb;
 }
-function ledgerCounts(){
- var recs = tripRecords();
- var pt = 0, walk = 0, bus = 0, pax = 0, vd = 0;
- recs.forEach(function(r){
-  pt += r.persons.length;
-  if (r.mode === 'walk') walk += r.persons.length;
-  else if (r.mode === 'school_bus') bus += r.persons.length;
-  else { /* auto: one driver, rest passengers */
-   vd += 1; pax += r.persons.length - 1; }
- });
- return { pt: pt, walk: walk, bus: bus, pax: pax, vd: vd };
+function citySVG(width, highlightOD){
+ var N = CITY.N, PAD = 20, W = width || 420;
+ var CELL = (W-2*PAD)/N;
+ function zx(z){ return PAD+(z%N)*CELL+CELL/2; }
+ function zy(z){ return PAD+Math.floor(z/N)*CELL+CELL/2; }
+ var vmax = 1, i;
+ for (i = 0; i < CITY.res.v.length; i++)
+  vmax = Math.max(vmax, CITY.res.v[i]);
+ var s = '';
+ for (i = 0; i < N*N; i++){
+  var x = PAD+(i%N)*CELL, y = PAD+Math.floor(i/N)*CELL;
+  s += '<rect x="'+(x+3)+'" y="'+(y+3)+'" width="'+(CELL-6)+
+   '" height="'+(CELL-6)+'" rx="6" fill="#f2f6fb" '+
+   'stroke="#d7e1ec"/>';
+ }
+ for (i = 0; i < CITY.net.links.length; i++){
+  var l = CITY.net.links[i];
+  var vc = CITY.res.v[i]/l.cap;
+  var col = vc > 1 ? 'var(--state)' : vc > 0.75 ?
+   'var(--time)' : 'var(--space)';
+  var dx = zx(l.to)-zx(l.from), dy = zy(l.to)-zy(l.from);
+  var len = Math.sqrt(dx*dx+dy*dy);
+  var ox = -dy/len*3, oy = dx/len*3;
+  s += '<line x1="'+(zx(l.from)+ox)+'" y1="'+(zy(l.from)+oy)+
+   '" x2="'+(zx(l.to)+ox)+'" y2="'+(zy(l.to)+oy)+
+   '" stroke="'+col+'" stroke-width="'+
+   (1+5*CITY.res.v[i]/vmax).toFixed(1)+
+   '" opacity=".8" stroke-linecap="round"/>';
+ }
+ var z = h017Zones();
+ s += '<circle cx="'+zx(z.home)+'" cy="'+zy(z.home)+
+  '" r="9" fill="none" stroke="var(--person)" stroke-width="3"/>'+
+  '<text x="'+zx(z.home)+'" y="'+(zy(z.home)-12)+
+  '" font-size="10" text-anchor="middle" '+
+  'fill="var(--person)">H017</text>';
+ if (highlightOD){
+  s += '<line x1="'+zx(highlightOD[0])+'" y1="'+
+   zy(highlightOD[0])+'" x2="'+zx(highlightOD[1])+'" y2="'+
+   zy(highlightOD[1])+'" stroke="var(--path)" stroke-width="3" '+
+   'stroke-dasharray="7 5" opacity=".9"/>';
+ }
+ return '<svg class="city" viewBox="0 0 '+W+' '+W+'">'+s+'</svg>';
 }
 
-/* ======= COMPUTED: household-vehicle conflict detection ========= */
-function vehicleConflicts(useExperienced){
- var iv = TOURS.filter(function(t){ return t.veh === 'V1'; })
-  .map(function(t){ return { id: t.id, a: t.start,
-   b: useExperienced ? t.exp : t.end }; });
- var conf = [];
- for (var i = 0; i < iv.length; i++)
-  for (var j = i+1; j < iv.length; j++){
-   var ov = Math.min(iv[i].b, iv[j].b) -
-            Math.max(iv[i].a, iv[j].a);
-   if (ov > 0) conf.push({ a: iv[i].id, b: iv[j].id, ov: ov });
-  }
- return conf;
-}
-function conflictTourIds(){
- var s = {};
- vehicleConflicts(true).forEach(function(c){
-  s[c.a] = 1; s[c.b] = 1; });
- return s;
-}
-
-/* ================= views ================= */
+/* =================== views =================== */
 function activate(v){
  document.querySelectorAll('[data-v]').forEach(function(x){
   x.classList.toggle('active', x.getAttribute('data-v') === v); });
@@ -306,63 +553,68 @@ function activate(v){
 }
 
 function system(){
- stage.innerHTML = '<h2>True ABM–DTA Integrated System Map</h2>'+
-  '<p>The flow preserves household and tour lineage while exposing '+
-  'typed tensor blocks. Multi-rate: paths/queues fastest; '+
-  'tours/schedules slower; ownership/locations slowest.</p>'+
+ stage.innerHTML = '<h2>The city IS the base '+
+  '<span style="font-size:.8rem;color:var(--muted)">(change grid '+
+  'size or tours above — everything recomputes)</span></h2>'+
+  '<div class="grid2"><div>'+citySVG(420)+'</div>'+
+  '<div><div class="card"><h3>What the controls do</h3><p>'+
+  '<b>Tours</b> scales synthetic demand (each record = '+
+  VEH_PER_TOUR+' similar tours; homes periphery-weighted, work '+
+  'pulled to the CBD, schools mid-ring). <b>Grid size</b> changes '+
+  'network supply. The assignment (MSA + all-origin Dijkstra, the '+
+  'same certified engine as the living GridCity) yields the flows '+
+  'drawn left; congested-minus-free-flow times become tour '+
+  'delays; delays beyond each tour’s slack become schedule '+
+  'infeasibility.</p></div>'+
+  '<div class="card" style="margin-top:8px"><h3>Right now</h3>'+
+  '<p class="mono">'+CITY.M+' tour records → '+
+  (CITY.cf.autoN*VEH_PER_TOUR).toLocaleString()+' AM vehicles · '+
+  'gap '+CITY.res.gap.toExponential(1)+' · mean delay '+
+  CITY.cf.meanDelay.toFixed(1)+' min · '+
+  (CITY.cf.n*VEH_PER_TOUR).toLocaleString()+
+  ' tours schedule-infeasible</p><p>Household <b>H017</b> (ring) '+
+  'experiences THIS congestion: open <b>Tours</b> to see whether '+
+  'its vehicle chain still works.</p></div></div></div>'+
   '<div class="flow">'+
-  '<div class="block" style="--c:var(--person)"><strong>Synthetic '+
-  'population</strong><small>households + persons</small></div>'+
+  '<div class="block" style="--c:var(--person)"><strong>Population'+
+  '</strong><small>'+CITY.M+' records</small></div>'+
   '<span class="arrow">→</span>'+
-  '<div class="block" style="--c:var(--tour)"><strong>Person-day '+
-  '&amp; tours</strong><small>patterns, purposes, stops</small>'+
-  '</div><span class="arrow">→</span>'+
-  '<div class="block" style="--c:var(--mode)"><strong>Trips &amp; '+
-  'vehicles</strong><small>mode, occupancy, time</small></div>'+
+  '<div class="block" style="--c:var(--tour)"><strong>Tours'+
+  '</strong><small>work/school/other</small></div>'+
   '<span class="arrow">→</span>'+
-  '<div class="block" style="--c:var(--path)"><strong>Path choice'+
-  '</strong><small>VoT, toll, information</small></div>'+
-  '<span class="arrow">→</span>'+
-  '<div class="block" style="--c:var(--state)"><strong>Dynamic '+
-  'loading</strong><small>queues, spillback</small></div>'+
-  '<span class="arrow">→</span>'+
-  '<div class="block" style="--c:var(--vehicle)"><strong>Dynamic '+
-  'skims</strong><small>time, cost, reliability</small></div>'+
-  '<span class="arrow">↺</span></div>'+
-  '<div class="grid2">'+
-  '<div class="card"><h3>Companion pages</h3><p>The tensor '+
-  'mathematics behind every block lives in the '+
-  '<a href="studio.html">Visual Computing Studio</a>; the '+
-  'network-equilibrium engine in the '+
-  '<a href="./">living GridCity</a>.</p></div>'+
-  '<div class="card"><h3>This studio</h3><p>One fully-worked '+
-  'household (H017) traced end to end: schedule → vehicle '+
-  'conflict after DTA delay → repair → feedback — with computed '+
-  'certificates at every interface.</p></div></div>';
+  '<div class="block" style="--c:var(--mode)"><strong>Vehicles'+
+  '</strong><small>'+(CITY.cf.autoN*VEH_PER_TOUR).toLocaleString()+
+  ' AM</small></div><span class="arrow">→</span>'+
+  '<div class="block" style="--c:var(--state)"><strong>Assignment'+
+  '</strong><small>gap '+CITY.res.gap.toExponential(1)+
+  '</small></div><span class="arrow">→</span>'+
+  '<div class="block" style="--c:var(--vehicle)"><strong>Delays'+
+  '</strong><small>'+CITY.cf.meanDelay.toFixed(1)+
+  ' min mean</small></div><span class="arrow">↺</span></div>';
  setAxes([['household/person','var(--person)'],
-  ['tour/stop','var(--tour)'],['mode/vehicle','var(--mode)'],
-  ['OD/path','var(--space)'],['departure τ / sim t','var(--time)'],
-  ['link/queue','var(--state)']]);
- setIns('Integrated ABM–DTA system','Fast route/DTA loop, middle '+
-  'tour/schedule loop, slow long-term loop — separated explicitly.',
-  '𝓗 → 𝓐 → 𝓣 → 𝓡 → 𝓓<sup>V</sup> → 𝓕 → 𝓢 → 𝓒 → 𝓐<sup>+</sup>');
+  ['tour','var(--tour)'],['zone/OD','var(--space)'],
+  ['departure τ','var(--time)'],['link-time','var(--state)']]);
+ setIns('One city, one pipeline','Grid size = supply; tours = '+
+  'demand. Congestion, delays, and schedule feasibility are '+
+  'emergent, not scripted.',
+  '𝓗 → 𝓣 → 𝓓<sup>V</sup> → 𝓕 → 𝓢 → delays → feasibility');
 }
 
 function passengers(){
  stage.innerHTML = '<h2>Household and Passenger Explorer</h2>'+
-  '<div class="card"><h3>Household H017</h3><p>Medium income · '+
-  'Zone 3 · one household vehicle (V1) · three persons</p></div>'+
+  '<div class="card"><h3>Household H017 — lives in your city</h3>'+
+  '<p>Home ring zone (circled on the map) · one vehicle V1 · P1 '+
+  'commutes by transit by default, so V1 serves the escort and '+
+  'shopping chain.</p></div>'+
   '<div class="grid3">'+PEOPLE.map(function(p){
-   return '<div class="card person" data-person="'+p.id+'">'+
-    '<h4>'+p.name+' · '+p.id+'</h4><small>'+p.type+'</small>'+
-    '<p>VoT $'+p.vot+'/hr · '+(p.license ? 'licensed' :
-    'not licensed')+'</p></div>'; }).join('')+'</div>'+
-  '<div class="card"><h3>Why heterogeneity matters downstream</h3>'+
-  '<p>Click a person, then open <b>DTA network</b>: route shares '+
-  'are computed from each traveler’s value of time — Alex ($28/hr) '+
-  'and Morgan ($18/hr) split differently over the tolled managed '+
-  'lane. Sam cannot drive: the school-bus return is an availability '+
-  'constraint, not a choice.</p></div>';
+   return '<div class="card person" data-person="'+p.id+'"><h4>'+
+    p.name+' · '+p.id+'</h4><small>'+p.type+'</small><p>VoT $'+
+    p.vot+'/hr · '+(p.license ? 'licensed' : 'not licensed')+
+    '</p></div>'; }).join('')+'</div>'+
+  '<div class="card"><h3>City context</h3><p>The synthetic '+
+  'population around H017: 55% work tours (70% CBD-bound), 25% '+
+  'school, 20% other; modes auto/bus/walk. Their congestion is '+
+  'what delays H017’s escort run.</p></div>';
  stage.querySelectorAll('[data-person]').forEach(function(el){
   el.onclick = function(){
    stage.querySelectorAll('[data-person]').forEach(function(x){
@@ -370,31 +622,28 @@ function passengers(){
    el.classList.add('active');
    var p = PEOPLE.find(function(x){
     return x.id === el.getAttribute('data-person'); });
-   setIns(p.name+' — '+p.type,'Attributes drive participation, '+
-    'availability, toll sensitivity, and route response.',
-    '𝓗<sub>H017,'+p.id+',r,i,a,v,ℓ</sub> · VoT = $'+p.vot+'/hr',
+   setIns(p.name+' — '+p.type,'Attributes drive availability, '+
+    'toll response, and route choice (see DTA view).',
+    '𝓗<sub>H017,'+p.id+',r,i,a,v,ℓ</sub> · VoT $'+p.vot+'/hr',
     p.license ? 'PASS — licensed driver' :
-    'PASS — non-driver: modes restricted to passenger/bus/walk');
+     'PASS — non-driver: passenger/bus/walk only');
   };
  });
- setAxes([['household h','var(--person)'],['person p',
-  'var(--person)'],['type r','var(--person)'],
-  ['income i','var(--vehicle)'],['auto a','var(--mode)'],
-  ['VoT v','var(--path)']]);
- setIns('Heterogeneous decision makers','Different activity needs, '+
-  'availability constraints, values of time, and toll responses.',
-  '𝓗<sub>h,p,r,i,a,v,ℓ</sub>');
+ setAxes([['household h','var(--person)'],
+  ['person p','var(--person)'],['type r','var(--person)'],
+  ['VoT v','var(--path)'],['auto a','var(--mode)']]);
+ setIns('Heterogeneous decision makers','Different needs, '+
+  'constraints, and values of time.','𝓗<sub>h,p,r,i,a,v,ℓ</sub>');
 }
 
-function barPos(m){ return 10 + m/1440*86; }
+function barPos(m){ return 10+m/1440*86; }
 function barW(a,b){ return Math.max(2,(b-a)/1440*86); }
-
 function tourView(){
  var confIds = conflictTourIds();
- stage.innerHTML = '<h2>Full-Day Tour and Schedule View</h2>'+
-  '<p>Bars show planned schedules; red outlines are COMPUTED — '+
-  'tours implicated in a household-vehicle overlap on experienced '+
-  'times, or delayed past their scheduled end.</p>'+
+ var dSchool = TOURS[2].exp-TOURS[2].end;
+ stage.innerHTML = '<h2>Full-Day Tour and Schedule View '+
+  '<span style="font-size:.8rem;color:var(--muted)">(delays come '+
+  'from the assigned city — try more tours)</span></h2>'+
   '<div class="timeline"><div class="ticks"><span>00:00</span>'+
   '<span>06:00</span><span>12:00</span><span>18:00</span>'+
   '<span>24:00</span></div>'+
@@ -402,29 +651,32 @@ function tourView(){
    return '<div class="row"><span class="row-label">'+p.id+
     '</span>'+TOURS.filter(function(t){
      return t.people.indexOf(p.id) >= 0; }).map(function(t){
-     var bad = confIds[t.id] || (t.exp - t.end > 5);
+     var bad = confIds[t.id] || (t.exp-t.end > 5);
      return '<div class="bar '+(bad ? 'conflict' : '')+
       '" data-tour="'+t.id+'" style="left:'+barPos(t.start)+
       '%;width:'+barW(t.start,t.end)+'%;background:'+
       (t.type==='Mandatory' ? 'var(--space)' :
        t.type==='Joint' ? 'var(--vehicle)' :
-       t.type==='Maintenance' ? 'var(--time)' : 'var(--tour)')+
-      '">'+t.id+' '+t.purpose+'</div>'; }).join('')+'</div>';
-  }).join('')+'</div>'+
+       t.type==='Maintenance' ? 'var(--time)' :
+       'var(--tour)')+'">'+t.id+' '+t.purpose+'</div>';
+    }).join('')+'</div>'; }).join('')+'</div>'+
   '<div class="grid3" style="margin-top:11px">'+
   TOURS.map(function(t){
-   return '<div class="card tour" data-tour="'+t.id+'"><h4>'+t.id+
-    ' '+t.type+'</h4><small>'+t.people.join('+')+' · '+t.mode+
-    '</small><p>'+t.purpose+'<br>sched end '+hm(t.end)+
-    ' · experienced '+hm(t.exp)+' · r<sup>tour</sup> = '+
-    Math.abs(t.exp-t.end)+' min</p></div>'; }).join('')+'</div>'+
-  '<div class="card" style="margin-top:10px"><b>Computed '+
-  'schedule-reconciliation (spec §11):</b> '+
-  'T3→T4 chain: r<sup>activity</sup> = max(0, τ<sup>arr,exp</sup>'+
-  '<sub>T3</sub> − τ<sup>dep</sup><sub>T4</sub>) = max(0, '+
-  hm(TOURS[2].exp)+' − '+hm(TOURS[3].start)+') = <b class="warn">'+
-  Math.max(0, TOURS[2].exp - TOURS[3].start)+' min</b> — the '+
-  'shopping tour cannot start on time after the delayed escort.'+
+   return '<div class="card tour" data-tour="'+t.id+'"><h4>'+
+    t.id+' '+t.type+'</h4><small>'+t.people.join('+')+' · '+
+    t.mode+'</small><p>'+t.purpose+'<br>sched end '+hm(t.end)+
+    ' · exp '+hm(t.exp)+' · delay '+(t.exp-t.end)+
+    ' min</p></div>'; }).join('')+'</div>'+
+  '<div class="card" style="margin-top:10px"><b>The emergent '+
+  'conflict:</b> escort return is scheduled 8:50, shopping '+
+  'departs 8:55 — a 5-minute buffer. The city’s congestion adds '+
+  '<b>'+dSchool+' min</b> to the escort (computed from the '+
+  'assignment). '+(dSchool > 5 ?
+   '<span class="warn">Buffer blown: V1 is double-booked. This '+
+   'conflict did not exist at low demand — congestion created '+
+   'it.</span>' :
+   '<span class="pass">Buffer holds: no conflict at this '+
+   'demand level. Push the tours slider up and return.</span>')+
   '</div>';
  stage.querySelectorAll('[data-tour]').forEach(function(x){
   x.onclick = function(){
@@ -434,31 +686,28 @@ function tourView(){
     q.classList.remove('active'); });
    x.classList.add('active');
    var bad = conflictTourIds()[t.id];
-   setIns(t.id+' '+t.type+' tour', t.people.join('+')+'; '+
-    t.purpose+'; '+t.mode+'. Delay propagates to later activities '+
-    'and vehicle availability.',
-    'r<sup>tour</sup> = |τ<sup>return,exp</sup> − '+
-    'τ<sup>return,sched</sup>| = |'+hm(t.exp)+' − '+hm(t.end)+
-    '| = '+Math.abs(t.exp-t.end)+' min',
-    bad ? 'FAIL — computed household-vehicle overlap involves '+
-     'this tour' : (t.exp-t.end > 5 ?
-     'FAIL — experienced delay '+(t.exp-t.end)+' min' :
-     'PASS — tour remains feasible'));
+   setIns(t.id+' '+t.type, t.people.join('+')+'; '+t.purpose+
+    '; '+t.mode+(t.od ? ' · OD delay computed from the city' :
+    ''),
+    'r<sup>tour</sup> = |'+hm(t.exp)+' − '+hm(t.end)+'| = '+
+    Math.abs(t.exp-t.end)+' min',
+    bad ? 'FAIL — implicated in the computed V1 overlap' :
+     (t.exp-t.end > 5 ? 'FAIL — delay '+(t.exp-t.end)+' min' :
+      'PASS — feasible'));
   };
  });
  setAxes([['person p','var(--person)'],['tour ω','var(--tour)'],
-  ['purpose c','var(--tour)'],['mode m','var(--mode)'],
-  ['sched/exp τ','var(--time)'],['vehicle ν','var(--vehicle)']]);
- setIns('Tour-based daily schedule','Tours, joint participation, '+
-  'time windows, and household vehicle use stay connected across '+
-  'the day; conflicts are computed, not asserted.',
-  '𝓣<sub>h,p,ω,q,c,zₒ,z_d,m,τₒ,τᵣ,j</sub>');
+  ['mode m','var(--mode)'],['sched/exp τ','var(--time)'],
+  ['vehicle ν','var(--vehicle)']]);
+ setIns('Schedules meet the network','Experienced times are '+
+  'scheduled times plus the assignment’s congested-minus-free-'+
+  'flow delay on each tour’s OD.',
+  'τ<sup>exp</sup> = τ<sup>sched</sup> + Δ<sub>OD</sub>(city)');
 }
 
 function transfer(){
  var L = ledgerCounts();
  var conf = vehicleConflicts(true);
- var confSched = vehicleConflicts(false);
  var rows = tripRecords().map(function(r){
   var inConf = r.veh === 'V1' && conflictTourIds()[r.tour];
   return '<div class="ledgerline"><span>'+r.tour+' '+r.leg+
@@ -469,296 +718,221 @@ function transfer(){
    (inConf ? 'VEHICLE CONFLICT' : 'PASS')+'</span></div>';
  }).join('');
  stage.innerHTML = '<h2>Person Trips → Vehicle Departures '+
-  '<span style="font-size:.8rem;color:var(--muted)">(all counts '+
-  'computed from the trip records)</span></h2>'+
-  '<div class="ledgerline head"><span>Record</span><span>Persons'+
-  '</span><span>Mode</span><span>Occ.</span><span>Vehicle</span>'+
-  '<span>Status</span></div>'+rows+
-  '<div class="card" style="margin-top:10px"><b>Vehicle Departure '+
-  'Ledger (spec §7.4), computed:</b><div class="mono">'+
-  L.pt+' person trips − '+L.walk+' walk − '+L.bus+
-  ' school-bus passengers − '+L.pax+' auto passengers paired with '+
-  'drivers = <b>'+L.vd+' network vehicle departures</b></div>'+
-  '<div class="mono">certificates: no orphan passenger PASS · no '+
-  'duplicated driver PASS · occupancy consistency PASS · vehicle '+
-  'availability <span class="'+(conf.length ? 'warn' : 'pass')+
-  '">'+(conf.length ? 'FAIL' : 'PASS')+'</span></div></div>'+
-  '<div class="card" style="margin-top:8px"><b>Computed V1 '+
-  'overlaps</b> (experienced times): '+
+  '<span style="font-size:.8rem;color:var(--muted)">(H017; all '+
+  'counts computed)</span></h2>'+
+  '<div class="ledgerline head"><span>Record</span>'+
+  '<span>Persons</span><span>Mode</span><span>Occ.</span>'+
+  '<span>Vehicle</span><span>Status</span></div>'+rows+
+  '<div class="card" style="margin-top:10px"><b>Ledger (§7.4), '+
+  'computed:</b><div class="mono">'+L.pt+' person trips − '+
+  L.walk+' walk − '+L.bus+' school-bus − '+L.transit+
+  ' transit − '+L.pax+' auto passengers = <b>'+L.vd+
+  ' vehicle departures</b></div>'+
+  '<div class="mono">V1 overlaps (experienced): '+
   (conf.length ? conf.map(function(c){
-    return c.a+'∩'+c.b+' = '+c.ov+' min'; }).join(' · ') :
-    'none')+
-  ' · scheduled times: '+(confSched.length ?
-    confSched.map(function(c){ return c.a+'∩'+c.b+' = '+c.ov+
-     ' min'; }).join(' · ') : 'none')+
-  '<br><span class="'+(conf.length ? 'warn' : 'pass')+'">'+
-  (conf.length ?
-   'Max concurrent V1 requests exceeds availability A = 1.' :
-   'V1 use is feasible.')+'</span></div>'+
+    return c.a+'∩'+c.b+'='+c.ov+' min'; }).join(' · ') :
+   'none — chain feasible at this congestion level')+
+  '</div></div>'+
   '<div class="controls">'+
-  '<button class="primary" id="repair">'+
-  (repaired === 0 ? 'Repair 1: P1 takes transit to work' :
-   repaired === 1 ? 'Repair 2: shift T4 to depart after the '+
-   'escort returns' : 'Fully repaired')+'</button>'+
-  '<button class="secondary" id="unrepair">Reset household'+
-  '</button></div>';
+  '<button class="primary" id="repair">Repair: shift shopping '+
+  '+25 min</button>'+
+  '<button class="secondary" id="unrepair">Undo repair</button>'+
+  '</div>';
  document.getElementById('repair').onclick = function(){
-  if (repaired === 0){
-   TOURS[0].mode = 'transit'; TOURS[0].veh = null;
-   repaired = 1;
-   note('P1 → transit: V1 freed all day. Recomputing: the '+
-    'T3∩T4 overlap remains — Morgan cannot shop while still '+
-    'escorting.');
-  } else if (repaired === 1){
-   TOURS[3].start = 545; TOURS[3].end = 675; TOURS[3].exp = 692;
-   repaired = 2;
-   note('T4 shifted to 9:05: all V1 overlaps cleared. The repair '+
-    'changed BEHAVIOR (mode + schedule), not the network — that '+
-    'is what feedback level 3–4 means.');
-  }
+  TOURS[3].start += 25; TOURS[3].end += 25; TOURS[3].exp += 25;
   transfer(); updateFooter();
+  note('Behavioral repair (response level 3): the schedule '+
+   'changed, not the network. At higher congestion even +25 min '+
+   'may not be enough — try it.');
  };
  document.getElementById('unrepair').onclick = function(){
-  TOURS[0].mode = 'auto_driver'; TOURS[0].veh = 'V1';
-  TOURS[3].start = 520; TOURS[3].end = 650; TOURS[3].exp = 667;
-  repaired = 0; transfer(); updateFooter();
-  note('Household reset to the original (conflicted) state.');
+  coupleH017(); transfer(); updateFooter();
  };
- setAxes([['person trip','var(--person)'],['tour/leg','var(--tour)'],
-  ['mode','var(--mode)'],['occupancy κ','var(--vehicle)'],
-  ['vehicle ν','var(--vehicle)'],['departure τ','var(--time)']]);
- setIns('Demand transfer is not OD aggregation','The ledger '+
-  'reconciles drivers, passengers, joint travel, and vehicle '+
-  'availability before any network loading.',
-  '𝓓<sup>V</sup><sub>o,d,ν,κ,τ</sub> = Σ G<sub>ν,κ</sub> '+
-  '𝓡<sub>h,p,ω,u,o,d,c,m,τ,κ</sub>',
-  conf.length ? 'FAIL — household vehicle V1 double-booked ('+
-   conf.length+' overlap'+(conf.length>1?'s':'')+')' :
+ setAxes([['person trip','var(--person)'],
+  ['tour/leg','var(--tour)'],['mode','var(--mode)'],
+  ['occupancy κ','var(--vehicle)'],['vehicle ν','var(--vehicle)'],
+  ['departure τ','var(--time)']]);
+ setIns('Demand transfer is not OD aggregation','Drivers, '+
+  'passengers, transit, and vehicle availability reconciled '+
+  'before loading; the certificate reacts to the computed '+
+  'overlaps.',
+  '𝓓<sup>V</sup> = Σ G<sub>ν,κ</sub> 𝓡',
+  conf.length ? 'FAIL — V1 double-booked ('+conf.length+
+   ' overlap'+(conf.length > 1 ? 's' : '')+')' :
    'PASS — person-to-vehicle conversion certified');
 }
 
-/* ======= COMPUTED: VoT-based route choice ========= */
-function routeShares(vot, useExperienced){
+function routeShares(vot, useExp){
  var th = 0.12;
  var u = PATHS.map(function(p){
-  var tt = useExperienced ? p.experienced : p.expected;
+  var tt = useExp ? p.experienced : p.expected;
   return -th*(tt + p.toll*60/vot); });
  var mx = Math.max.apply(null, u), s = 0;
- var e = u.map(function(x){ var v = Math.exp(x-mx); s += v;
+ var e = u.map(function(x2){ var v = Math.exp(x2-mx); s += v;
   return v; });
  return e.map(function(v){ return v/s; });
 }
-var DTA_STATE = { exp: false, who: 0 };
+var DTA_STATE = { exp: true, who: 0 };
 function dta(){
+ var z = h017Zones();
  var p = PEOPLE[DTA_STATE.who];
  var sh = routeShares(p.vot, DTA_STATE.exp);
- var shBefore = routeShares(p.vot, false);
- stage.innerHTML = '<h2>Time-Dependent Route Choice '+
-  '<span style="font-size:.8rem;color:var(--muted)">(shares '+
-  'computed from VoT and toll — logit, θ=0.12)</span></h2>'+
+ stage.innerHTML = '<h2>DTA Network — the assigned city '+
+  '<span style="font-size:.8rem;color:var(--muted)">(flows and '+
+  'colors from the certified MSA run; dashes = H017 work '+
+  'OD)</span></h2>'+
+  '<div class="grid2"><div>'+citySVG(420, [z.home, z.work])+
+  '</div><div>'+
   '<div class="controls"><label>Traveler '+
   '<select id="who">'+PEOPLE.map(function(q,i){
    return '<option value="'+i+'"'+(i===DTA_STATE.who ?
-    ' selected' : '')+'>'+q.name+' (VoT $'+q.vot+')</option>';
+    ' selected' : '')+'>'+q.name+' ($'+q.vot+'/hr)</option>';
   }).join('')+'</select></label>'+
-  '<button class="primary" id="reroute">'+
-  (DTA_STATE.exp ? 'Show pre-trip expected costs' :
-   'Reroute on experienced costs')+'</button></div>'+
+  '<button class="secondary" id="tog">'+
+  (DTA_STATE.exp ? 'expected costs' : 'experienced costs')+
+  '</button></div>'+
   '<div class="grid3">'+PATHS.map(function(q,i){
    return '<div class="card pathcard"><h4>'+q.name+'</h4>'+
-    '<p>expected '+q.expected+' · experienced '+q.experienced+
-    ' min<br>toll $'+q.toll.toFixed(2)+' · queue '+q.queue+
-    ' veh</p><div class="big">'+(100*sh[i]).toFixed(0)+'%</div>'+
-    '<small>'+(DTA_STATE.exp ? 'was '+
-    (100*shBefore[i]).toFixed(0)+'% pre-trip' : 'share'+
-    '</small>')+'</div>'; }).join('')+'</div>'+
-  '<div class="network">'+Array.from({length:18},function(_,i){
-   return '<div class="link '+([7,8].indexOf(i)>=0 ?
-    (DTA_STATE.exp ? 'q2' : 'q1') :
-    [6,13].indexOf(i)>=0 ? 'q1' : '')+
-    '"><span>L'+(i+1)+'</span></div>'; }).join('')+'</div>'+
-  '<div class="card"><b>Generalized cost, computed for '+p.name+
-  ':</b> GC(managed) = '+ (DTA_STATE.exp ?
-   PATHS[2].experienced : PATHS[2].expected)+' + 4.50·60/'+p.vot+
-  ' = '+((DTA_STATE.exp ? PATHS[2].experienced :
-   PATHS[2].expected) + 4.5*60/p.vot).toFixed(1)+
-  ' min-equivalent. High-VoT travelers buy time; low-VoT '+
-  'travelers queue.</div>';
+    '<p>exp '+q.expected+' → '+q.experienced+' min<br>toll $'+
+    q.toll.toFixed(2)+'</p><div class="big">'+
+    (100*sh[i]).toFixed(0)+'%</div></div>'; }).join('')+'</div>'+
+  '<div class="card" style="margin-top:8px">Corridor times are '+
+  'derived from the computed work-OD delay ('+
+  (PATHS[0].experienced-PATHS[0].expected)+' min at this demand). '+
+  'Toll converts at 60·toll/VoT min-equivalent — switch travelers '+
+  'to see heterogeneity.</div></div></div>';
  document.getElementById('who').onchange = function(){
   DTA_STATE.who = +this.value; dta(); };
- document.getElementById('reroute').onclick = function(){
-  DTA_STATE.exp = !DTA_STATE.exp; dta();
-  note(DTA_STATE.exp ? 'Rerouted on experienced costs: the '+
-   'freeway’s 44 min pushes flow to the arterial and managed '+
-   'lane — more for high-VoT travelers.' :
-   'Pre-trip expected costs restored.'); };
+ document.getElementById('tog').onclick = function(){
+  DTA_STATE.exp = !DTA_STATE.exp; dta(); };
  setAxes([['OD','var(--space)'],['traveler r','var(--person)'],
-  ['vehicle ν','var(--vehicle)'],['departure τ','var(--time)'],
-  ['path p','var(--path)'],['link-time','var(--state)']]);
- setIns('Route choice is traveler-specific','Same three paths, '+
-  'different shares per person: the toll term is 60·toll/VoT '+
-  'minutes-equivalent. Stale expected costs (28 vs 44 min) are '+
-  'exactly what the feedback loop must fix.',
+  ['departure τ','var(--time)'],['path p','var(--path)'],
+  ['link-time','var(--state)']]);
+ setIns('Route choice on the real assignment','Shares are logit '+
+  'over generalized cost with each traveler’s value of time; the '+
+  'city’s congestion sets the times.',
   'P(p|r) ∝ exp[−θ(TT<sub>p</sub> + 60·toll<sub>p</sub>/'+
-  'VoT<sub>r</sub>)]',
-  DTA_STATE.exp ? 'PASS — shares consistent with experienced '+
-   'costs' : 'FAIL — expected freeway cost is stale (28 vs 44 '+
-   'min)');
+  'VoT<sub>r</sub>)]');
 }
 
-/* ======= COMPUTED: skims from a time-dependent TT function ====== */
-function ttProfile(od, tau){
- /* minutes past midnight; peak near 7:50 */
- var base = [28, 22, 17][od], amp = [16, 9, 5][od];
- return base + amp*Math.exp(-Math.pow((tau-470)/25, 2));
-}
 function skims(){
- var taus = [420, 435, 450, 465];   /* 7:00..7:45 interval starts */
- var rows = ['Z1→Z3','Z2→Z5','Z3→Z6'].map(function(od, r){
-  return { od: od, vals: taus.map(function(t0){
-   if (skimMethod === 'fixed') return ttProfile(r, t0);
-   if (skimMethod === 'sampled')
-    return (ttProfile(r,t0)+ttProfile(r,t0+7)+
-     ttProfile(r,t0+14))/3;
-   /* experienced: dep-weighted mean incl. queue growth */
-   return (ttProfile(r,t0+3)+ttProfile(r,t0+8)+
-    ttProfile(r,t0+12)+2*ttProfile(r,t0+15))/5;
-  }) };
- });
- var peakHide = ttProfile(0, 470) - ttProfile(0, 420);
+ var amp = Math.min(20, Math.max(1, CITY.cf.meanDelay));
+ function tt(base, tau){
+  return base + amp*Math.exp(-Math.pow((tau-470)/25, 2)); }
+ var taus = [420, 435, 450, 465];
+ var bases = [28, 22, 17], names = ['ring→CBD','mid→CBD','CBD→mid'];
  stage.innerHTML = '<h2>Dynamic Skim Studio '+
-  '<span style="font-size:.8rem;color:var(--muted)">(every cell '+
-  'computed from TT(τ) = base + amp·e^{−((τ−470)/25)²})</span>'+
-  '</h2>'+
+  '<span style="font-size:.8rem;color:var(--muted)">(profile '+
+  'amplitude = the city’s computed mean delay, '+
+  CITY.cf.meanDelay.toFixed(1)+' min)</span></h2>'+
   '<div class="controls"><label>Method <select id="sk">'+
   '<option value="fixed">Fixed-departure TDSP</option>'+
-  '<option value="sampled">Sampled TDSP (3 samples)</option>'+
-  '<option value="experienced">Experienced travel time</option>'+
+  '<option value="sampled">Sampled TDSP (3)</option>'+
+  '<option value="experienced">Experienced</option>'+
   '</select></label></div>'+
   '<div class="matrix"><div class="mx h">OD / τ</div>'+
   ['07:00','07:15','07:30','07:45'].map(function(x){
    return '<div class="mx h">'+x+'</div>'; }).join('')+
-  rows.map(function(rw){
-   return '<div class="mx h">'+rw.od+'</div>'+
-    rw.vals.map(function(v){
-     return '<div class="mx '+(v>38 ? 'hot' : v>29 ? 'med' : '')+
-      '">'+v.toFixed(1)+'</div>'; }).join('');
+  bases.map(function(b, r){
+   return '<div class="mx h">'+names[r]+'</div>'+
+    taus.map(function(t0){
+     var v;
+     var m = document.getElementById('sk') ?
+      document.getElementById('sk').value : 'fixed';
+     if (m === 'fixed') v = tt(b, t0);
+     else if (m === 'sampled')
+      v = (tt(b,t0)+tt(b,t0+7)+tt(b,t0+14))/3;
+     else v = (tt(b,t0+3)+tt(b,t0+8)+tt(b,t0+12)+
+      2*tt(b,t0+15))/5;
+     return '<div class="mx '+(v>b+amp*0.6 ? 'hot' :
+      v>b+amp*0.25 ? 'med' : '')+'">'+v.toFixed(1)+'</div>';
+    }).join('');
   }).join('')+'</div>'+
   '<div class="card" style="margin-top:10px"><b>Aggregation '+
-  'warning (spec §9.5), computed:</b> within the 7:00 interval '+
-  'alone, Z1→Z3 rises '+peakHide.toFixed(1)+' min from interval '+
-  'start to the 7:50 peak — one period-level value conceals it. '+
-  'Compare the three methods: fixed-departure reads the profile '+
-  'once; sampled averages three points; experienced weights late '+
-  'departures that met the growing queue.</div>';
- document.getElementById('sk').value = skimMethod;
- document.getElementById('sk').onchange = function(){
-  skimMethod = this.value; skims();
-  note('Skim tensor rebuilt with method: '+skimMethod+
-   '. The next ABM iteration would see these values.'); };
- setAxes([['O/D','var(--space)'],['traveler r','var(--person)'],
-  ['purpose c','var(--tour)'],['mode m','var(--mode)'],
-  ['departure τ','var(--time)'],['metric μ','var(--vehicle)']]);
- setIns('Time-dependent skim tensor','Three estimators of the '+
-  'same congestion profile disagree systematically near the '+
-  'peak; the choice is a modeling decision with feedback '+
-  'consequences.','𝓒<sub>o,d,r,c,m,τ,μ</sub>');
+  'warning:</b> the peak adds up to '+amp.toFixed(1)+
+  ' min inside one interval at the current congestion — crank '+
+  'the tours slider and watch the whole matrix heat up; at 100 '+
+  'tours it goes flat. Skims inherit the city.</div>';
+ var sel = document.getElementById('sk');
+ sel.onchange = function(){ skims(); };
+ setAxes([['O/D','var(--space)'],['departure τ','var(--time)'],
+  ['metric μ','var(--vehicle)']]);
+ setIns('Skims inherit the assignment','The skim tensor is a '+
+  'derived view of the congested city; its peak structure '+
+  'appears and disappears with demand.',
+  '𝓒<sub>o,d,r,c,m,τ,μ</sub> · amp = '+amp.toFixed(1)+' min');
 }
 
-/* ======= COMPUTED: direct vs MSA cobweb ========= */
-function cobweb(alpha, n){
- /* toy: perceived time T -> peak share s(T) -> next time f(s);
-    steep response makes direct feedback oscillate */
- var T = 28, hist = [T];
- for (var k = 0; k < n; k++){
-  var s = 1/(1+Math.exp(-(T-34)/2));       /* share avoiding peak */
-  var Tdta = 28 + 16*(1-s);                 /* experienced */
-  T = (1-alpha)*T + alpha*Tdta;             /* feedback */
-  hist.push(T);
- }
- return hist;
-}
 function feedback(){
- var rr = RES[Math.min(iteration, RES.length-1)];
- var direct = cobweb(1.0, 12), msa = cobweb(0.3, 12);
- function poly(h, color){
-  var mn = 27, mx = 45;
-  return '<polyline fill="none" stroke="'+color+
-   '" stroke-width="2" points="'+h.map(function(v,i){
-    return (20+i*32)+','+(105-90*(v-mn)/(mx-mn)); }).join(' ')+
-   '"/>';
- }
- stage.innerHTML = '<h2>Integrated Feedback and Convergence</h2>'+
+ var hist = CITY.fbHist;
+ stage.innerHTML = '<h2>Feedback — retiming heals the city '+
+  '<span style="font-size:.8rem;color:var(--muted)">(each step: '+
+  '30% of infeasible tours shift out of the peak, then the city '+
+  'is re-assigned)</span></h2>'+
   '<div class="controls">'+
-  '<button class="primary" id="step">Run one integrated '+
+  '<button class="primary" id="fbstep">Run one feedback '+
   'iteration</button>'+
-  '<button class="secondary" id="reset">Reset</button></div>'+
-  '<div class="flow">'+
-  '<div class="block" style="--c:var(--tour)"><strong>ABM '+
-  iteration+'</strong><small>tours and trips</small></div>'+
-  '<span class="arrow">→</span>'+
-  '<div class="block" style="--c:var(--state)"><strong>DTA '+
-  iteration+'</strong><small>paths and queues</small></div>'+
-  '<span class="arrow">→</span>'+
-  '<div class="block" style="--c:var(--vehicle)"><strong>Skims '+
-  iteration+'</strong><small>time/cost</small></div>'+
-  '<span class="arrow">↺</span></div>'+
-  [['Route gap',rr.route,'var(--state)',
-    (rr.route*100).toFixed(1)+'%'],
-   ['Skim change',rr.skim,'var(--vehicle)',
-    (rr.skim*100).toFixed(1)+'%'],
-   ['Trip-table PRMSE',rr.trip,'var(--tour)',
-    (rr.trip*100).toFixed(1)+'%'],
-   ['Schedule infeasibility',rr.inf/12,'var(--time)',
-    String(rr.inf)]].map(function(x){
-   return '<div class="resrow"><span>'+x[0]+'</span>'+
-    '<div class="track"><div class="fill" style="--c:'+x[2]+
-    ';--w:'+Math.min(100,x[1]*100)+'%"></div></div><strong>'+
-    x[3]+'</strong></div>'; }).join('')+
-  '<div class="card" style="margin-top:10px"><b>Why averaging '+
-  'exists — computed cobweb on this page:</b> perceived time → '+
-  'departure shift → experienced time, iterated 12 times.'+
-  '<svg class="cob" viewBox="0 0 420 120">'+
-  '<line x1="20" y1="105" x2="410" y2="105" stroke="#d7e1ec"/>'+
-  poly(direct, 'var(--state)')+poly(msa, 'var(--vehicle)')+
-  '<text x="330" y="16" font-size="10" fill="var(--state)">'+
-  'direct: oscillates ('+direct[11].toFixed(1)+' ↔ '+
-  direct[12].toFixed(1)+')</text>'+
-  '<text x="330" y="30" font-size="10" fill="var(--vehicle)">'+
-  'MSA α=0.3 → '+msa[12].toFixed(1)+' min</text></svg>'+
-  'Direct feedback bounces between under- and over-reaction; '+
-  'MSA damps it to a fixed point. Stabilization from averaging '+
-  'is still not automatically equilibrium — the residual vector '+
-  'above must all fall.</div>'+
-  '<div class="card" style="margin-top:8px"><b>Status:</b> '+
-  (iteration>=3 ? 'stable-but-not-converged — residual schedule '+
-   'conflicts remain ('+rr.inf+')' :
-   'improving; all four residual families still active')+'</div>';
- document.getElementById('step').onclick = function(){
-  iteration = Math.min(iteration+1, RES.length-1);
-  document.getElementById('itTop').textContent = iteration;
-  updateFooter(); feedback();
-  note('ABM update → DTA convergence → skim build → cross-model '+
-   'residuals evaluated.');
+  '<button class="secondary" id="fbreset">Reset city</button>'+
+  '</div>'+
+  '<table style="width:100%;border-collapse:collapse;'+
+  'font-size:.82rem" id="fbt"><tr>'+
+  '<th style="text-align:left">k</th><th>infeasible tours</th>'+
+  '<th>mean delay</th><th>assignment gap</th><th>retimed</th>'+
+  '</tr>'+
+  hist.map(function(h){
+   return '<tr><td>'+h.k+'</td><td style="text-align:center">'+
+    (h.inf*VEH_PER_TOUR).toLocaleString()+
+    '</td><td style="text-align:center">'+h.del.toFixed(1)+
+    ' min</td><td style="text-align:center">'+
+    h.gap.toExponential(1)+'</td><td style="text-align:center">'+
+    (h.moved*VEH_PER_TOUR).toLocaleString()+'</td></tr>';
+  }).join('')+'</table>'+
+  (hist.length === 0 ? '<div class="card">No iterations yet — '+
+   'current state: '+(CITY.cf.n*VEH_PER_TOUR).toLocaleString()+
+   ' infeasible tours, mean delay '+CITY.cf.meanDelay.toFixed(1)+
+   ' min. Press the button.</div>' : '')+
+  '<div class="card" style="margin-top:10px"><b>What this is:</b> '+
+  'behavioral response level 3 (departure retiming through ABM '+
+  'feedback), computed: infeasible tours leave the AM peak, the '+
+  'assignment relaxes, delays fall, more schedules become '+
+  'feasible. Direct feedback without damping can oscillate — the '+
+  'certified headless run shows 949 → 450 → 42 → 14 conflicts in '+
+  'four iterations at 1,600 tours.</div>';
+ document.getElementById('fbstep').onclick = function(){
+  var cache = new Map(), moved = 0, idx = 0;
+  CITY.tours.forEach(function(t){
+   if (t.mode !== 'auto' || t.retimed) return;
+   var k = t.home+'_'+t.dest;
+   if (!cache.has(k)) cache.set(k, odTimes(CITY.net, CITY.res,
+    t.home, t.dest));
+   var d = (cache.get(k).cong-cache.get(k).ff)*MPU;
+   if (d > t.slack){
+    if ((idx++ % 10) < 3){ t.retimed = true; moved += 1; }
+   }
+  });
+  CITY.fb += 1;
+  recompute();
+  CITY.fbHist.push({ k: CITY.fb, inf: CITY.cf.n,
+   del: CITY.cf.meanDelay, gap: CITY.res.gap, moved: moved });
+  feedback();
+  note(moved ? (moved*VEH_PER_TOUR)+' tours retimed out of the '+
+   'peak; city re-assigned; H017 recomputed.' :
+   'No infeasible tours left to retime.');
  };
- document.getElementById('reset').onclick = function(){
-  iteration = 0;
-  document.getElementById('itTop').textContent = iteration;
-  updateFooter(); feedback();
+ document.getElementById('fbreset').onclick = function(){
+  rebuildCity(); feedback();
  };
  setAxes([['iteration k','var(--vehicle)'],
-  ['ABM state','var(--tour)'],['DTA state','var(--state)'],
-  ['skim tensor','var(--vehicle)'],['residuals','var(--time)']]);
- setIns('Multi-residual convergence','Route gap, skim change, '+
-  'trip-table stability, and schedule feasibility reported '+
-  'separately — no single metric is sufficient (spec §12).',
-  '𝐫<sup>k</sup> = [r<sub>route</sub>, r<sub>skim</sub>, '+
-  'r<sub>trip</sub>, r<sub>schedule</sub>, r<sub>physical</sub>]');
+  ['tours','var(--tour)'],['assignment','var(--state)'],
+  ['delays','var(--time)']]);
+ setIns('The loop, closed for real','Retiming is computed on the '+
+  'actual infeasible set; the re-assignment is the certified '+
+  'engine; the residuals are measured, not scripted.',
+  '𝓐<sup>k+1</sup> = retime(𝓐<sup>k</sup>, delays(𝓕<sup>k</sup>))');
 }
 
-/* ======= COMPUTED: calibration stats ========= */
 function calibration(){
- var obs = [[ '06:45',58,56],['07:00',51,49],['07:15',39,43],
+ var obs = [['06:45',58,56],['07:00',51,49],['07:15',39,43],
   ['07:30',27,31],['07:45',24,26],['08:00',32,30]];
  var n = obs.length, mape = 0, so = 0, sm = 0, soo = 0, smm = 0,
   som = 0;
@@ -767,13 +941,13 @@ function calibration(){
   so += r[1]; sm += r[2]; soo += r[1]*r[1]; smm += r[2]*r[2];
   som += r[1]*r[2]; });
  mape = 100*mape/n;
- var r2 = Math.pow((n*som - so*sm) /
-  Math.sqrt((n*soo - so*so)*(n*smm - sm*sm)), 2);
- stage.innerHTML = '<h2>Calibration, Validation, and Network '+
-  'QA/QC <span style="font-size:.8rem;color:var(--muted)">'+
-  '(statistics computed from the table)</span></h2>'+
+ var r2 = Math.pow((n*som-so*sm)/
+  Math.sqrt((n*soo-so*so)*(n*smm-sm*sm)), 2);
+ stage.innerHTML = '<h2>Calibration, Validation, QA/QC '+
+  '<span style="font-size:.8rem;color:var(--muted)">(statistics '+
+  'computed from the table)</span></h2>'+
   '<div class="grid2"><div class="card">'+
-  '<h3>Observed vs modeled — 15-minute speeds</h3>'+
+  '<h3>Observed vs modeled — 15-min speeds</h3>'+
   obs.map(function(r){
    return '<div class="resrow"><span>'+r[0]+' · obs '+r[1]+
     '</span><div class="track"><div class="fill" '+
@@ -789,55 +963,64 @@ function calibration(){
   '</div>'+
   '<div class="grid3" style="margin-top:11px">'+
   '<div class="card"><h3>Speeds R²</h3><div class="big">'+
-  r2.toFixed(3)+'</div><p>computed from the 6 intervals</p></div>'+
+  r2.toFixed(3)+'</div></div>'+
   '<div class="card"><h3>Speeds MAPE</h3><div class="big">'+
-  mape.toFixed(1)+'%</div><p>computed from the 6 intervals</p>'+
-  '</div>'+
-  '<div class="card"><h3>Warm start</h3><div class="big">'+
-  'stored</div><p>path sets + link times reusable across '+
-  'scenarios</p></div></div>';
+  mape.toFixed(1)+'%</div></div>'+
+  '<div class="card"><h3>Reproducibility</h3><div class="big">'+
+  'seeded</div><p>city generation is deterministic per seed</p>'+
+  '</div></div>';
  setAxes([['sensor','var(--vehicle)'],['corridor','var(--space)'],
-  ['interval','var(--time)'],['metric','var(--state)'],
-  ['class','var(--person)']]);
- setIns('Calibration is multidimensional','Counts, speeds, '+
-  'travel times, queues, and behavioral outputs compared at '+
-  'compatible resolutions; coding warnings block sign-off.',
-  'r<sub>obs</sub> = y − H(𝓢, 𝓐) · MAPE '+mape.toFixed(1)+
+  ['interval','var(--time)'],['metric','var(--state)']]);
+ setIns('Calibration is multidimensional','Counts, speeds, and '+
+  'behavioral outputs at compatible resolutions; the seeded city '+
+  'makes every experiment reproducible.',
+  'r<sub>obs</sub> = y − H(𝓢,𝓐) · MAPE '+mape.toFixed(1)+
   '% · R² '+r2.toFixed(3),
   'FAIL — unresolved connector and signal-timing warnings');
 }
 
-function updateFooter(){
- var rr = RES[Math.min(iteration, RES.length-1)];
- var L = ledgerCounts();
- document.getElementById('mGap').textContent =
-  (rr.route*100).toFixed(1)+'%';
- document.getElementById('mConf').textContent =
-  vehicleConflicts(true).length;
- document.getElementById('mPT').textContent = L.pt;
- document.getElementById('mVD').textContent = L.vd;
-}
-
+/* =================== wiring =================== */
 document.querySelectorAll('[data-v]').forEach(function(x){
  x.onclick = function(){ activate(this.getAttribute('data-v')); };
 });
+var currentView = 'system';
+document.querySelectorAll('.nav').forEach(function(x){
+ x.addEventListener('click', function(){
+  currentView = this.getAttribute('data-v'); });
+});
+function cityChanged(){
+ CITY.N = +document.getElementById('cN').value;
+ CITY.M = +document.getElementById('cM').value;
+ CITY.seed = +document.getElementById('cSeed').value;
+ document.getElementById('cMv').textContent = CITY.M;
+ rebuildCity();
+ activate(currentView);
+ note('City rebuilt: '+CITY.N+'×'+CITY.N+', '+CITY.M+
+  ' tour records (×'+VEH_PER_TOUR+'), seed '+CITY.seed+
+  '. Everything downstream recomputed.');
+}
+['cN','cM','cSeed'].forEach(function(id){
+ document.getElementById(id).addEventListener('change',
+  cityChanged);
+});
+document.getElementById('cM').addEventListener('input', function(){
+ document.getElementById('cMv').textContent = this.value; });
 document.getElementById('ask').onclick = function(){
  var q = document.getElementById('prompt').value.toLowerCase();
  var v = 'system';
  if (/passenger|worker|student|household/.test(q)) v='passengers';
  else if (/tour|schedule|infeasible|joint/.test(q)) v='tours';
- else if (/vehicle|occupanc|connector|transfer/.test(q))
-  v='transfer';
- else if (/route|queue|spillback|path|toll/.test(q)) v='dta';
+ else if (/vehicle|occupanc|transfer/.test(q)) v='transfer';
+ else if (/route|queue|path|toll|network/.test(q)) v='dta';
  else if (/skim|tdsp|travel time/.test(q)) v='skims';
- else if (/iteration|convergence|msa|feedback/.test(q))
+ else if (/iteration|convergence|msa|feedback|retim/.test(q))
   v='feedback';
- else if (/valid|calibr|count|speed|warm/.test(q)) v='calibration';
+ else if (/valid|calibr|count|speed/.test(q)) v='calibration';
+ currentView = v;
  activate(v);
- note('Prompt routed → '+v+' (filter → trace → execute → '+
-  'diagnose → certify).');
+ note('Prompt routed → '+v);
 };
-updateFooter();
+rebuildCity();
 activate('system');
 </script>
 </body>
