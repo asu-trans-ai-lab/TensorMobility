@@ -1,10 +1,14 @@
 # TensorMobility Explainer — design canon
 
-Lessons extracted from a source-level study of the Polo Club explainer
-suite (CNN Explainer, Transformer Explainer, GAN Lab, Diffusion
-Explainer), reduced to rules for the TensorMobility / GridCity
-explainer panels. Companion to the course book's 12-panel plan
-(`website_plan.md`).
+Lessons extracted from a source-level study of the
+[Polo Club of Data Science](https://poloclub.github.io/) explainer
+suite —
+[CNN Explainer](https://poloclub.github.io/cnn-explainer/),
+[Transformer Explainer](https://poloclub.github.io/transformer-explainer/),
+[GAN Lab](https://poloclub.github.io/ganlab/),
+[Diffusion Explainer](https://poloclub.github.io/diffusion-explainer/) —
+reduced to rules for the TensorMobility / GridCity explainer panels.
+Companion to the course book's 12-panel plan (`website_plan.md`).
 
 ## The five rules
 
