@@ -49,8 +49,8 @@ activity-DTA; E Chicago Sketch static scalability; **F TRMG2 regional
 tensor benchmark** (gmns_transfer; stages F1 transfer validation, F2
 super-zone FW warm starts, F3 sparse multi-axis assignment with
 axis-wise aggregation, F4 column generation + latent atoms, F5
-time-dependent subarea, F6 queue stability + CBI outputs). MAG remains
-a private-data application shown through aggregates only.
+time-dependent subarea, F6 queue stability + CBI outputs). The partner MPO application remains
+private-data, shown through aggregates only.
 
 ## Paper positioning (accepted)
 

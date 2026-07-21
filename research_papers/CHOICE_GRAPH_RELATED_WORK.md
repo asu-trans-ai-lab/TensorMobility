@@ -64,7 +64,7 @@ line plays; one line each on what to take and how we differ.*
 15. **Pendyala et al. (2012)**, SimTRAVEL (TRR) — minute-by-minute
     tight coupling; **Auld et al. (2016)**, POLARIS (TR-C) — integrated
     agent platform; **Balmer et al. (2009)**, MATSim architecture.
-16. **INRO (2020)**, *ABM-DTA Integration Vision* (MAG report) —
+16. **MPO ABM–DTA Integration Vision** (2020, internal agency report) —
     "essential features of integrable ABM and DTA"; the software-level
     counterpart of which the choice graph is the open algebraic form.
 17. **Zockaie, Saberi, Mahmassani et al. (2015)**, ABM+DTA with

@@ -43,7 +43,7 @@ The specification reflects six simulated expert reviews.
   and link-time states;
 - scheduled versus experienced travel-time consistency;
 - exact demand, path, node, link, and queue conservation;
-- realistic interfaces to CT-RAMP, ActivitySim, GMNS, and TRMG2;
+- realistic interfaces to established ABM platforms (e.g., open-source ActivitySim), GMNS, and TRMG2;
 - reverse attribution from congestion back to behavior.
 
 ### 1.2 Applied mathematics agent
