@@ -4,8 +4,8 @@ __pycache__/
 *.egg-info/
 build/
 dist/
-paper/*.aux
-paper/*.log
-paper/*.out
+research_papers/*.aux
+research_papers/*.log
+research_papers/*.out
 dev_internal_research_paper/*
 !dev_internal_research_paper/README.md
