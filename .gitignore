@@ -7,3 +7,5 @@ dist/
 paper/*.aux
 paper/*.log
 paper/*.out
+dev_internal_research_paper/*
+!dev_internal_research_paper/README.md

@@ -115,7 +115,7 @@ synchronization → mixed autonomy + engines). See
 ## Workflows
 
 Seven named workflows compose every use of the package — see
-[docs/workflow.html](docs/workflow.html) (self-contained, open locally)
+[public_gui/workflow.html](public_gui/workflow.html) (self-contained, open locally)
 and [docs/ECOSYSTEM_DESIGN.md](docs/ECOSYSTEM_DESIGN.md):
 
 **W1 generate** (self-contained networks) · **W2 assign** (certified
@@ -129,7 +129,7 @@ W1→W3→W4→W5 · research W1→W7→W5 · classroom W6.
 
 ## Papers & docs
 
-- `paper/main_v06.tex` — the framework wrap-up draft (compiles clean).
+- `research_papers/main_v06.tex` — the framework wrap-up draft (compiles clean).
 - `docs/ENGINES.md` — the solver escalation ladder position paper.
 - `docs/DESIGN_PRINCIPLES_V0_5.md`, `docs/GMNS_DNL_INTEGRATION*.md` —
   passenger/vehicle measures, external DNL exchange contract.
