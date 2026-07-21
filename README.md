@@ -3,13 +3,50 @@
 **Mobility systems as flow-through tensors — space, time, and behavior
 in one certified computational graph.**
 
-TensorMobility implements the Space–Time–Behavior Flow-Through Tensor
-(**STB-FTT**) framework: origin–destination flows, behavioral columns,
-path probabilities, link times, queues, and service layers as chained
-typed tensors, with every equilibrium certificate checked in the test
-suite (**49 tests**). It is the software home of the FTT research line
-(Flow-Through Tensors) and companions DTALite / TAPLite / TCGlite /
-path4gmns in the GMNS ecosystem.
+The object of study is the space–time–behavior demand tensor and its
+supply companions:
+
+**𝓕**[o, d, group, mode, departure, path, link, time] (persons) ·
+**𝓨**[company, vtype, stage, …] (vehicles) · **𝓠**[link, time, regime]
+(queues)
+
+Everything in this repository is an **operator acting on named axes of
+these tensors** — and every operator carries three readings at once:
+
+| neural | optimization | transportation |
+|---|---|---|
+| softmax router @ temp 1/θ | entropy-regularized program | **logit choice** (identical, tested) |
+| MoE expert path | column of the master | behavioral chain / route |
+| router score − duals | negative reduced cost | column pricing |
+| deep-equilibrium layer h\*=T(h\*) | fixed point / VI | traffic equilibrium |
+| backprop (transposed forward) | adjoint chain | FTT Jacobian B·A·diag(φ′)·Aᵀ·Bᵀ |
+| masked-softmax stack | conserved flow chain | zone→OD→path→link (TCG) |
+| tanh residual head | admissible utility term | bounded behavioral calibration |
+| latent atoms f = Dα | low-rank feasible coordinates | compression on spectator axes |
+
+**The division of responsibility is fixed: neural architecture learns
+the search and representation; optimization architecture enforces
+feasibility and equilibrium; transportation networks provide physical
+meaning and exact verification.**
+
+The axes are real objects (`STBTensor`, named-axis contraction with
+Kronecker-lifted spectators), the correspondence is executable
+(`tensormobility.neural`, equality-tested), and every equilibrium claim
+is certificate-checked (**55 tests**). See
+[docs/TENSOR_AXES.md](docs/TENSOR_AXES.md) — *what the mobility,
+behavior, time, and space axes are* — the front door of the framework.
+TensorMobility is the software home of the STB-FTT research line and
+companions DTALite / TAPLite / TCGlite / path4gmns in the GMNS
+ecosystem.
+
+```python
+from tensormobility.core.stb_tensor import STBTensor
+from tensormobility.neural import router_is_logit
+
+F = STBTensor(demand, axes=('od', 'group', 'departure'), measure='persons')
+F_paths = F.contract('od', B, new_axis='path')   # spectators ride along
+assert router_is_logit(costs, theta=2.0)          # identity, not analogy
+```
 
 ## Sub-name architecture
 
@@ -45,7 +82,7 @@ all-origin Dijkstra, never over the enumerated pool.
 ## Run
 
 ```bash
-python -m pytest -q                  # 49 tests: contracts, closure, profiles
+python -m pytest -q                  # 55 tests: tensor+neural identity, contracts, closure, profiles
 python cases/run_mage_grid.py        # mixed-autonomy equilibrium + sweeps
 python cases/run_unified_grid_harness.py
 python cases/run_passenger_vehicle_harness.py

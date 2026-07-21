@@ -16,5 +16,7 @@ from tensormobility.core.unified_networks import load_case, UnifiedCase
 from tensormobility.core.axes import CANONICAL_AXES, slice_mage
 from tensormobility.dta.sparse_assignment import network_from_case, solve_fw
 from tensormobility.engines.equilibrium_engines import solve_fixed_point
+from tensormobility.core.stb_tensor import STBTensor
+from tensormobility.neural import router_is_logit, softmax_router, logit_choice
 
 __version__ = "0.6.1"
