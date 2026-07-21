@@ -632,17 +632,17 @@ function insLink(i, tab){
     'Dijkstra; its flow is a convex combination of the ' +
     'all-or-nothing targets (MSA), rebuilt each render from the ' +
     'column pool for the Verify audit.</div>';
-  /* verify */
-  var users = [], k, z;
+  /* verify: audit sums ALL columns; the table shows only the big ones */
+  var users = [], vcol = 0, k, z;
   for (k = 0; k < S.cols.length; k++)
     for (z = 0; z < S.cols[k].length; z++){
       var c = S.cols[k][z];
-      if (c.flow > 1 && c.links.indexOf(i) >= 0)
-        users.push({ od: S.dem.od[k], f: c.flow });
+      if (c.links.indexOf(i) >= 0){
+        vcol += c.flow;
+        if (c.flow > 1) users.push({ od: S.dem.od[k], f: c.flow });
+      }
     }
   users.sort(function(a,b){ return b.f - a.f; });
-  var vcol = 0;
-  for (k = 0; k < users.length; k++) vcol += users[k].f;
   var rows = '';
   for (var u = 0; u < Math.min(4, users.length); u++)
     rows += '<tr><td>zone ' + users[u].od.o + ' → zone ' +
