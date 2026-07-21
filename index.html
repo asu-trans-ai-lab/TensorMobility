@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TensorMobility — a computational foundation for mobility systems</title>
+<style>
+  :root{
+    --ink:#0e1726; --paper:#ffffff; --muted:#5b6b7c; --line:#d8dee6;
+    --core:#1f7a8c; --kernel:#c77b32; --cal:#b23a6e; --viz:#3a7d44;
+    --chip:#f2f5f8;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --ink:#e8edf3; --paper:#101722; --muted:#93a3b4;
+           --line:#2a3644; --chip:#1a2432; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:2rem 1rem 4rem;background:var(--paper);
+       color:var(--ink);font:15px/1.55 system-ui,Segoe UI,Roboto,sans-serif;
+       max-width:980px;margin-inline:auto}
+  h1{font-size:1.7rem;margin:.2rem 0 0}
+  .sub{color:var(--muted);margin:.3rem 0 1.4rem}
+  h2{font-size:1.1rem;margin:2rem 0 .6rem}
+  .eq{font-family:Georgia,'Times New Roman',serif;font-size:1.35rem;
+      text-align:center;padding:1rem .5rem;border:1px solid var(--line);
+      border-radius:.7rem;background:var(--chip);margin:1rem 0 .4rem}
+  .eq i{font-style:italic}
+  .eqnote{color:var(--muted);font-size:.85rem;text-align:center;
+      margin:0 0 .5rem}
+  .flowline{font-family:Georgia,serif;font-size:1.1rem;text-align:center;
+      margin:.8rem 0;color:var(--ink)}
+  .flowline .op{color:var(--muted);font-size:.8rem;font-family:system-ui}
+  .layers{display:grid;gap:.55rem;margin:.8rem 0}
+  .layer{display:grid;grid-template-columns:2.2rem 15rem 1fr;gap:.7rem;
+      align-items:start;border:1px solid var(--line);border-radius:.6rem;
+      padding:.6rem .8rem;background:var(--chip)}
+  .layer .n{font-weight:700;font-size:1.1rem;color:var(--core)}
+  .layer .t{font-weight:600}
+  .layer .w{color:var(--muted);font-size:.87rem}
+  @media (max-width:700px){.layer{grid-template-columns:2rem 1fr}
+      .layer .w{grid-column:1/-1}}
+  table{border-collapse:collapse;width:100%;font-size:.9rem;margin:.6rem 0}
+  td,th{padding:.35rem .5rem;border-bottom:1px solid var(--line);
+      text-align:right}
+  td:first-child,th:first-child{text-align:left}
+  th{color:var(--muted);font-weight:600}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:.7rem;margin:.8rem 0}
+  a.card{display:block;border:1px solid var(--line);border-radius:.7rem;
+      padding:.8rem .9rem;text-decoration:none;color:var(--ink);
+      background:var(--chip)}
+  a.card:hover{border-color:var(--core)}
+  a.card b{color:var(--core)}
+  a.card span{display:block;color:var(--muted);font-size:.85rem;
+      margin-top:.2rem}
+  .note{color:var(--muted);font-size:.87rem}
+  code{font-family:ui-monospace,Consolas,monospace;background:var(--chip);
+      padding:.05rem .3rem;border-radius:.3rem}
+</style>
+</head>
+<body>
+
+<h1>TensorMobility</h1>
+<p class="sub">Mobility systems as flow-through tensors — space, time,
+and behavior in one certified computational graph. The software home of
+the STB-FTT research line (asu-trans-ai-lab).</p>
+
+<h2>The unified equation</h2>
+<div class="eq">
+  𝒵<sup>&#9733;</sup> = &Pi;<sub>&Omega;</sub>
+  [ 𝒦<sub>struct</sub>(𝒵<sup>&#9733;</sup>, 𝒰)
+  + 𝒩<sub>&theta;</sub>(𝒵<sup>&#9733;</sup>, 𝒰) ]
+</div>
+<p class="eqnote">multi-axis urban state 𝒵 = {ℒ, ℋ, 𝒜, 𝒟, ℱ, 𝒮, 𝒴} ·
+structural land-use–ABM–DTA–queue–observation operators 𝒦 ·
+trainable operators 𝒩<sub>θ</sub> (PINN / neural operator / residual) ·
+projection Π<sub>Ω</sub> onto conservation, capacity, temporal, and
+behavioral feasibility.</p>
+
+<p>Neural networks are not the starting point; tensor decomposition is
+not the starting point; ADMM is not the starting point. The starting
+point is: <em>which states compose the urban system, and through which
+conservation operators are they connected?</em> The chain is a
+sequence of typed operators, never a file hand-off:</p>
+
+<div class="flowline">
+  𝒜 <span class="op">→ demand formation →</span> 𝒟
+  <span class="op">→ path generation →</span> ℱ
+  <span class="op">→ dynamic network loading →</span> 𝒮
+  <span class="op">→ experienced costs →</span> 𝒜<sup>+</sup>
+</div>
+
+<h2>The six-layer foundation — each layer proven by a certified case</h2>
+<div class="layers">
+  <div class="layer"><span class="n">1</span>
+    <span class="t">multidimensional representation</span>
+    <span class="w">named-axis contraction ≡ Kronecker-lifted operator
+    (tested); grouped-simplex projection 7e-15; 597× sparse-storage
+    measurement</span></div>
+  <div class="layer"><span class="n">2</span>
+    <span class="t">conservation &amp; physical structure</span>
+    <span class="w">chain mass conservation 1e-13; fluid-queue pulse ≤
+    7e-5 vs closed form; queue causality on real detector inflow (IEEE
+    corridor)</span></div>
+  <div class="layer"><span class="n">3</span>
+    <span class="t">variational equilibrium &amp; fixed points</span>
+    <span class="w">entropy-master KKT ≡ logit (exact); τ→0 ladder to
+    deterministic UE; mixed-autonomy closure with consistency
+    residuals</span></div>
+  <div class="layer"><span class="n">4</span>
+    <span class="t">numerical optimization</span>
+    <span class="w">full-space certified column generation: Chicago
+    93,135 ODs @ 9.8e-5 in 12 s; TRMG2 1,039,117 ODs @ 4.4e-7;
+    engine-escalation ladder with the measured stiff-block
+    lesson</span></div>
+  <div class="layer"><span class="n">5</span>
+    <span class="t">compression &amp; scalable computation</span>
+    <span class="w">rank-economy sweep (bias 2e-5 → 2.95 as K: 2→16;
+    promotions sublinear); the K̄ ≈ 2.2 compression-admissibility
+    boundary, reported honestly</span></div>
+  <div class="layer"><span class="n">6</span>
+    <span class="t">modern neural computation</span>
+    <span class="w">softmax router ≡ logit (bitwise); hand adjoint ≡
+    autograd 1e-9; bounded residual admissibility; the learned-proposer
+    honest negative</span></div>
+</div>
+<p class="note">These layers must connect; learning only the last one
+is exactly the failure mode this framework is designed against.
+Attention enters as a <em>transportation-constrained</em>,
+state-dependent kernel Y<sub>i</sub> = &Sigma;<sub>j</sub>
+K<sub>ij</sub>(𝒵) X<sub>j</sub> — its masks come from incidence,
+causality, and availability, never from hyperparameters. A learned
+loading surrogate is never free-standing:
+𝒮 = Π<sub>Ω</sub>[Φ<sub>DNL</sub>(𝒟) + r<sub>θ</sub>(𝒟, 𝒴)], never
+𝒮 = NN(𝒟).</p>
+
+<h2>Reproduced and scalable — <code>python cases/run_demo_suite.py</code></h2>
+<table>
+<tr><th>demo</th><th>nodes</th><th>links</th><th>OD pairs</th>
+<th>columns</th><th>full-space gap</th><th>wall</th></tr>
+<tr><td>grid 10×10 (self-contained)</td><td>100</td><td>360</td>
+<td>20</td><td>280</td><td>8.0e-5</td><td>0.2 s</td></tr>
+<tr><td>grid 20×20</td><td>400</td><td>1,520</td><td>60</td>
+<td>2,750</td><td>9.8e-5</td><td>1.8 s</td></tr>
+<tr><td>grid 50×50</td><td>2,500</td><td>9,800</td><td>200</td>
+<td>16,041</td><td>2.4e-4</td><td>36 s</td></tr>
+<tr><td>IEEE TrafficFlowBench I405N</td><td>225</td><td>313</td>
+<td>1,058</td><td>1,058</td><td>0 (machine)</td><td>0.05 s</td></tr>
+<tr><td>Chicago Sketch (full)</td><td>933</td><td>2,950</td>
+<td>93,135</td><td>198,683</td><td>9.8e-5</td><td>12 s</td></tr>
+<tr><td><b>TRMG2 AM (full regional)</b></td><td>33,963</td>
+<td>75,939</td><td><b>1,039,117</b></td><td>1,063,642</td>
+<td><b>4.4e-7</b></td><td>209 s</td></tr>
+</table>
+<p class="note">Every relative gap is priced over the full network by
+all-origin shortest paths — never over the enumerated pool.
+Single-process, single-thread.</p>
+
+<h2>Explore</h2>
+<div class="cards">
+  <a class="card" href="public_gui/workflow.html"><b>Workflow map</b>
+    <span>W1 generate · W2 assign · W3 import · W4 calibrate ·
+    W5 visualize · W6 teach · W7 profile — rendered from
+    workflow.yml</span></a>
+  <a class="card" href="public_gui/demo_dashboard.html"><b>Demo
+    dashboard</b><span>the fresh certified four-scale run</span></a>
+  <a class="card"
+    href="https://github.com/asu-trans-ai-lab/TensorMobility">
+    <b>Source on GitHub</b><span>76 tests · GMNS interfaces ·
+    certificates.json beside every output</span></a>
+  <a class="card" href="https://asu-trans-ai-lab.github.io/gui4gmns/">
+    <b>gui4gmns</b><span>companion GMNS visualization — the W5
+    face</span></a>
+</div>
+
+<p class="note">TensorMobility is the software; STB-FTT /
+Flow-Through Tensors is the framework name used in the papers.
+Ecosystem contract: GMNS folders are the only inter-tool interface;
+<code>certificates.json</code> rides beside every output.</p>
+
+</body>
+</html>
