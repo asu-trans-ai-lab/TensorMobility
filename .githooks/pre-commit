@@ -1,0 +1,19 @@
+#!/bin/sh
+# Name-hygiene screen (internal rule 2026-07-22): block commits whose
+# staged public content or message draft contains blocklisted names.
+BL="dev_internal_research_paper/BLOCKLIST.txt"
+[ -f "$BL" ] || exit 0
+HITS=$(git diff --cached -U0 | grep '^+' | grep -v '^+++' \
+  | grep -n -F -f "$BL")
+STAGED_INTERNAL=$(git diff --cached --name-only \
+  | grep -c '^dev_internal_research_paper/' )
+if [ -n "$HITS" ]; then
+  # allow if the only staged paths are internal (ignored dir is never
+  # staged anyway, so any hit is in public files)
+  echo "BLOCKED: staged changes contain blocklisted names:" >&2
+  echo "$HITS" | head -5 >&2
+  echo "Anonymize (see memory rule) or move to " \
+       "dev_internal_research_paper/." >&2
+  exit 1
+fi
+exit 0

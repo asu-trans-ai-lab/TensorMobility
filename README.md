@@ -16,6 +16,7 @@ in one certified computational graph.**
 ```bash
 git clone https://github.com/asu-trans-ai-lab/TensorMobility
 cd TensorMobility && pip install -e ".[dev]"
+git config core.hooksPath .githooks   # enable local content-screen hooks
 python cases/run_demo_suite.py     # first success: grid 10x10 certified in ~0.2 s
 ```
 
