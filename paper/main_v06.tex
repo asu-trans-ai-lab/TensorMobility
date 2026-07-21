@@ -1,0 +1,343 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,booktabs,xcolor}
+\newtheorem{proposition}{Proposition}
+\newtheorem{remark}{Remark}
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+\newcommand{\code}[1]{\texttt{#1}}
+
+\title{Space--Time--Behavior Flow-Through Tensors:\\
+A Certified Multi-Axis Operator Framework Connecting\\
+Logit SUE, Fluid Queues, and Layered Network Equilibria\\
+{\large (STB-FTT v0.6 wrap-up draft --- 2026-07-20)}}
+\author{Xuesong Zhou \and \red{[co-authors TBD]}}
+\date{Draft v0.6 --- every number reproduced from the certified test
+suite (49 tests) and run scripts of \code{stb\_ftt\_unified\_v0.6}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The Flow-Through Tensor (FTT) architecture connects origin--destination
+flows, path probabilities, and link travel times as chained tensors on
+one computational graph. This paper wraps that foundation into a
+\emph{certified multi-axis operator framework}: every axis of the
+space--time--behavior tensor declares exactly a \emph{status}
+(spectator, contracted, or synchronized), a \emph{semiring}
+($(+,\times)$ flow, $(\min,+)$ pricing, $(\max,\times)$ state decode),
+and a methodological \emph{anchor}; a model is a chain of promotions of
+axes from spectator to synchronized; and every synchronized axis owes
+one well-posedness argument and one certificate class. Three
+foundational special cases close the framework from below --- logit
+stochastic user equilibrium and its deterministic limit (behavior),
+Newell fluid point queues (time), and the flow-through tensor chain
+itself (space) --- each verified against closed forms inside one code
+base. Above them, the same operator calculus carries multi-layer
+passenger--freight price consensus, the passenger--vehicle service
+coupling $Rx \le Sy$, and a mixed-autonomy ride-hailing profile with
+competing companies, AV/HV fleets, and patience-capped matching queues.
+A solver-engine escalation ladder (damped fixed point $\to$ averaging
+$\to$ Anderson $\to$ stiff-block Newton $\to$ semismooth NCP/VI)
+computes the fixed points that pin synchronized axes, with cycle
+detection and engine bookkeeping as part of the certificate. All
+claims are bounded by an explicit validity domain: learned or
+behavioral terms are flow-independent along synchronized axes,
+compression is admissible only on column-rich spectator axes, and
+nonsmooth dynamic loading is a stated physics boundary, not a hidden
+smoothing.
+\end{abstract}
+
+\section{Introduction}
+
+Three research lines meet in this paper. First, the FTT computational
+graph, which chains $\mathbf f_{OD} \to \mathbf f_P \to \mathbf f_L \to
+\mathbf t_L \to \mathbf t_{OD}$ through typed incidence operators and
+exploits the transpose symmetry of contraction for gradients. Second,
+the classical equilibrium canon --- logit SUE, deterministic UE, and
+fluid queue loading --- whose recovery as special cases is the ground
+truth any unifying framework must pass. Third, layered service systems
+--- multi-commodity freight, passenger--vehicle service coupling, and
+mixed-autonomy ride-hailing --- whose defining feature is that layers
+interact \emph{only} through shared resources synchronized by prices.
+
+The claim of this paper is deliberately narrow, in the sense fixed by
+our earlier position notes: we do not claim a new three-way unification
+of neural, optimization, and transportation architectures. We claim a
+\emph{certified operator framework}: (i) an axis calculus in which the
+classical models are exact reductions, verified numerically to
+closed-form accuracy; (ii) a scalable column-generation layer whose
+optimality gaps are always priced over the full network, never over the
+enumerated pool; (iii) a layered-equilibrium layer whose prices are
+certified against exact duals where the coupling is convex, and whose
+complementarity conditions are audited where it is not; and (iv) an
+explicit engine ladder for the fixed points, with failure modes
+diagnosed rather than tuned away.
+
+\section{The axis calculus}
+
+Let the demand tensor carry indices
+$(o,d,g,m,\tau,p,a,t)$ --- origin, destination, group, mode, departure
+period, path/column, link, entry time --- extended by profile-specific
+axes (company, vehicle type, operational stage, matching queue). Every
+axis declares exactly three properties:
+
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+declaration & values & meaning \\
+\midrule
+status & spectator / contracted / synchronized &
+rides along / summed out / pinned by a fixed point \\
+semiring & $(+,\times)$, $(\min,+)$, $(\max,\times)$ &
+flow aggregation / pricing / state decode \\
+anchor & $S_{\mathrm{repr}}, S_{\mathrm{stat}}, S_{\mathrm{mech}},
+S_{\mathrm{ctrl}}$ & which methodological layer owns it \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Four consequences follow mechanically.
+
+\textbf{Models are promotion chains.} Static UE promotes only the link
+axis (congestion fixed point). Dynamic assignment additionally promotes
+departure/entry time (queue conservation recursion). Multi-layer
+systems promote the layer axis (price consensus). State estimation
+promotes the regime axis under $(\max,\times)$. The mixed-autonomy
+profile promotes the matching-queue axis (patience-capped waiting).
+
+\textbf{Compression lives on spectator axes only, and only where
+columns are rich.} The Chicago Sketch experiment below shows the
+boundary empirically: at $\bar K \approx 2.2$ active columns per OD,
+route-family atoms cannot pay.
+
+\textbf{Learning is admissible only if flow-independent along every
+synchronized axis} (the clean-VI boundary): priors, values, and utility
+offsets may be learned; anything entering a flow-dependent cost voids
+the certificates unless monotone by construction.
+
+\textbf{Each synchronized axis owes one certificate class:}
+monotonicity $\Rightarrow$ FW/KKT gap; causality $\Rightarrow$
+conservation and closed-form pulses; convex duality $\Rightarrow$
+consensus gap against exact duals; integrality or nonmonotone coupling
+$\Rightarrow$ report the residual gap, never assume it away.
+
+\section{Special-case closure}
+
+All three foundational cases are certified inside one package
+(\code{tests/test\_v06\_closure.py} and the Sioux Falls special-case
+suite; data: TCGlite GMNS Sioux Falls, 24 nodes / 76 links / 33 ODs /
+126 behavioral paths).
+
+\subsection{Behavior: logit SUE and the deterministic limit}
+
+The entropy-regularized master over the fixed path pool has, at frozen
+costs, the multinomial logit as its \emph{exact} KKT solution (machine
+precision, $0.0$ error). With congestion, Evans-type partial
+linearization with exact line search yields self-consistency residuals
+$\le 2\times10^{-5}$ across $\theta \in [0.1, 50]$, and the Wardrop gap
+falls monotonically from $6.9\times10^{-2}$ at $\tau{=}10$ to
+$8.3\times10^{-6}$ at $\tau{=}0.02$: the $\tau \to 0$ ladder reaches
+deterministic UE inside one solver family. Two solver lessons are part
+of the record: the plain damped fixed point \emph{oscillates} at high
+congestion (residual $0.99$), and demand scaling matters ($\times 25$
+gives $v/c = 4.7$ and an ill-conditioned master; $\times 8$, $v/c
+\approx 2$, is the certified stress level).
+
+A full-network Dijkstra audit prices the fixed 126-path pool at every
+reported solution: the pool is \emph{exact} at free flow (relative gap
+$1.9\times10^{-16}$) and \emph{35.7\% inadequate} at congested UE
+times. The static-pool failure mode is therefore measured, not
+assumed, and adaptive column generation is the certified remedy.
+
+\subsection{Time: Newell fluid point queues}
+
+The point-queue recursion reproduces the closed-form constant-overload
+pulse ($\lambda{=}30$, $\mu{=}20$, $\tau_0{=}10$ min) to relative
+errors $\le 7\times10^{-5}$ in peak queue, clearing time, and total
+delay; network flow-through of the certified UE column flows conserves
+mass to $9\times10^{-12}$ vehicles over 71 loaded links, with causality
+$D(t)\le A(t)$ everywhere. The boundary is stated with the operator:
+sending/receiving $\min(\cdot)$ is nonsmooth at binding capacity;
+smoothing restores gradients but changes the physics; no
+differentiability through the queue is claimed.
+
+\subsection{Space: the flow-through tensor chain}
+
+The TCG chain $\alpha \to \Gamma \to P \to \Delta$ (zone generation,
+OD split, path proportion, link incidence) is exactly the conserved
+decoder composition $x = D(\Pi)X$: row-stochastic masked layers, mass
+conservation $2\times10^{-13}$, link reconstruction residual
+$<10^{-9}$, and the forward chain at target observations reproduces the
+sensor counts to the data's own rounding (max relative error
+$1.0\times10^{-2}$). The calibration direction carries an analytic
+gradient through the masked-softmax chain, verified by finite
+differences to $2\times10^{-7}$ --- with the methodological caveat that
+the first FD check was vacuous (masked coordinates have identically
+zero gradient and difference) until sampling was restricted to
+meaningful coordinates.
+
+\section{Scale and the compression boundary}
+
+The same solvers run unchanged on a deterministic grid generator, Sioux
+Falls, and Chicago Sketch (933 nodes, 2{,}950 links, 386 zones,
+93{,}135 ODs, 1.14M trips) through one canonical GMNS contract.
+Full-network certified results (single process, single thread; all
+gaps priced by all-origin Dijkstra over the real network):
+
+\begin{center}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+algorithm & full-space rel.\ gap & wall (s) & columns & atoms \\
+\midrule
+CG Frank--Wolfe & $8.3\times10^{-5}$ & 7.4 & 198{,}871 & --- \\
+CG FW + grouped-simplex GP & $9.4\times10^{-5}$ & 39.3 & 207{,}248 & --- \\
+route-family atoms (static) & $6.1\times10^{-3}$ & 141.9 & 200{,}712 & 157{,}373 \\
+route-family atoms (adaptive) & $4.6\times10^{-3}$ & 178.4 & 215{,}237 & 220{,}152 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The certified link flows correlate $1.0000$ with the
+network's reference volumes (RMSE 23.8 veh). The atom rows are the
+honest boundary datum: at $\bar K \approx 2.2$ columns per OD, the
+compression ratio is only $1.28\times$, adaptive promotion generates
+62{,}761 singletons until atoms \emph{outnumber} columns, and the gap
+floor sits two orders above tolerance --- reproducing, at scale, the
+crossover law that compression pays only in column-rich regimes
+(activity hierarchies, transit itineraries), never in the coupling
+itself. Wall-clock numbers support algorithm ordering only; engine-level
+speed claims are out of scope.
+
+\section{Layers and prices}
+
+\subsection{Convex two-layer benchmark with exact dual certificates}
+
+Passenger columns (mandatory, PCE 1) and elective e-commerce freight
+requests (PCE 2) share link capacity on Sioux Falls. With linear costs
+the joint problem is an LP: 11 binding links, max price 40.8
+min/veh-equiv. Iterative block coordination --- parallel min-plus best
+responses per layer, projected subgradient on the shared price, primal
+averaging --- certifies against the exact optimum: dual-bound gap
+$3.3\times10^{-4}$, price agreement within 1.6\% on every binding
+link, served freight $38.1\%$ falling to $32.4\%$ as slack tightens.
+Replacing hard capacity by BPR congestion keeps joint convexity (one
+Beckmann potential in total veh-equivalent load): joint FW gap
+$1.8\times10^{-6}$; Gauss--Seidel block coordination agrees to
+$5.3\times10^{-7}$ with link loads within 0.12 veh-equiv; freight
+threshold complementarity is exact; and congestion \emph{alone} prices
+freight from 100\% served ($\times4$ passenger demand) to 86.3\%
+($\times16$) --- the congested travel time is itself the synchronizing
+price. The step-size lesson is recorded: the subgradient step must be
+scaled to the load/price ratio ($\rho_0{=}0.5$ diverges; $0.01$
+converges; report the best dual bound).
+
+\subsection{The passenger--vehicle coupling and the integer corner}
+
+The service coupling $Rx \le Sy$ with a scarcity price on service
+capacity is carried in the package as its own layer, with passenger
+mass, service capacity, vehicle flow, and queue mass audited
+separately. The activity--travel vehicle-scheduling line (the
+``how many trip requests'' formulation) is precisely the \emph{integer
+corner} of this master: passenger chains as columns, one-chain
+constraints as simplexes, on-board arc coupling as incidence, and the
+Lagrangian trip price as the synchronizing dual. On the integer side
+the duality gap need not vanish and must be reported; our convex
+benchmarks are the certified relaxation of that corner.
+
+\subsection{The mixed-autonomy ride-hailing profile}
+
+The MAGE class (competing TNCs; AV/HV fleets under an AV-share cap;
+pickup and service stages; patience-capped customer matching;
+congestion-coupled routing) enters as an \emph{operator profile}:
+extension axes (company, vehicle type, stage, matching queue) are
+registered without touching the canonical registry; the matching queue
+is kept structurally distinct from the road queue; and the road layer
+reuses the certified full-space assignment each outer iteration.
+On an $8\times8$ grid with two asymmetric companies the equilibrium
+closes in 4 outer iterations (inner residual $4\times10^{-14}$;
+conservation $10^{-13}$; patience, rationing-complementarity, and
+fleet-cap violations $0$; multi-start share spread $4\times10^{-6}$).
+Comparative statics behave economically: raising one company's AV cap
+from $0$ to $1$ moves its AV share from 6.7\% to 29.8\% and cuts its
+matching wait from 12.0 to 1.8 minutes; fleet scale $\times0.3 \to
+\times1.5$ moves served fraction from 46\% to 100\%; and the patience
+sweep exposes the defining subtlety --- \emph{lower} patience (4 min)
+\emph{raises} ride-hailing share to 64.8\% while service is rationed to
+77.9\%, because patience caps the disutility, not the supply, with the
+complementarity (unserved ${>}\,0 \Rightarrow$ wait at patience)
+holding exactly. The full NCP/VI equilibrium (PATH class) is the
+declared next solver rung; the profile's existence claims are
+restricted to the steady-state operators, exactly as in the source
+formulation.
+
+\section{Equilibrium engines}
+
+Fixed points that pin synchronized axes are computed by an explicit
+escalation ladder --- damped Picard (E0), MSA averaging (E1),
+safeguarded Anderson acceleration (E2), stiff-block Newton (E3), and
+semismooth NCP/VI (E4, declared) --- with a period-$p$ cycle detector
+as the promotion trigger and the engine choice recorded in the result.
+The motivating instance is part of the test suite as an honest
+negative: the ride-hailing choice$\leftrightarrow$wait subsystem has
+$|\partial w / \partial s| \sim 10^4$ near saturation, damped iteration
+limit-cycles at residual $0.12$ (detected, period 4), smoothing and
+two-timescale damping do not rescue it, and the exact Newton solve of
+the \emph{smallest stiffest block in its low-dimensional dual-like
+variable} (the wait vector) closes it. That design rule --- solve the
+stiff block exactly in waits/prices/multipliers, never in
+high-dimensional primal shares; keep slow blocks in cheap fixed-point
+form --- is the solver-side counterpart of the
+coordination-vs-synchronization distinction.
+
+\section{Roadmap: the phase--time axis (v0.7)}
+
+The deferred state/regime axis has a concrete target: the
+phase-augmented DTA formulation with X (queue dynamics), Y (generalized
+phase selection), and Z (vehicle trajectory) blocks coupled by
+Lagrangian relaxation. In the axis calculus this is one further
+promotion: the regime axis becomes synchronized, contracted under
+$(\max,\times)$ for decoding and $(\min,+)$ for pricing on the
+phase-expanded network, with within-phase closed-form queue profiles
+replacing the binding $\min(\cdot)$ --- moving the nonsmoothness to the
+phase boundary where a discrete engine (E4/branch-and-price) owns it.
+The engine ladder and the consensus machinery above are exactly the
+solver substrate this promotion requires.
+
+\section{Validity domain and limitations}
+
+(i) All learned/behavioral terms in every certified experiment are
+flow-independent along synchronized axes; the monotonicity boundary is
+stated wherever a flow-dependent extension would cross it.
+(ii) The dynamic loading operator is forward-only; no gradients are
+claimed through binding capacities.
+(iii) Integer couplings (vehicle tours, phase selection) carry duality
+gaps that are reported, not assumed zero.
+(iv) The well-posedness map currently spans behavioral-feedback and
+queue-feedback strength; the coupling-integrality axis is documented
+but not yet swept.
+(v) Wall-clock comparisons support algorithm ordering on one machine,
+single-threaded; engine-level speed claims require the separate
+compiled-solver line.
+
+\section{Conclusion}
+
+The FTT chain supplies the spine; the axis calculus supplies the
+grammar; the special cases nail the framework to closed forms; the
+layered benchmarks show that one price mechanism --- explicit duals
+under hard coupling, congested times under soft coupling, patience-capped
+waits under service coupling --- synchronizes every layer pair; and the
+engine ladder makes the computation of those fixed points a diagnosed,
+certified choice rather than a tuning exercise. Everything above is
+reproducible from one package with one test suite (49 tests) and the
+run scripts cited throughout.
+
+\paragraph{Reproducibility.} \code{python -m pytest} (49 tests);
+\code{run\_mage\_grid.py}, \code{run\_unified\_grid\_harness.py},
+\code{run\_passenger\_vehicle\_harness.py} in
+\code{stb\_ftt\_unified\_v0.6}; multi-layer benchmarks in
+\code{STB\_multilayer\_benchmark} (7 tests); special-case artifacts in
+\code{STB\_special\_cases\_SF} (7 tests). \red{[Bibliography, author
+list, and venue formatting pending author decisions; FTT manuscript and
+MAGE submission to be cited as companion/related work.]}
+
+\end{document}
