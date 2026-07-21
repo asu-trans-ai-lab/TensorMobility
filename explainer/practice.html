@@ -185,6 +185,10 @@ svg.cob{width:100%;max-width:430px;display:block;margin:6px auto}
   <div class="card"><h4 id="insTitle"></h4><p id="insText"></p></div>
   <div class="card"><h4>Typed axes</h4>
     <div class="axes" id="axes"></div></div>
+  <div class="card"><h4>Tensor mapping
+    <span style="font-weight:400;color:var(--muted);font-size:11px">
+    (canonical state + operator contract)</span></h4>
+    <div id="tmap" style="font-size:12px"></div></div>
   <div class="card"><h4>Equation / rule</h4>
     <div class="eq" id="eq"></div></div>
   <div class="card"><h4>Certificate</h4>
@@ -628,6 +632,133 @@ function citySVG(width, highlightOD){
  return '<svg class="city" viewBox="0 0 '+W+' '+W+'">'+s+'</svg>';
 }
 
+/* ===== tensor mapping (right panel, per view) ===== */
+var FAM = { person:'var(--person)', tour:'var(--tour)',
+ space:'var(--space)', time:'var(--time)', mode:'var(--mode)',
+ vehicle:'var(--vehicle)', path:'var(--path)', state:'var(--state)' };
+function pills(list){
+ return list.map(function(x){
+  return '<span class="axis" style="--c:'+FAM[x[1]]+'">'+x[0]+
+   '</span>'; }).join(' ');
+}
+var TENSORMAP = {
+ system: {
+  tensor: '𝒵 = {ℒ, ℋ, 𝒜, 𝒯, ℛ, 𝒟ᵛ, ℱ, 𝒮, 𝒞}',
+  name: 'the full typed state chain',
+  rows: [['operators', 'each edge is a contraction or generation '+
+   'with a certificate; open a view on the left for its contract']],
+  page: 'studio.html', chapter: 'Block-Flow chapter' },
+ passengers: {
+  tensor: 'ℋ<sub>h,p,r,i,a,v,ℓ</sub>',
+  name: 'household–person state',
+  rows: [
+   ['axes', pills([['h','person'],['p','person'],['r','person'],
+     ['i','vehicle'],['a','mode'],['v','path'],['ℓ','space']])],
+   ['role', 'state (slow clock: long-term choices)'],
+   ['next operator', 'Φ<sub>HA</sub>: preserves h,p · '+
+    'generates activity axes c,ω,η,τ']],
+  page: 'studio.html', chapter: 'Coordinate & block chapter' },
+ tours: {
+  tensor: '\u{1D4AF}<sub>h,p,ω,q,c,z₀,z_d,m,'+
+   'τ₀,τᵣ,j</sub>',
+  name: 'tour state under schedule constraints',
+  rows: [
+   ['axes', pills([['h,p','person'],['ω,q,c','tour'],
+     ['z₀,z_d','space'],['m','mode'],
+     ['τ₀,τᵣ','time'],['j','person']])],
+   ['feasible set Ω', 'continuity d<sup>arr</sup>='+
+    'o<sup>dep</sup> · closure z<sup>final</sup>='+
+    'z<sup>anchor</sup> · vehicle availability '+
+    'Σ ≤ A<sub>h,v,t</sub>'],
+   ['certificate', 'r<sup>tour</sup>, r<sup>activity</sup> '+
+    '(computed per card)']],
+  page: 'tensor-admm.html', chapter: 'feasible sets & projection' },
+ transfer: {
+  tensor: 'ℛ<sub>h,p,ω,u,o,d,c,m,τ,κ</sub> '+
+   '→ \u{1D49F}<sup>V</sup><sub>o,d,ν,κ,τ</sub>',
+  name: 'demand-transfer contraction G<sub>ν,κ</sub>',
+  rows: [
+   ['contracts', pills([['h,p','person'],['ω,u,c','tour'],
+     ['m','mode']])],
+   ['preserves', pills([['o,d','space'],['τ','time'],
+     ['κ','vehicle']])],
+   ['generates', pills([['ν','vehicle']])],
+   ['certificate', 'person-trip conservation · no orphan '+
+    'passenger · vehicle availability']],
+  page: 'studio.html', chapter: 'Contraction studio' },
+ dta: {
+  tensor: 'ℱ<sub>o,d,r,c,ν,κ,τ,p</sub> '+
+   '→ x<sub>a,t,ν</sub>',
+  name: 'path→link-time loading (δ incidence)',
+  rows: [
+   ['contracts', pills([['o,d','space'],['r','person'],
+     ['κ','vehicle'],['τ','time'],['p','path']])],
+   ['generates', pills([['a','space'],['t','time']])+
+    ' <span style="color:var(--muted)">(static face: t collapsed '+
+    '— fidelity: static-bpr)</span>'],
+   ['certificate', 'full-space gap · node conservation '+
+    '(A·x = b)']],
+  page: 'studio.html', chapter: 'Block-Flow chapter' },
+ skims: {
+  tensor: '\u{1D49E}<sub>o,d,r,c,m,τ,μ</sub>',
+  name: 'skim tensor — a DERIVED view, never the core state',
+  rows: [
+   ['axes', pills([['o,d','space'],['r','person'],['c','tour'],
+     ['m','mode'],['τ','time'],['μ','vehicle']])],
+   ['role', 'derived: aggregating \u{1D4AE} over paths/time loses '+
+    'information — the aggregation warning quantifies it']],
+  page: 'studio.html', chapter: 'Unfold/fold chapter' },
+ feedback: {
+  tensor: '\u{1D4B5}<sup>k+1</sup> = Φ(\u{1D4B5}<sup>k</sup>)',
+  name: 'the multi-rate fixed point',
+  rows: [
+   ['synchronized axes', pills([['τ','time'],['od','space']])+
+    ' (synchronization: fixed_point)'],
+   ['residual vector', '𝐫 = [r<sub>route</sub>, '+
+    'r<sub>demand</sub>, r<sub>schedule</sub>, '+
+    'r<sub>shifted</sub>]'],
+   ['certificate', 'no single metric suffices — the vector '+
+    'must fall together']],
+  page: 'tensor-admm.html', chapter: 'ADMM consensus (dual view)' },
+ landuse: {
+  tensor: 'ℒ<sub>z,k,y</sub>, H<sub>z,g,y</sub> → '+
+   'A<sub>z</sub>',
+  name: 'annual stocks + accessibility contraction',
+  rows: [
+   ['contracts', pills([['j (destinations)','space']])+
+    ' via logsum over congested costs'],
+   ['preserves', pills([['z','space'],['g','person'],
+     ['y','time']])+' (clock: annual — the slow axis)'],
+   ['certificate', 'Σ<sub>z</sub>H exact (stock-flow '+
+    'conservation) · Python twin: tensormobility/landuse']],
+  page: 'studio.html', chapter: 'Mode product chapter' },
+ calibration: {
+  tensor: '\u{1D4B4} = H(\u{1D4AE}, \u{1D49C}) + ε',
+  name: 'observation operator',
+  rows: [
+   ['observes', pills([['sensor','vehicle'],['interval','time'],
+     ['metric','state']])],
+   ['certificate', 'r<sub>obs</sub> at declared resolutions; '+
+    'coding warnings block sign-off']],
+  page: 'studio.html', chapter: 'Transformer bridge (masks from H)' }
+};
+function renderTmap(v){
+ var m = TENSORMAP[v] || TENSORMAP.system;
+ var h = '<div style="font-family:Cambria Math,Georgia,serif;'+
+  'font-size:14px;margin-bottom:4px">'+m.tensor+'</div>'+
+  '<div style="color:var(--muted);margin-bottom:6px">'+m.name+
+  '</div>';
+ m.rows.forEach(function(r){
+  h += '<div style="margin:3px 0"><b style="color:#52647a;'+
+   'font-size:10.5px;text-transform:uppercase;'+
+   'letter-spacing:.04em">'+r[0]+'</b><br>'+r[1]+'</div>';
+ });
+ h += '<div style="margin-top:6px;font-size:11px">↳ same '+
+  'concept in the <a href="'+m.page+'" '+
+  'style="color:var(--space)">'+m.chapter+'</a></div>';
+ document.getElementById('tmap').innerHTML = h;
+}
+
 /* =================== views =================== */
 function activate(v){
  document.querySelectorAll('[data-v]').forEach(function(x){
@@ -635,6 +766,7 @@ function activate(v){
  ({system:system, passengers:passengers, tours:tourView,
    transfer:transfer, dta:dta, skims:skims, feedback:feedback,
    landuse:landuseView, calibration:calibration}[v] || system)();
+ renderTmap(v);
 }
 
 function system(){
