@@ -65,11 +65,17 @@ def detect_cycle(states: list[np.ndarray], max_period: int = 6,
     if step <= rtol * scale:
         return None                      # converging, not cycling
     for p in range(1, max_period + 1):
-        if len(states) <= 2 * p:
+        if len(states) <= 2 * p + 1:
             continue
         rec = float(np.abs(states[-1] - states[-1 - p]).max())
         rec2 = float(np.abs(states[-1 - p] - states[-1 - 2 * p]).max())
-        if rec <= 10 * rtol * scale and rec2 <= 10 * rtol * scale:
+        # a genuine cycle keeps moving at a NON-DECAYING step; slow
+        # geometric convergence also recurs (period 1) but its steps
+        # shrink every sweep -- do not flag that as a cycle
+        prev_step = float(np.abs(states[-1 - p]
+                                 - states[-2 - p]).max())
+        if (rec <= 10 * rtol * scale and rec2 <= 10 * rtol * scale
+                and step > 0.8 * prev_step):
             return dict(period=p, recurrence=rec, step=step)
     return None
 

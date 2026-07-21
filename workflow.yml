@@ -49,6 +49,9 @@ workflows:
     certificates: [complementarity, feasibility, multi_start_spread, duality_gap_reported]
 
 pipelines:
+  # the master fixed point x = B_theta(L(x)) of the graphical abstract:
+  fixed_point: [behavior_choice, person_flow, occupancy_conversion,
+                path_to_link, dnl_queue, cost_update]
   quickstart: [W1, W2, W5]
   mpo:        [W1, W3, W5]
   corridor:   [W1, W3, W4, W5]

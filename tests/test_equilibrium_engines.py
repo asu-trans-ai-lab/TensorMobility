@@ -16,13 +16,14 @@ from tensormobility.profiles.mage_profile import solve_mage, default_two_company
 
 
 def stiff_wait_map(w, patience=12.0, w0=60.0, z=1500.0,
-                   demand=4800.0, theta=0.15, base_u=-20.0):
-    """Scalar analogue of the MAGE choice<->wait subsystem: share via
-    logit against a fixed outside option, wait via smoothed M/M/1.
-    dw/dshare ~ 1e3-1e4 near saturation -> damped Picard limit-cycles,
-    exactly the observed 'stuck at 0.12' pathology."""
-    u = -(15.0 + w)
-    s = 1.0 / (1.0 + np.exp(-theta * (base_u - u)))
+                   demand=6000.0, theta=2.0, w_indiff=5.0):
+    """Scalar analogue of the MAGE choice<->wait subsystem with the
+    correct NEGATIVE feedback: higher wait -> lower share -> more slack
+    -> lower wait. With a cold logit (theta=2) the composite slope is
+    far below -1, so damped Picard sustains a bounded limit cycle
+    (swinging between near-zero wait and the patience cap) -- the
+    'stuck at 0.12' pathology in one dimension."""
+    s = 1.0 / (1.0 + np.exp(theta * (w - w_indiff)))   # share falls in w
     tot = s * demand
     slack = np.maximum(z - tot, 0.0)
     return w0 / (slack + w0 / patience)
