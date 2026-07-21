@@ -3,6 +3,8 @@
 **Mobility systems as flow-through tensors — space, time, and behavior
 in one certified computational graph.**
 
+![TensorMobility / STB-FTT framework](figures/framework.png)
+
 The object of study is the space–time–behavior demand tensor and its
 supply companions:
 
@@ -55,7 +57,7 @@ assert router_is_logit(costs, theta=2.0)          # identity, not analogy
 | **TensorMobility.Core** | `tensormobility.core` | axis calculus (spectator / contracted / synchronized × semiring), typed sparse contracts, unified GMNS networks (grid, Sioux Falls, Chicago Sketch) |
 | **TensorMobility.DTA** | `tensormobility.dta` | the DTA core: column generation, full-space-certified sparse assignment, latent atoms, classical special cases (logit SUE ↔ UE) |
 | **TensorMobility.Dynamics** | `tensormobility.dynamics` | fluid point queues, path/cohort queue loading (the time seam) |
-| **TensorMobility.Behavior** | `tensormobility.behavior` | activity chains, activity-DTA coupling, bounded learning residuals |
+| **TensorMobility.Behavior** | `tensormobility.behavior` | **the Choice Graph** (layered DAG; chains = behavioral columns; recursive-logit face ≡ column face, tested), activity chains, activity-DTA coupling, bounded learning residuals |
 | **TensorMobility.Engines** | `tensormobility.engines` | the equilibrium engine escalation ladder (Picard → MSA → Anderson → stiff-block Newton → NCP/VI) with cycle detection |
 | **TensorMobility.Profiles** | `tensormobility.profiles` | layered equilibria: passenger–vehicle service coupling `Rx ≤ Sy`, mixed-autonomy ride-hailing (MAGE) |
 | **TensorMobility.Harness** | `tensormobility.harness` | experiment harnesses, analytical anchors, well-posedness maps |
