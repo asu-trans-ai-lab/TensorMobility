@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TensorMobility — a computational foundation for mobility systems</title>
+<title>TensorMobility — an interactive computational foundation for mobility systems</title>
 <style>
   :root{
     --ink:#0e1726; --paper:#ffffff; --muted:#5b6b7c; --line:#d8dee6;
     --core:#1f7a8c; --kernel:#c77b32; --cal:#b23a6e; --viz:#3a7d44;
-    --chip:#f2f5f8;
+    --chip:#f2f5f8; --accent:#1f7a8c;
   }
   @media (prefers-color-scheme: dark){
     :root{ --ink:#e8edf3; --paper:#101722; --muted:#93a3b4;
@@ -17,40 +17,91 @@
   *{box-sizing:border-box}
   body{margin:0;padding:2rem 1rem 4rem;background:var(--paper);
        color:var(--ink);font:15px/1.55 system-ui,Segoe UI,Roboto,sans-serif;
-       max-width:980px;margin-inline:auto}
+       max-width:1020px;margin-inline:auto}
   h1{font-size:1.7rem;margin:.2rem 0 0}
-  .sub{color:var(--muted);margin:.3rem 0 1.4rem}
-  h2{font-size:1.1rem;margin:2rem 0 .6rem}
-  .eq{font-family:Georgia,'Times New Roman',serif;font-size:1.35rem;
-      text-align:center;padding:1rem .5rem;border:1px solid var(--line);
-      border-radius:.7rem;background:var(--chip);margin:1rem 0 .4rem}
-  .eq i{font-style:italic}
+  .sub{color:var(--muted);margin:.3rem 0 1.2rem}
+  h2{font-size:1.15rem;margin:2.4rem 0 .5rem}
+  h3{font-size:1rem;margin:1.2rem 0 .3rem}
+  .eq{font-family:Georgia,'Times New Roman',serif;font-size:1.3rem;
+      text-align:center;padding:.9rem .5rem;border:1px solid var(--line);
+      border-radius:.7rem;background:var(--chip);margin:.8rem 0 .3rem}
   .eqnote{color:var(--muted);font-size:.85rem;text-align:center;
       margin:0 0 .5rem}
-  .flowline{font-family:Georgia,serif;font-size:1.1rem;text-align:center;
-      margin:.8rem 0;color:var(--ink)}
-  .flowline .op{color:var(--muted);font-size:.8rem;font-family:system-ui}
-  .layers{display:grid;gap:.55rem;margin:.8rem 0}
-  .layer{display:grid;grid-template-columns:2.2rem 15rem 1fr;gap:.7rem;
-      align-items:start;border:1px solid var(--line);border-radius:.6rem;
-      padding:.6rem .8rem;background:var(--chip)}
-  .layer .n{font-weight:700;font-size:1.1rem;color:var(--core)}
-  .layer .t{font-weight:600}
-  .layer .w{color:var(--muted);font-size:.87rem}
-  @media (max-width:700px){.layer{grid-template-columns:2rem 1fr}
-      .layer .w{grid-column:1/-1}}
+  .hint{color:var(--muted);font-size:.85rem;font-style:italic}
+  svg text{fill:var(--ink)}
+  .stagebox{cursor:pointer}
+  .stagebox rect{fill:var(--chip);stroke:var(--line);stroke-width:1.4;
+      rx:10;transition:stroke .15s}
+  .stagebox:hover rect{stroke:var(--accent);stroke-width:2}
+  .stagebox.active rect{stroke:var(--accent);stroke-width:2.6}
+  .stagebox .glyph{font-family:Georgia,serif;font-size:26px;
+      font-weight:700}
+  .stagebox .lbl{font-size:11.5px;fill:var(--muted)}
+  .oplbl{font-size:10.5px;fill:var(--muted)}
+  .pipe{stroke:var(--line);stroke-width:2;fill:none;marker-end:url(#arr)}
+  .detail{border:1px solid var(--accent);border-radius:.7rem;
+      padding:.9rem 1rem;background:var(--chip);margin:.6rem 0 0;
+      min-height:7.5rem}
+  .detail .cont{font-family:Georgia,serif;font-size:1.05rem;margin:.3rem 0}
+  .detail .disc{font-family:ui-monospace,Consolas,monospace;
+      font-size:.85rem;background:var(--paper);border:1px solid var(--line);
+      border-radius:.4rem;padding:.3rem .5rem;display:inline-block;
+      margin:.25rem 0}
+  .detail .wit{color:var(--viz);font-size:.85rem;margin-top:.35rem}
+  .detail .mod{color:var(--muted);font-size:.82rem}
+  .demo{border:1px solid var(--line);border-radius:.8rem;
+      padding:1rem 1.1rem;margin:1rem 0;background:var(--chip)}
+  .demo h3{margin-top:0;color:var(--accent)}
+  .row{display:flex;flex-wrap:wrap;gap:1.2rem;align-items:flex-start}
+  .col{flex:1 1 300px;min-width:280px}
+  .ctl{display:flex;align-items:center;gap:.6rem;margin:.35rem 0;
+      font-size:.88rem}
+  .ctl label{min-width:12.5rem;color:var(--muted)}
+  .ctl input[type=range]{flex:1;accent-color:var(--accent)}
+  .ctl .val{font-family:ui-monospace,Consolas,monospace;min-width:4.2rem;
+      text-align:right}
+  .bars{margin:.5rem 0}
+  .bar{display:flex;align-items:center;gap:.5rem;margin:.3rem 0;
+      font-size:.85rem}
+  .bar .name{min-width:9.5rem;font-family:ui-monospace,Consolas,monospace}
+  .bar .track{flex:1;background:var(--paper);border:1px solid var(--line);
+      border-radius:.3rem;height:1.15rem;overflow:hidden}
+  .bar .fill{height:100%;background:var(--accent);
+      transition:width .25s ease}
+  .bar .pv{font-family:ui-monospace,Consolas,monospace;min-width:3.6rem;
+      text-align:right}
+  button{font:inherit;font-size:.85rem;padding:.35rem .9rem;
+      border:1px solid var(--accent);background:var(--accent);color:#fff;
+      border-radius:.45rem;cursor:pointer;margin-right:.4rem}
+  button.ghost{background:transparent;color:var(--accent)}
+  button:disabled{opacity:.45;cursor:default}
+  .readout{font-family:ui-monospace,Consolas,monospace;font-size:.85rem;
+      margin:.45rem 0;color:var(--ink)}
+  .badge{display:inline-block;padding:.08rem .5rem;border-radius:.4rem;
+      font-size:.78rem;font-weight:600;background:var(--viz);color:#fff;
+      visibility:hidden}
+  .badge.on{visibility:visible}
+  canvas{width:100%;height:auto;border:1px solid var(--line);
+      border-radius:.5rem;background:var(--paper)}
+  details.layer{border:1px solid var(--line);border-radius:.6rem;
+      background:var(--chip);margin:.45rem 0;padding:.15rem .8rem}
+  details.layer summary{cursor:pointer;padding:.45rem 0;font-weight:600;
+      list-style-position:outside}
+  details.layer summary .n{color:var(--accent);font-weight:700;
+      margin-right:.5rem}
+  details.layer .w{color:var(--muted);font-size:.87rem;padding:0 0 .6rem}
   table{border-collapse:collapse;width:100%;font-size:.9rem;margin:.6rem 0}
   td,th{padding:.35rem .5rem;border-bottom:1px solid var(--line);
       text-align:right}
   td:first-child,th:first-child{text-align:left}
   th{color:var(--muted);font-weight:600}
-  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
       gap:.7rem;margin:.8rem 0}
   a.card{display:block;border:1px solid var(--line);border-radius:.7rem;
       padding:.8rem .9rem;text-decoration:none;color:var(--ink);
       background:var(--chip)}
-  a.card:hover{border-color:var(--core)}
-  a.card b{color:var(--core)}
+  a.card:hover{border-color:var(--accent)}
+  a.card b{color:var(--accent)}
   a.card span{display:block;color:var(--muted);font-size:.85rem;
       margin-top:.2rem}
   .note{color:var(--muted);font-size:.87rem}
@@ -62,10 +113,10 @@
 
 <h1>TensorMobility</h1>
 <p class="sub">Mobility systems as flow-through tensors — space, time,
-and behavior in one certified computational graph. The software home of
-the STB-FTT research line (asu-trans-ai-lab).</p>
+and behavior in one certified computational graph. An interactive tour
+of the mathematics; every number on this page is reproduced by code in
+the <a href="https://github.com/asu-trans-ai-lab/TensorMobility">repository</a>.</p>
 
-<h2>The unified equation</h2>
 <div class="eq">
   𝒵<sup>&#9733;</sup> = &Pi;<sub>&Omega;</sub>
   [ 𝒦<sub>struct</sub>(𝒵<sup>&#9733;</sup>, 𝒰)
@@ -73,66 +124,220 @@ the STB-FTT research line (asu-trans-ai-lab).</p>
 </div>
 <p class="eqnote">multi-axis urban state 𝒵 = {ℒ, ℋ, 𝒜, 𝒟, ℱ, 𝒮, 𝒴} ·
 structural land-use–ABM–DTA–queue–observation operators 𝒦 ·
-trainable operators 𝒩<sub>θ</sub> (PINN / neural operator / residual) ·
-projection Π<sub>Ω</sub> onto conservation, capacity, temporal, and
-behavioral feasibility.</p>
+trainable operators 𝒩<sub>θ</sub> · projection Π<sub>Ω</sub> onto
+conservation, capacity, temporal, and behavioral feasibility.
+Neural networks, tensor decomposition, and ADMM are <em>not</em> the
+starting point — the state and its conservation operators are.</p>
 
-<p>Neural networks are not the starting point; tensor decomposition is
-not the starting point; ADMM is not the starting point. The starting
-point is: <em>which states compose the urban system, and through which
-conservation operators are they connected?</em> The chain is a
-sequence of typed operators, never a file hand-off:</p>
+<h2>The operator pipeline <span class="hint">— click a stage; the dots
+are demand flowing through the chain</span></h2>
 
-<div class="flowline">
-  𝒜 <span class="op">→ demand formation →</span> 𝒟
-  <span class="op">→ path generation →</span> ℱ
-  <span class="op">→ dynamic network loading →</span> 𝒮
-  <span class="op">→ experienced costs →</span> 𝒜<sup>+</sup>
+<svg id="pipe" viewBox="0 0 960 190" role="img"
+     aria-label="ABM to DTA operator pipeline">
+  <defs>
+    <marker id="arr" viewBox="0 0 8 8" refX="7" refY="4"
+      markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L8 4 L0 8 z" fill="#93a3b4"/>
+    </marker>
+  </defs>
+  <path class="pipe" d="M148 80 L192 80"/>
+  <path class="pipe" d="M340 80 L384 80"/>
+  <path class="pipe" d="M532 80 L576 80"/>
+  <path class="pipe" d="M724 80 L768 80"/>
+  <path class="pipe" d="M844 112 C 844 170, 76 170, 76 112"/>
+  <text class="oplbl" x="170" y="68" text-anchor="middle">ℬ</text>
+  <text class="oplbl" x="362" y="68" text-anchor="middle">Φ_path</text>
+  <text class="oplbl" x="554" y="68" text-anchor="middle">Φ_DNL</text>
+  <text class="oplbl" x="746" y="68" text-anchor="middle">Π_Ω</text>
+  <text class="oplbl" x="460" y="182" text-anchor="middle">Φ_behavior — experienced costs close the loop</text>
+  <g class="stagebox" data-k="A">
+    <rect x="4" y="48" width="144" height="64"/>
+    <text class="glyph" x="76" y="78" text-anchor="middle">𝒜</text>
+    <text class="lbl" x="76" y="100" text-anchor="middle">activities · households</text>
+  </g>
+  <g class="stagebox" data-k="D">
+    <rect x="196" y="48" width="144" height="64"/>
+    <text class="glyph" x="268" y="78" text-anchor="middle">𝒟</text>
+    <text class="lbl" x="268" y="100" text-anchor="middle">OD demand</text>
+  </g>
+  <g class="stagebox" data-k="F">
+    <rect x="388" y="48" width="144" height="64"/>
+    <text class="glyph" x="460" y="78" text-anchor="middle">ℱ</text>
+    <text class="lbl" x="460" y="100" text-anchor="middle">path flows</text>
+  </g>
+  <g class="stagebox" data-k="S">
+    <rect x="580" y="48" width="144" height="64"/>
+    <text class="glyph" x="652" y="78" text-anchor="middle">𝒮</text>
+    <text class="lbl" x="652" y="100" text-anchor="middle">link–time state · queues</text>
+  </g>
+  <g class="stagebox" data-k="Ap">
+    <rect x="772" y="48" width="144" height="64"/>
+    <text class="glyph" x="844" y="78" text-anchor="middle">𝒜⁺</text>
+    <text class="lbl" x="844" y="100" text-anchor="middle">adjusted behavior</text>
+  </g>
+  <circle r="4" fill="var(--accent)">
+    <animateMotion dur="6s" repeatCount="indefinite"
+      path="M76 80 L844 80"/>
+  </circle>
+  <circle r="4" fill="var(--accent)" opacity=".7">
+    <animateMotion dur="6s" begin="2s" repeatCount="indefinite"
+      path="M76 80 L844 80"/>
+  </circle>
+  <circle r="4" fill="#c77b32" opacity=".8">
+    <animateMotion dur="4s" repeatCount="indefinite"
+      path="M844 112 C 844 170, 76 170, 76 112"/>
+  </circle>
+</svg>
+
+<div class="detail" id="detail"></div>
+
+<h2>Play with the mathematics</h2>
+<p class="note">Three live computations — the same operators that run
+at regional scale, small enough to touch. Each one is an executable
+identity in the test suite, not an analogy.</p>
+
+<div class="demo">
+<h3>1 · Logit route choice ≡ softmax router <span class="hint">(bitwise
+identical in <code>tensormobility.neural</code>)</span></h3>
+<div class="row">
+<div class="col">
+  <div class="ctl"><label>route 1 travel time t₁</label>
+    <input type="range" id="t1" min="8" max="30" step="0.5" value="10">
+    <span class="val" id="t1v"></span></div>
+  <div class="ctl"><label>route 2 travel time t₂</label>
+    <input type="range" id="t2" min="8" max="30" step="0.5" value="12">
+    <span class="val" id="t2v"></span></div>
+  <div class="ctl"><label>route 3 travel time t₃</label>
+    <input type="range" id="t3" min="8" max="30" step="0.5" value="15">
+    <span class="val" id="t3v"></span></div>
+  <div class="ctl"><label>rationality θ (softmax temp 1/θ)</label>
+    <input type="range" id="theta" min="0.02" max="3" step="0.02"
+      value="0.5"><span class="val" id="thetav"></span></div>
+  <p class="note">P<sub>k</sub> = e<sup>−θc<sub>k</sub></sup> ⁄
+  Σ<sub>j</sub> e<sup>−θc<sub>j</sub></sup>. Slide θ up: choice
+  hardens to all-or-nothing (top-1 ≡ AON); θ→0: uniform. The τ→0
+  ladder from logit SUE to deterministic UE is this slider.</p>
+</div>
+<div class="col">
+  <div class="bars" id="logitbars"></div>
+  <div class="readout" id="logitread"></div>
+</div>
+</div>
 </div>
 
-<h2>The six-layer foundation — each layer proven by a certified case</h2>
-<div class="layers">
-  <div class="layer"><span class="n">1</span>
-    <span class="t">multidimensional representation</span>
-    <span class="w">named-axis contraction ≡ Kronecker-lifted operator
-    (tested); grouped-simplex projection 7e-15; 597× sparse-storage
-    measurement</span></div>
-  <div class="layer"><span class="n">2</span>
-    <span class="t">conservation &amp; physical structure</span>
-    <span class="w">chain mass conservation 1e-13; fluid-queue pulse ≤
-    7e-5 vs closed form; queue causality on real detector inflow (IEEE
-    corridor)</span></div>
-  <div class="layer"><span class="n">3</span>
-    <span class="t">variational equilibrium &amp; fixed points</span>
-    <span class="w">entropy-master KKT ≡ logit (exact); τ→0 ladder to
-    deterministic UE; mixed-autonomy closure with consistency
-    residuals</span></div>
-  <div class="layer"><span class="n">4</span>
-    <span class="t">numerical optimization</span>
-    <span class="w">full-space certified column generation: Chicago
-    93,135 ODs @ 9.8e-5 in 12 s; TRMG2 1,039,117 ODs @ 4.4e-7;
-    engine-escalation ladder with the measured stiff-block
-    lesson</span></div>
-  <div class="layer"><span class="n">5</span>
-    <span class="t">compression &amp; scalable computation</span>
-    <span class="w">rank-economy sweep (bias 2e-5 → 2.95 as K: 2→16;
-    promotions sublinear); the K̄ ≈ 2.2 compression-admissibility
-    boundary, reported honestly</span></div>
-  <div class="layer"><span class="n">6</span>
-    <span class="t">modern neural computation</span>
-    <span class="w">softmax router ≡ logit (bitwise); hand adjoint ≡
-    autograd 1e-9; bounded residual admissibility; the learned-proposer
-    honest negative</span></div>
+<div class="demo">
+<h3>2 · The equilibrium fixed point 𝒵<sup>★</sup> =
+Π<sub>Ω</sub>[𝒦(𝒵<sup>★</sup>)] <span class="hint">(watch the
+certificate go to zero)</span></h3>
+<div class="row">
+<div class="col">
+  <div class="ctl"><label>OD demand d (veh/min)</label>
+    <input type="range" id="dem" min="40" max="160" step="5" value="110">
+    <span class="val" id="demv"></span></div>
+  <p class="note">Three BPR routes (t₀ = 10, 12, 15; capacities 40,
+  50, 60). Each step: price routes at current flows → all-or-nothing
+  to the cheapest → averaging step toward it (MSA). The
+  <b>relative gap</b> is the equilibrium certificate — the same
+  full-space-priced quantity reported for Chicago (9.8e-5) and TRMG2
+  (4.4e-7).</p>
+  <p>
+    <button id="stepbtn">step</button>
+    <button id="runbtn">run to 1e-4</button>
+    <button class="ghost" id="resetbtn">reset</button>
+    <span class="badge" id="certbadge">certified &lt; 1e-4</span>
+  </p>
+  <div class="readout" id="eqread"></div>
 </div>
-<p class="note">These layers must connect; learning only the last one
-is exactly the failure mode this framework is designed against.
-Attention enters as a <em>transportation-constrained</em>,
-state-dependent kernel Y<sub>i</sub> = &Sigma;<sub>j</sub>
-K<sub>ij</sub>(𝒵) X<sub>j</sub> — its masks come from incidence,
-causality, and availability, never from hyperparameters. A learned
-loading surrogate is never free-standing:
-𝒮 = Π<sub>Ω</sub>[Φ<sub>DNL</sub>(𝒟) + r<sub>θ</sub>(𝒟, 𝒴)], never
-𝒮 = NN(𝒟).</p>
+<div class="col">
+  <div class="bars" id="eqbars"></div>
+  <svg id="gapchart" viewBox="0 0 420 150" style="width:100%">
+    <line x1="42" y1="10" x2="42" y2="128" stroke="var(--line)"/>
+    <line x1="42" y1="128" x2="410" y2="128" stroke="var(--line)"/>
+    <text x="8" y="16" font-size="10" fill="var(--muted)">gap</text>
+    <text x="8" y="30" font-size="10" fill="var(--muted)">(log)</text>
+    <text x="226" y="146" font-size="10" fill="var(--muted)"
+      text-anchor="middle">iteration</text>
+    <polyline id="gapline" fill="none" stroke="var(--accent)"
+      stroke-width="2" points=""/>
+  </svg>
+</div>
+</div>
+</div>
+
+<div class="demo">
+<h3>3 · Conservation: the fluid queue <span class="hint">(the same
+recursion certified ≤ 7e-5 vs the closed form, and run on real IEEE
+detector inflow)</span></h3>
+<div class="row">
+<div class="col">
+  <div class="ctl"><label>demand pulse height (veh/min)</label>
+    <input type="range" id="pulse" min="0" max="60" step="2" value="35">
+    <span class="val" id="pulsev"></span></div>
+  <div class="ctl"><label>capacity cut during incident</label>
+    <input type="range" id="cut" min="0" max="70" step="5" value="30">
+    <span class="val" id="cutv"></span></div>
+  <p class="note">Cumulative arrivals A(t) and departures
+  D(t) = min(A, D + μ dt); the shaded band is the queue — vertical
+  distance = vehicles stored, horizontal distance = delay. Nothing is
+  learned here: this layer is pure conservation, which is exactly why
+  a neural surrogate must live <em>inside</em>
+  Π<sub>Ω</sub>[Φ_DNL + r<sub>θ</sub>], never replace it.</p>
+  <div class="readout" id="qread"></div>
+</div>
+<div class="col">
+  <canvas id="qcanvas" width="640" height="360"></canvas>
+</div>
+</div>
+</div>
+
+<h2>The six-layer foundation <span class="hint">— expand a layer for
+its certified witness in this repo</span></h2>
+<details class="layer" open><summary><span class="n">1</span>
+  multidimensional representation — typed axes, not bigger arrays
+  </summary><div class="w">The integrated state
+  𝒳[h,n,c,r,u,o,d,m,τ,p,a,t,ρ] is a <b>typed</b> tensor: some axes
+  are states, some are choices, some are constraints, some are
+  generated, some observed, some synchronized, some compressible, some
+  never aggregable. Witnesses: named-axis contraction ≡
+  Kronecker-lifted operator (tested); grouped-simplex projection
+  7e-15; 597× sparse-storage measurement.</div></details>
+<details class="layer"><summary><span class="n">2</span>
+  conservation &amp; physical structure</summary><div class="w">
+  Network flow, cumulative flow, queue propagation, capacity,
+  incidence, activity-time conservation. Witnesses: chain mass
+  conservation 1e-13; fluid-queue pulse ≤ 7e-5 vs closed form (demo 3
+  above); queue causality on real detector inflow.</div></details>
+<details class="layer"><summary><span class="n">3</span>
+  variational equilibrium &amp; fixed points</summary><div class="w">
+  UE/SUE, variational inequalities, complementarity, demand–supply
+  closure. Witnesses: entropy-master KKT ≡ logit (exact — demo 1);
+  τ→0 ladder to deterministic UE; mixed-autonomy closure with
+  final-state consistency residuals.</div></details>
+<details class="layer"><summary><span class="n">4</span>
+  numerical optimization</summary><div class="w">Frank–Wolfe, gradient
+  projection, ADMM, column generation, major/minor decomposition —
+  the <b>solver layer</b>, chosen after state, operators, and
+  conservation are fixed. Witnesses: Chicago 93,135 ODs @ 9.8e-5 in
+  12 s; TRMG2 1,039,117 ODs @ 4.4e-7 (demo 2 is this machinery in
+  miniature); the engine-escalation ladder with its measured
+  stiff-block lesson.</div></details>
+<details class="layer"><summary><span class="n">5</span>
+  compression &amp; scalable computation</summary><div class="w">
+  Sparse tensors, CP/Tucker/TT, generated columns, low rank, regional
+  decomposition. Witnesses: the rank-economy sweep (bias 2e-5 → 2.95
+  as K: 2→16; promotions sublinear); the K̄ ≈ 2.2
+  compression-admissibility boundary — reported honestly, including
+  where compression cannot pay.</div></details>
+<details class="layer"><summary><span class="n">6</span>
+  modern neural computation</summary><div class="w">Computational
+  graphs, autodiff, adjoints, PINN, neural operators, constrained
+  attention Y<sub>i</sub> = Σ<sub>j</sub> K<sub>ij</sub>(𝒵)
+  X<sub>j</sub> with masks from incidence, causality, and
+  availability. Witnesses: softmax router ≡ logit (bitwise); hand
+  adjoint ≡ autograd 1e-9; bounded residual admissibility; the
+  learned-proposer honest negative. <b>These layers must connect —
+  learning only this one is the failure mode the framework is
+  designed against.</b></div></details>
 
 <h2>Reproduced and scalable — <code>python cases/run_demo_suite.py</code></h2>
 <table>
@@ -175,8 +380,234 @@ Single-process, single-thread.</p>
 
 <p class="note">TensorMobility is the software; STB-FTT /
 Flow-Through Tensors is the framework name used in the papers.
-Ecosystem contract: GMNS folders are the only inter-tool interface;
-<code>certificates.json</code> rides beside every output.</p>
+Interactive-explainer format inspired by
+<a href="https://poloclub.github.io/transformer-explainer/">Transformer
+Explainer</a> (Polo Club of Data Science).</p>
+
+<script>
+'use strict';
+var $ = function(id){ return document.getElementById(id); };
+
+/* ---------- pipeline stage details ---------- */
+var STAGES = {
+  A:  { t:'𝒜 — activity / household state',
+        c:'A(n,c,τ) = ∫ K_LA(n,c,τ; z,k) L(z,k) dz dk',
+        d:'behavior/choice_graph.py — layered DAG; chains = behavioral columns',
+        w:'witness: sequential (recursive-logit) face ≡ flat logit face to 1e-12' },
+  D:  { t:'𝒟 — demand formation (contraction over h,n,c,r,u)',
+        c:'D[o,d,m,τ] = Σ B[o,d,m,τ; h,n,c,r,u] · A[h,n,c,r,u]',
+        d:'core/stb_tensor.py — named-axis contract(); spectators ride along',
+        w:'witness: contraction ≡ Kronecker-lifted operator (tested); grouped-simplex projection 7e-15' },
+  F:  { t:'ℱ — path generation & route choice',
+        c:'F(o,d,τ,p) = ∫ K_DP(p | o,d,τ, C) D(o,d,τ) dC',
+        d:'dta/sparse_assignment.py — column generation, full-space pricing',
+        w:'witness: Chicago 93,135 ODs @ 9.8e-5; TRMG2 1,039,117 ODs @ 4.4e-7' },
+  S:  { t:'𝒮 — dynamic network loading & queues',
+        c:'S = Π_Ω[ Φ_DNL(F) + r_θ(F, Y) ]  — never S = NN(D)',
+        d:'dynamics/ — fluid point queues, path/cohort loading',
+        w:'witness: queue pulse ≤ 7e-5 vs closed form; causality on real IEEE detector inflow' },
+  Ap: { t:'𝒜⁺ — experienced costs close the loop',
+        c:'A⁺ = Φ_behavior(H, L, C_experienced(S));  fixed point Z★ = Π_Ω[K(Z★)]',
+        d:'engines/ — Picard → MSA → Anderson → stiff-block Newton ladder',
+        w:'witness: mixed-autonomy closure, final-state consistency residuals; the measured stiff-block lesson' }
+};
+function showStage(k){
+  var s = STAGES[k];
+  $('detail').innerHTML =
+    '<b>' + s.t + '</b>' +
+    '<div class="cont">' + s.c + '</div>' +
+    '<div class="disc">' + s.d + '</div>' +
+    '<div class="wit">✓ ' + s.w + '</div>' +
+    '<div class="mod">Discrete face: tensor contraction ' +
+    'Yᵢ = Σⱼ Kᵢⱼ Xⱼ; continuous face: the ' +
+    'integral kernel Y(ξ) = ∫ K(ξ,η;ℤ) X(η) dη. ' +
+    'Same operator, two representations.</div>';
+  var boxes = document.querySelectorAll('.stagebox');
+  for (var i = 0; i < boxes.length; i++)
+    boxes[i].classList.toggle('active', boxes[i].dataset.k === k);
+}
+(function(){
+  var boxes = document.querySelectorAll('.stagebox');
+  for (var i = 0; i < boxes.length; i++)
+    boxes[i].addEventListener('click', function(){
+      showStage(this.dataset.k); });
+  showStage('F');
+})();
+
+/* ---------- demo 1: logit = softmax router ---------- */
+function logitUpdate(){
+  var t = [ +$('t1').value, +$('t2').value, +$('t3').value ];
+  var th = +$('theta').value;
+  $('t1v').textContent = t[0].toFixed(1);
+  $('t2v').textContent = t[1].toFixed(1);
+  $('t3v').textContent = t[2].toFixed(1);
+  $('thetav').textContent = th.toFixed(2);
+  var m = Math.min.apply(null, t), s = 0, e = [], i;
+  for (i = 0; i < 3; i++){ e[i] = Math.exp(-th * (t[i] - m)); s += e[i]; }
+  var html = '';
+  for (i = 0; i < 3; i++){
+    var p = e[i] / s;
+    html += '<div class="bar"><span class="name">route ' + (i+1) +
+      ' (c=' + t[i].toFixed(1) + ')</span><div class="track">' +
+      '<div class="fill" style="width:' + (100*p).toFixed(1) +
+      '%"></div></div><span class="pv">' + (100*p).toFixed(1) +
+      '%</span></div>';
+  }
+  $('logitbars').innerHTML = html;
+  var H = 0;
+  for (i = 0; i < 3; i++){
+    var p2 = e[i] / s; if (p2 > 1e-12) H -= p2 * Math.log(p2);
+  }
+  $('logitread').textContent =
+    'P_k ∝ exp(−θ c_k)   ·   choice entropy H = ' +
+    H.toFixed(3) + ' nats' +
+    (th > 2.5 ? '   → approaching all-or-nothing (top-1 ≡ AON)'
+              : (th < 0.1 ? '   → approaching uniform' : ''));
+}
+['t1','t2','t3','theta'].forEach(function(id){
+  $(id).addEventListener('input', logitUpdate); });
+logitUpdate();
+
+/* ---------- demo 2: MSA fixed point with certificate ---------- */
+var EQ = { t0:[10,12,15], cap:[40,50,60], v:[0,0,0], it:0, gaps:[],
+           timer:null };
+function bpr(k, v){
+  var x = v / EQ.cap[k];
+  return EQ.t0[k] * (1 + 0.15 * Math.pow(x, 4));
+}
+function eqReset(){
+  var d = +$('dem').value;
+  EQ.v = [d/3, d/3, d/3]; EQ.it = 0; EQ.gaps = [];
+  if (EQ.timer){ clearInterval(EQ.timer); EQ.timer = null; }
+  $('certbadge').classList.remove('on');
+  eqDraw(null);
+}
+function eqStep(){
+  var d = +$('dem').value, c = [0,1,2].map(function(k){
+    return bpr(k, EQ.v[k]); });
+  var best = c.indexOf(Math.min.apply(null, c));
+  var tot = 0, i;
+  for (i = 0; i < 3; i++) tot += EQ.v[i] * c[i];
+  var gap = (tot - d * c[best]) / tot;
+  EQ.it += 1;
+  var a = 1 / EQ.it;
+  for (i = 0; i < 3; i++){
+    var target = (i === best) ? d : 0;
+    EQ.v[i] += a * (target - EQ.v[i]);
+  }
+  EQ.gaps.push(Math.max(gap, 1e-12));
+  if (gap < 1e-4){
+    $('certbadge').classList.add('on');
+    if (EQ.timer){ clearInterval(EQ.timer); EQ.timer = null; }
+  }
+  eqDraw(gap);
+}
+function eqDraw(gap){
+  var d = +$('dem').value;
+  $('demv').textContent = d.toFixed(0);
+  var html = '', i;
+  for (i = 0; i < 3; i++){
+    var c = bpr(i, EQ.v[i]);
+    html += '<div class="bar"><span class="name">route ' + (i+1) +
+      '  c=' + c.toFixed(2) + '</span><div class="track">' +
+      '<div class="fill" style="width:' +
+      (100 * EQ.v[i] / d).toFixed(1) + '%"></div></div>' +
+      '<span class="pv">' + EQ.v[i].toFixed(1) + '</span></div>';
+  }
+  $('eqbars').innerHTML = html;
+  $('eqread').textContent = 'iteration ' + EQ.it + '   ·   ' +
+    'relative gap = ' + (gap === null ? '—'
+      : gap.toExponential(2)) +
+    '   ·   equal costs at equilibrium ≡ Wardrop';
+  /* map: gap 1 -> y=10 ... gap 1e-5 -> y=128 */
+  var pts = '', n = EQ.gaps.length;
+  for (i = 0; i < n; i++){
+    var xx = 42 + 368 * (n === 1 ? 0 : i / (n - 1));
+    var frac = Math.min(1, Math.max(0, -Math.log10(EQ.gaps[i]) / 5));
+    pts += xx.toFixed(1) + ',' + (10 + 118 * frac).toFixed(1) + ' ';
+  }
+  $('gapline').setAttribute('points', pts);
+}
+$('stepbtn').addEventListener('click', eqStep);
+$('runbtn').addEventListener('click', function(){
+  if (EQ.timer) return;
+  EQ.timer = setInterval(function(){
+    eqStep();
+    if (EQ.it > 400 && EQ.timer){ clearInterval(EQ.timer);
+      EQ.timer = null; }
+  }, 25);
+});
+$('resetbtn').addEventListener('click', eqReset);
+$('dem').addEventListener('input', eqReset);
+eqReset();
+
+/* ---------- demo 3: fluid queue ---------- */
+function queueUpdate(){
+  var pulse = +$('pulse').value, cut = +$('cut').value;
+  $('pulsev').textContent = pulse.toFixed(0);
+  $('cutv').textContent = cut.toFixed(0) + '%';
+  var T = 120, dt = 1, base = 18, mu0 = 45;
+  var A = [0], D = [0], t, i;
+  for (t = 1; t <= T; t++){
+    var inflow = base + pulse * Math.exp(-Math.pow((t - 40) / 10, 2));
+    var mu = mu0 * ((t >= 50 && t <= 80) ? (1 - cut / 100) : 1);
+    A[t] = A[t-1] + inflow * dt;
+    D[t] = Math.min(A[t], D[t-1] + mu * dt);
+  }
+  var peak = 0, delay = 0;
+  for (t = 0; t <= T; t++){
+    var q = A[t] - D[t];
+    if (q > peak) peak = q;
+    delay += q * dt;
+  }
+  $('qread').textContent = 'peak queue = ' + peak.toFixed(0) +
+    ' veh   ·   total delay = ' + (delay/60).toFixed(1) +
+    ' veh·h   ·   conservation: D(T) ≤ A(T) exactly';
+  var cv = $('qcanvas'), ctx = cv.getContext('2d');
+  var css = getComputedStyle(document.documentElement);
+  var ink = css.getPropertyValue('--ink').trim() || '#0e1726';
+  var mutd = css.getPropertyValue('--muted').trim() || '#5b6b7c';
+  var acc = css.getPropertyValue('--accent').trim() || '#1f7a8c';
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  var W = cv.width, Hh = cv.height, pad = 42;
+  var maxY = A[T] * 1.05;
+  function X(t){ return pad + (W - pad - 12) * t / T; }
+  function Y(v){ return Hh - 30 - (Hh - 48) * v / maxY; }
+  ctx.strokeStyle = mutd; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(pad, 12); ctx.lineTo(pad, Hh - 30);
+  ctx.lineTo(W - 8, Hh - 30); ctx.stroke();
+  /* queue band */
+  ctx.beginPath(); ctx.moveTo(X(0), Y(A[0]));
+  for (t = 1; t <= T; t++) ctx.lineTo(X(t), Y(A[t]));
+  for (t = T; t >= 0; t--) ctx.lineTo(X(t), Y(D[t]));
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(199,123,50,0.28)'; ctx.fill();
+  /* A(t) */
+  ctx.strokeStyle = acc; ctx.lineWidth = 2.2; ctx.beginPath();
+  ctx.moveTo(X(0), Y(A[0]));
+  for (t = 1; t <= T; t++) ctx.lineTo(X(t), Y(A[t]));
+  ctx.stroke();
+  /* D(t) */
+  ctx.strokeStyle = '#3a7d44'; ctx.lineWidth = 2.2; ctx.beginPath();
+  ctx.moveTo(X(0), Y(D[0]));
+  for (t = 1; t <= T; t++) ctx.lineTo(X(t), Y(D[t]));
+  ctx.stroke();
+  /* incident window */
+  ctx.fillStyle = 'rgba(178,58,110,0.10)';
+  ctx.fillRect(X(50), 12, X(80) - X(50), Hh - 42);
+  ctx.font = '13px system-ui'; ctx.fillStyle = ink;
+  ctx.fillText('A(t) cumulative arrivals', pad + 10, 26);
+  ctx.fillStyle = '#3a7d44';
+  ctx.fillText('D(t) cumulative departures', pad + 10, 44);
+  ctx.fillStyle = mutd;
+  ctx.fillText('queue', X(58), Y((A[62]+D[62])/2));
+  ctx.fillText('incident (capacity cut)', X(50), Hh - 8);
+  ctx.fillText('time (min)', W - 90, Hh - 8);
+}
+$('pulse').addEventListener('input', queueUpdate);
+$('cut').addEventListener('input', queueUpdate);
+queueUpdate();
+</script>
 
 </body>
 </html>
