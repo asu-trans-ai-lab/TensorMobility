@@ -1,0 +1,29 @@
+{
+  "axis_colors": {
+    "behavior_person": "#168b83",
+    "activity_tour": "#3a9a63",
+    "space_network": "#2f63b5",
+    "time": "#e57922",
+    "mode_vehicle": "#1f9cac",
+    "observation": "#7452a8",
+    "latent_rank": "#ba4b8a",
+    "policy_scenario": "#c89317"
+  },
+  "node_types": [
+    "tensor_block",
+    "tensor_network_node",
+    "operator",
+    "projection",
+    "solver",
+    "certificate"
+  ],
+  "edge_types": [
+    "preserve",
+    "translate",
+    "contract",
+    "generate",
+    "synchronize",
+    "observe",
+    "compress"
+  ]
+}

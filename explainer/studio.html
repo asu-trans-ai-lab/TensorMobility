@@ -1,0 +1,905 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TensorMobility Visual Computing Studio</title>
+<style>
+:root{
+ --bg:#eef3f8;--panel:#fff;--ink:#17233b;--muted:#667085;--line:#d8e2ee;
+ --blue:#2f63b5;--teal:#168b83;--green:#3a9a63;--orange:#e57922;
+ --cyan:#1f9cac;--purple:#7452a8;--magenta:#ba4b8a;--gold:#c89317;
+ --red:#c83f49;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;
+ color:var(--ink);background:var(--bg)}
+button,input,select{font:inherit}
+.topbar{min-height:64px;background:#fff;border-bottom:1px solid
+ var(--line);display:flex;align-items:center;padding:8px 20px;gap:16px;
+ position:sticky;top:0;z-index:10;flex-wrap:wrap}
+.brand{font-weight:800;color:#173b73;white-space:nowrap}
+.brand small{display:block;font-weight:400;color:var(--muted);
+ font-size:11px}
+.prompt{display:flex;flex:1;max-width:700px;border:1px solid #b9c8da;
+ border-radius:10px;overflow:hidden;min-width:240px}
+.prompt input{border:0;padding:10px 12px;flex:1;outline:none}
+.prompt button{border:0;background:#173b73;color:#fff;padding:0 16px;
+ cursor:pointer}
+.badge{font-size:12px;padding:4px 8px;border-radius:12px;
+ background:#edf3fb;color:#31547c}
+.badge a{color:inherit;text-decoration:none}
+.shell{display:grid;grid-template-columns:195px minmax(560px,1fr) 300px;
+ gap:13px;padding:13px;min-height:calc(100vh - 72px)}
+.rail,.canvas,.inspector,.ledger{background:#fff;
+ border:1px solid var(--line);border-radius:13px}
+.rail{padding:12px;overflow:auto}
+.rail h3,.inspector h3{margin:4px 4px 10px;font-size:13px;
+ text-transform:uppercase;letter-spacing:.06em;color:#52647a}
+.chapter{display:flex;gap:9px;align-items:center;padding:9px;
+ border-radius:9px;margin:3px 0;cursor:pointer;font-size:13px}
+.chapter:hover,.chapter.active{background:#eaf2ff;color:#173b73;
+ font-weight:700}
+.dot{width:10px;height:10px;border-radius:50%;background:#b7c4d2;
+ flex:none}
+.chapter.done .dot{background:var(--green)}
+.chapter.active .dot{background:var(--blue)}
+.canvas{padding:13px;display:flex;flex-direction:column;min-width:0}
+.stage{flex:1;padding:10px 4px 4px;overflow:auto}
+.stage h2{margin:.2rem 0 .4rem;font-size:1.15rem}
+.stage p{color:var(--muted);font-size:.9rem;margin:.3rem 0}
+.inspector{padding:13px}
+.card{border:1px solid var(--line);border-radius:10px;padding:11px;
+ margin-top:11px;font-size:.86rem}
+.card h4{margin:0 0 7px;font-size:.9rem}
+.eq{font-family:Cambria Math,STIX Two Math,Georgia,serif;
+ background:#f7f9fd;border-left:4px solid var(--purple);
+ padding:10px;border-radius:6px;line-height:1.6;overflow-x:auto}
+.legend{display:flex;gap:9px;flex-wrap:wrap;font-size:11px;
+ color:var(--muted);margin-top:6px}
+.legend span:before{content:"";display:inline-block;width:9px;
+ height:9px;border-radius:3px;background:var(--c);margin-right:4px}
+.block{border:2px solid var(--blue);border-radius:12px;padding:9px;
+ background:#fff;box-shadow:0 4px 12px rgba(34,68,100,.08);
+ min-width:130px;font-size:.85rem}
+.block strong{display:block;color:#183e72}
+.shape{font-size:11px;color:var(--muted);margin-top:3px}
+.flow{display:flex;align-items:center;justify-content:center;gap:7px;
+ flex-wrap:wrap;margin:18px 0}
+.arrow{font-size:22px;color:#526d8d}
+.tensor-network{display:flex;justify-content:center;align-items:center;
+ gap:26px;margin:34px auto 46px;min-height:200px;flex-wrap:wrap}
+.node{position:relative;width:110px;height:84px;
+ border:3px solid var(--c);border-radius:15px;display:flex;
+ align-items:center;justify-content:center;background:#fff;
+ font-family:Cambria Math,serif;font-size:26px;font-weight:bold;
+ color:var(--c)}
+.leg{position:absolute;background:var(--c)}
+.leg.h{height:3px;width:38px;top:40px}
+.leg.l{left:-40px}.leg.r{right:-40px}
+.leg.v{width:3px;height:34px;left:52px}
+.leg.t{top:-36px}.leg.b{bottom:-36px}
+.leg-label{position:absolute;font:10.5px Inter;color:var(--muted);
+ white-space:nowrap}
+.lab-top{top:-52px;left:30px}.lab-bottom{bottom:-52px;left:28px}
+.lab-left{left:-84px;top:31px}.lab-right{right:-84px;top:31px}
+.contract-line{height:5px;width:100px;background:var(--orange);
+ border-radius:3px}
+.controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;
+ margin:8px 0}
+.primary{background:#173b73;color:#fff;border:0;border-radius:8px;
+ padding:8px 13px;cursor:pointer}
+.secondary{background:#fff;color:#173b73;border:1px solid #9eb4cf;
+ border-radius:8px;padding:7px 12px;cursor:pointer}
+.grid{display:grid;gap:6px;max-width:560px;margin:14px auto}
+.cell{border:1px solid #b9c9dc;border-radius:7px;padding:7px 4px;
+ text-align:center;cursor:pointer;background:#f8fbff;font-size:.85rem}
+.cell.active{background:#ffeddc;border-color:var(--orange);
+ box-shadow:0 0 0 2px rgba(229,121,34,.15)}
+.cell small{color:var(--muted)}
+.rowlab{font-size:11px;color:var(--muted);display:flex;
+ align-items:center;justify-content:flex-end;padding-right:4px}
+table.tt{border-collapse:collapse;margin:10px auto;font-size:.8rem}
+table.tt td,table.tt th{border:1px solid var(--line);
+ padding:4px 7px;text-align:right;
+ font-family:ui-monospace,Consolas,monospace}
+table.tt th{background:#f2f6fb;color:#31547c;font-family:inherit}
+table.tt td.hot{background:#ffeddc;font-weight:700}
+.admm{display:grid;grid-template-columns:1fr 180px 1fr;
+ grid-template-rows:auto auto;gap:20px;align-items:center;
+ max-width:780px;margin:14px auto}
+.local{border:2px solid var(--c);border-radius:12px;padding:11px;
+ text-align:center}
+.local .value{font-size:23px;font-weight:800;color:var(--c)}
+.consensus{grid-column:2;grid-row:1 / span 2;
+ border:3px solid var(--purple);background:#f7f1ff;border-radius:50%;
+ width:165px;height:165px;display:flex;flex-direction:column;
+ align-items:center;justify-content:center;text-align:center}
+.consensus .value{font-size:29px;color:var(--purple);font-weight:800}
+.dual-lane{display:grid;grid-template-columns:1fr 80px 1fr;gap:13px;
+ align-items:stretch}
+.lane{border:2px solid var(--c);border-radius:12px;padding:11px;
+ background:#fff;font-size:.85rem}
+.lane h4{color:var(--c);margin:0 0 9px}
+.mini-flow{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.mini{padding:6px;border-radius:7px;background:#f5f8fc;
+ border:1px solid #cfdbea;font-size:11px}
+.merge{display:flex;flex-direction:column;align-items:center;
+ justify-content:center;font-size:30px;color:var(--purple)}
+.ledger{grid-column:1 / -1;padding:9px 13px;display:grid;
+ grid-template-columns:repeat(6,1fr);gap:8px}
+.metric{border-right:1px solid var(--line);padding:3px 8px}
+.metric:last-child{border-right:0}
+.metric small{display:block;color:var(--muted);font-size:11px}
+.metric strong{font-size:13px}
+.toast{position:fixed;right:16px;bottom:16px;background:#17233b;
+ color:#fff;padding:11px 15px;border-radius:9px;opacity:0;
+ transition:.25s;pointer-events:none;max-width:440px;font-size:.86rem}
+.toast.show{opacity:1}
+input[type=range]{accent-color:var(--magenta)}
+@media(max-width:1100px){.shell{grid-template-columns:160px 1fr}
+ .inspector{grid-column:1/-1}.ledger{grid-template-columns:
+ repeat(3,1fr)}}
+@media(max-width:760px){.shell{display:block}
+ .rail,.canvas,.inspector,.ledger{margin-bottom:12px}
+ .ledger{display:grid;grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">TensorMobility Visual Computing Studio
+    <small>From tensor blocks to transportation computational
+    networks</small></div>
+  <div class="prompt"><input id="prompt"
+    value="Contract BMR columns into OD demand"
+    aria-label="prompt"><button id="ask">Run prompt</button></div>
+  <span class="badge"><a href="./">← Explainer</a></span>
+  <span class="badge"><a href="tensor-admm.html">ADMM Lab</a></span>
+  <span class="badge">Offline · all numbers computed live</span>
+</div>
+<div class="shell">
+  <aside class="rail">
+    <h3>Concept dependency</h3>
+    <div class="chapter active" data-view="foundation">
+      <span class="dot"></span>Coordinate &amp; block</div>
+    <div class="chapter" data-view="unfold"><span class="dot"></span>
+      Unfold / fold</div>
+    <div class="chapter" data-view="mode"><span class="dot"></span>
+      Mode product</div>
+    <div class="chapter" data-view="contraction">
+      <span class="dot"></span>Contraction studio</div>
+    <div class="chapter" data-view="flow"><span class="dot"></span>
+      TensorMobility flow</div>
+    <div class="chapter" data-view="decomposition">
+      <span class="dot"></span>CP / Tucker ranks</div>
+    <div class="chapter" data-view="sparse"><span class="dot"></span>
+      Sparse support</div>
+    <div class="chapter" data-view="admm"><span class="dot"></span>
+      ADMM consensus</div>
+    <div class="chapter" data-view="transformer">
+      <span class="dot"></span>Transformer bridge</div>
+  </aside>
+
+  <main class="canvas"><section class="stage" id="stage"></section>
+  </main>
+
+  <aside class="inspector">
+    <h3>Linked inspector</h3>
+    <div class="card"><h4 id="inspectTitle"></h4>
+      <p id="inspectText" style="margin:0;font-size:.85rem;
+      color:var(--muted)"></p></div>
+    <div class="card"><h4>Active equation</h4>
+      <div class="eq" id="activeEq"></div></div>
+    <div class="card"><h4>Axis legend (fixed site-wide)</h4>
+      <div class="legend">
+        <span style="--c:var(--teal)">behavior/person</span>
+        <span style="--c:var(--green)">activity/tour</span>
+        <span style="--c:var(--blue)">space/network</span>
+        <span style="--c:var(--orange)">time</span>
+        <span style="--c:var(--cyan)">mode/vehicle</span>
+        <span style="--c:var(--purple)">observation</span>
+        <span style="--c:var(--magenta)">latent/rank</span>
+        <span style="--c:var(--gold)">policy</span>
+      </div></div>
+  </aside>
+
+  <footer class="ledger">
+    <div class="metric"><small>Input shape</small>
+      <strong id="m1"></strong></div>
+    <div class="metric"><small>Active axes</small>
+      <strong id="m2"></strong></div>
+    <div class="metric"><small>Operation</small>
+      <strong id="m3"></strong></div>
+    <div class="metric"><small>Output shape</small>
+      <strong id="m4"></strong></div>
+    <div class="metric"><small>Conservation</small>
+      <strong id="m5"></strong></div>
+    <div class="metric"><small>Certificate</small>
+      <strong id="m6"></strong></div>
+  </footer>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+'use strict';
+/* ============ canonical data (shared with Tensor+ADMM Lab) ======= */
+var SV = ['s1','s2','s3','s4'];
+var AKEYS = ['worker|auto|AM','worker|auto|PM','worker|transit|AM',
+ 'worker|transit|PM','student|auto|AM','student|auto|PM',
+ 'student|transit|AM','student|transit|PM'];
+var FIB = {
+ 'worker|auto|AM':[10,14,18,8],'worker|auto|PM':[8,12,14,6],
+ 'worker|transit|AM':[4,6,5,3],'worker|transit|PM':[3,5,4,2],
+ 'student|auto|AM':[5,7,6,4],'student|auto|PM':[4,6,5,3],
+ 'student|transit|AM':[6,8,7,5],'student|transit|PM':[5,7,6,4]};
+/* 4x8 spatial unfolding X_(s)x(gmt) */
+var X48 = [0,1,2,3].map(function(s){
+  return AKEYS.map(function(k){ return FIB[k][s]; }); });
+
+var stage = document.getElementById('stage');
+var toastEl = document.getElementById('toast');
+var ins = { t: document.getElementById('inspectTitle'),
+  x: document.getElementById('inspectText'),
+  eq: document.getElementById('activeEq') };
+var metrics = [1,2,3,4,5,6].map(function(i){
+  return document.getElementById('m'+i); });
+function setM(v){ v.forEach(function(x,i){
+  metrics[i].textContent = x; }); }
+function notify(s){ toastEl.textContent = s;
+  toastEl.classList.add('show');
+  setTimeout(function(){ toastEl.classList.remove('show'); }, 3200); }
+var done = {};
+function markDone(v){ done[v] = true;
+  document.querySelectorAll('.chapter').forEach(function(c){
+    if (done[c.getAttribute('data-view')])
+      c.classList.add('done'); }); }
+
+/* ================= ch.1 foundation ================= */
+var FSEL = { s: 2, a: 0 };
+function foundation(){
+  var rows = [0,1,2,4];    /* four alpha rows shown */
+  var g = '<div class="grid" style="grid-template-columns:'+
+    'auto repeat(4,1fr)"><div></div>' +
+    SV.map(function(s){ return '<div class="rowlab" '+
+      'style="justify-content:center">'+s+'</div>'; }).join('');
+  rows.forEach(function(a){
+    g += '<div class="rowlab">'+AKEYS[a].replace(/\|/g,' ')+'</div>';
+    for (var s = 0; s < 4; s++){
+      var on = (s === FSEL.s && a === FSEL.a);
+      g += '<div class="cell'+(on ? ' active' : '')+'" data-s="'+s+
+        '" data-a="'+a+'"><strong>'+FIB[AKEYS[a]][s]+
+        '</strong></div>';
+    }
+  });
+  g += '</div>';
+  var f = FIB[AKEYS[FSEL.a]];
+  stage.innerHTML = '<h2>Typed Coordinate → Fiber → Slice → Block'+
+    '</h2><p>Click any cell: the coordinate stays linked to its '+
+    'fiber, slice, and lineage — no fictitious 4D cube (spec '+
+    '§6).</p>'+g+
+    '<div class="flow">'+
+    '<div class="block"><strong>Coordinate</strong>𝓧['+SV[FSEL.s]+
+    ', '+AKEYS[FSEL.a].replace(/\|/g,', ')+'] = '+f[FSEL.s]+
+    '<div class="shape">one scalar + full semantics · '+
+    'person-trips</div></div><span class="arrow">→</span>'+
+    '<div class="block" style="border-color:var(--teal)">'+
+    '<strong>Spatial fiber</strong>['+f.join(', ')+']'+
+    '<div class="shape">𝓧[:, '+AKEYS[FSEL.a].replace(/\|/g,', ')+
+    '] · Σ = '+f.reduce(function(x,y){return x+y;},0)+
+    '</div></div><span class="arrow">→</span>'+
+    '<div class="block" style="border-color:var(--orange)">'+
+    '<strong>Slice</strong>𝓧['+SV[FSEL.s]+', :, :, :]'+
+    '<div class="shape">all 8 (g,m,τ) states at '+SV[FSEL.s]+
+    ': ['+AKEYS.map(function(k){ return FIB[k][FSEL.s]; })
+      .join(', ')+']</div></div></div>';
+  stage.querySelectorAll('.cell').forEach(function(c){
+    c.onclick = function(){
+      FSEL.s = +this.getAttribute('data-s');
+      FSEL.a = +this.getAttribute('data-a');
+      foundation();
+      notify('Coordinate, fiber, slice, and ledger updated '+
+        'together.');
+    };
+  });
+  ins.t.textContent = 'Typed tensor block';
+  ins.x.textContent = 'A coordinate is a semantic tuple; a fiber '+
+    'fixes all but one axis; a slice fixes all but two. Every '+
+    'selection keeps units (person-trips) and lineage attached.';
+  ins.eq.innerHTML = '𝓧<sub>s,g,m,τ</sub> ∈ '+
+    'ℝ<sup>4×2×2×2</sup>, &nbsp;𝓧<sub>:,'+
+    AKEYS[FSEL.a].replace(/\|/g,',')+'</sub> = ['+
+    FIB[AKEYS[FSEL.a]].join(', ')+']';
+  setM(['4 × 2 × 2 × 2','s, g, m, τ',
+    'coordinate → fiber → slice','linked views','preserved',
+    'axis semantics PASS']);
+  markDone('foundation');
+}
+
+/* ================= ch.2 unfold ================= */
+function unfold(){
+  var t = '<table class="tt"><tr><th>s \\ (g,m,τ)</th>'+
+    AKEYS.map(function(k){ return '<th style="font-size:.62rem">'+
+      k.replace(/\|/g,',')+'</th>'; }).join('')+'</tr>';
+  for (var s = 0; s < 4; s++){
+    t += '<tr><th>'+SV[s]+'</th>'+X48[s].map(function(v,j){
+      return '<td'+((s===FSEL.s && j===FSEL.a)?' class="hot"':'')+
+        '>'+v+'</td>'; }).join('')+'</tr>';
+  }
+  t += '</table>';
+  stage.innerHTML = '<h2>Unfold / Fold — matricization is '+
+    'reversible reindexing</h2>'+
+    '<p>The 4×2×2×2 tensor becomes the 4×8 matrix '+
+    'X<sub>(s)×(gmτ)</sub>: rows are spatial cells, columns are '+
+    'behavioral market-time states. No value disappears.</p>'+t+
+    '<div class="controls">'+
+    '<button class="primary" id="fold">Fold back and verify</button>'+
+    '<button class="secondary" id="whylr">Why low rank here has '+
+    'transportation meaning</button></div>'+
+    '<div class="card" id="foldout"></div>';
+  document.getElementById('fold').onclick = function(){
+    var ok = true;
+    for (var s = 0; s < 4; s++)
+      for (var j = 0; j < 8; j++)
+        if (X48[s][j] !== FIB[AKEYS[j]][s]) ok = false;
+    document.getElementById('foldout').innerHTML =
+      'fold<sub>s</sub>(X<sub>(s)</sub>) = 𝓧 · all 32 entries '+
+      'identical: <b style="color:var(--green)">'+
+      (ok ? 'PASS' : 'FAIL')+'</b>';
+    setM(['4 × 8','rows s · cols (g,m,τ)','unfold → fold',
+      '4 × 2 × 2 × 2','all 32 values preserved',
+      'round trip PASS']);
+    notify('Folded back losslessly — arrangement changed, '+
+      'semantics did not.');
+  };
+  document.getElementById('whylr').onclick = function(){
+    document.getElementById('foldout').innerHTML =
+      'The singular values of this unfolding are 41.96, 3.73, '+
+      '1.17, 0.00 — the tensor is exactly rank 3 in the spatial '+
+      'unfolding, because behavioral market-time columns repeat '+
+      'the same spatial pattern at different volumes. Low rank '+
+      '<em>is</em> a transportation statement: markets share '+
+      'spatial structure. Explore it in the CP/Tucker chapter.';
+  };
+  ins.t.textContent = 'Unfolding changes arrangement only';
+  ins.x.textContent = 'Rows = OD/space cells; columns = behavioral '+
+    'market-time states. Rank statements about this matrix are '+
+    'statements about shared spatial structure across markets.';
+  ins.eq.innerHTML = '𝓧 ⟷ X<sub>(s)×(gmτ)</sub>, &nbsp; '+
+    'fold<sub>s</sub>(X<sub>(s)</sub>) = 𝓧';
+  setM(['4 × 2 × 2 × 2','s vs (g,m,τ)','matricization','4 × 8',
+    'lossless','reversibility: press Fold']);
+  markDone('unfold');
+}
+
+/* ================= ch.3 mode product ================= */
+function modeView(){
+  stage.innerHTML = '<h2>Mode Product — translate one axis, '+
+    'spectators ride along</h2>'+
+    '<p>𝓨 = 𝓧 ×<sub>s</sub> B translates 4 source cells to 2 '+
+    'zones while g, m, τ are untouched. The full interactive '+
+    'version — editable B, conservation break/diagnose, the '+
+    'null-space information-loss lesson, and per-coordinate ADMM '+
+    '— is the dedicated lab.</p>'+
+    '<div class="tensor-network">'+
+    '<div class="node" style="--c:var(--blue)">𝓧'+
+    '<div class="leg v b"></div><span class="leg-label lab-bottom" '+
+    'style="color:var(--orange)">s (4)</span>'+
+    '<div class="leg v t" style="background:var(--teal)"></div>'+
+    '<span class="leg-label lab-top">g, m, τ</span></div>'+
+    '<div class="contract-line"></div>'+
+    '<div class="node" style="--c:var(--orange)">B'+
+    '<div class="leg h l"></div>'+
+    '<span class="leg-label lab-left">s (4)</span>'+
+    '<div class="leg h r"></div>'+
+    '<span class="leg-label lab-right">z (2)</span></div>'+
+    '<span class="arrow">⇒</span>'+
+    '<div class="node" style="--c:var(--teal)">𝓨'+
+    '<div class="leg v b"></div>'+
+    '<span class="leg-label lab-bottom">z (2)</span>'+
+    '<div class="leg v t"></div>'+
+    '<span class="leg-label lab-top">g, m, τ</span></div></div>'+
+    '<div class="card">Worked numbers for the (worker, auto, AM) '+
+    'fiber: Y = B[10,14,18,8]ᵀ = [27, 23]; totals 50 = 50. '+
+    'Commutation: independent-mode products commute, same-mode '+
+    'products compose (𝓧×<sub>n</sub>A×<sub>n</sub>B = '+
+    '𝓧×<sub>n</sub>(BA)).</div>'+
+    '<div class="controls"><a class="primary" '+
+    'style="text-decoration:none" href="tensor-admm.html">Open the '+
+    'Tensor + ADMM Lab →</a></div>';
+  ins.t.textContent = 'Spatial translation is one mode product';
+  ins.x.textContent = 'Only the spatial leg connects to B; the '+
+    'spectator legs pass through. Column sums of B equal 1 ⇒ '+
+    'totals conserved.';
+  ins.eq.innerHTML = '𝓨<sub>z,g,m,τ</sub> = Σ<sub>s</sub> '+
+    'B<sub>z,s</sub> 𝓧<sub>s,g,m,τ</sub>';
+  setM(['B[2×4] · X[4×2×2×2]','s contracted; g,m,τ preserved',
+    'mode product ×s','Y[2×2×2×2]','50 = 50 PASS',
+    'column sums 1 PASS']);
+  markDone('mode');
+}
+
+/* ================= ch.4 contraction studio ================= */
+var CT = { Bc: [[1,1,0],[0,0,1]], xg: [[12,6,9],[7,4,5]],
+  ran: false, predicted: false };
+function contraction(){
+  var D = CT.Bc.map(function(row){
+    return CT.xg.map(function(xr){
+      return row.reduce(function(s,b,w){ return s+b*xr[w]; }, 0);
+    }); });
+  stage.innerHTML = '<h2>Tensor Contraction Studio</h2>'+
+    '<p>Behavior columns ω carry flows x[g,ω]; the incidence '+
+    'B[od,ω] says which OD market each column serves. Connecting '+
+    'the ω legs contracts them: ω disappears, od and g survive.</p>'+
+    '<div class="tensor-network">'+
+    '<div class="node" style="--c:var(--blue)">𝓑'+
+    '<div class="leg h r" style="background:var(--green)"></div>'+
+    '<span class="leg-label lab-right" '+
+    'style="color:var(--green)">ω (3)</span>'+
+    '<div class="leg v t"></div>'+
+    '<span class="leg-label lab-top">od (2)</span></div>'+
+    '<div class="contract-line" '+
+    'style="background:var(--green)"></div>'+
+    '<div class="node" style="--c:var(--teal)">x'+
+    '<div class="leg h l" style="background:var(--green)"></div>'+
+    '<span class="leg-label lab-left" '+
+    'style="color:var(--green)">ω (3)</span>'+
+    '<div class="leg v b"></div>'+
+    '<span class="leg-label lab-bottom">g (2)</span></div>'+
+    '<span class="arrow">⇒</span>'+
+    '<div class="node" style="--c:var(--orange)">𝓓'+
+    '<div class="leg v t" style="background:var(--blue)"></div>'+
+    '<span class="leg-label lab-top">od (2)</span>'+
+    '<div class="leg v b" style="background:var(--teal)"></div>'+
+    '<span class="leg-label lab-bottom">g (2)</span></div></div>'+
+    '<div class="controls">'+
+    '<button class="secondary" id="predict">1 · Predict output '+
+    'shape</button>'+
+    '<button class="primary" id="run">2 · Contract</button>'+
+    '<button class="secondary" id="terms">3 · Inspect one entry '+
+    'term-by-term</button></div>'+
+    '<div class="card" id="ctout">B = [[1,1,0],[0,0,1]] '+
+    '(column→market incidence) · x = [[12,6,9],[7,4,5]] '+
+    '(flows by group)</div>';
+  document.getElementById('predict').onclick = function(){
+    CT.predicted = true;
+    document.getElementById('ctout').innerHTML =
+      '<b>Predict:</b> ω is shared (contracted); od survives from '+
+      '𝓑, g survives from x. So 𝓓 has shape <b>2 × 2</b> '+
+      '(od × g), unit person-trips. Now press Contract to check.';
+  };
+  document.getElementById('run').onclick = function(){
+    CT.ran = true;
+    document.getElementById('ctout').innerHTML =
+      (CT.predicted ? '' : '<b>(You skipped the prediction — '+
+      'spec §17 says predict first!)</b><br>')+
+      '𝓓 = <table class="tt"><tr><th>od \\ g</th><th>worker</th>'+
+      '<th>student</th></tr><tr><th>od₁</th><td>'+D[0][0]+
+      '</td><td>'+D[0][1]+'</td></tr><tr><th>od₂</th><td>'+
+      D[1][0]+'</td><td>'+D[1][1]+'</td></tr></table>'+
+      'shape 2×2 · 3 summed terms per entry · 12 multiplications';
+    setM(['B[2×3], x[2×3]','shared ω (3)','Σ over ω','D[2×2]',
+      'Σx = '+(12+6+9+7+4+5)+' = ΣD = '+
+      (D[0][0]+D[0][1]+D[1][0]+D[1][1]),'shape + units PASS']);
+    notify('Contracted ω. Total flow conserved: 43 in, 43 out.');
+    markDone('contraction');
+  };
+  document.getElementById('terms').onclick = function(){
+    document.getElementById('ctout').innerHTML =
+      'D[od₁, worker] = Σ<sub>ω</sub> B[od₁,ω]·x[worker,ω] = '+
+      '1·12 + 1·6 + 0·9 = <b>18</b> person-trips. The zero term '+
+      'is the sparse skip: real pools sum only the active '+
+      'support.';
+  };
+  ins.t.textContent = 'Contraction removes shared axes';
+  ins.x.textContent = 'The green ω legs are summed away; every '+
+    'unconnected leg survives. Same grammar as BMR→demand and '+
+    'path→link-time loading — only the axis names grow.';
+  ins.eq.innerHTML = '𝓓<sub>od,g</sub> = Σ<sub>ω</sub> '+
+    'B<sub>od,ω</sub> x<sub>g,ω</sub>';
+  setM(['B[2×3], x[2×3]','od, g, ω','awaiting contraction',
+    'predict first','pending','compatible legs PASS']);
+}
+
+/* ================= ch.5 flow ================= */
+function flowView(){
+  var nodes = [
+    ['𝓛','Land use','zone×year','gold'],
+    ['𝓗','Population','zone×group','teal'],
+    ['𝓐','BMR','hh×person×tour×mode×τ','green'],
+    ['𝓓','Demand','od×g×m×τ','blue'],
+    ['𝓕','Path flow','od×g×m×τ×path','blue'],
+    ['𝓢','Traffic state','link×t×regime','orange'],
+    ['Ŷ','Observation','sensor×t×metric','purple']];
+  var edges = [
+    'Φ_LH · preserves zone · generates group',
+    'Φ_HA · contracts zone attributes · generates activity axes',
+    'Φ_AD · contracts behavior column ω · preserves g · generates '+
+      'od, m, τ',
+    'Φ_DF · generates path axis p (column generation)',
+    'Φ_FS · contracts od,g,m,τ,p via δ incidence · generates '+
+      'link, time',
+    'H · observes: samples 𝓢 at sensors'];
+  stage.innerHTML = '<h2>TensorMobility Block-Flow Canvas</h2>'+
+    '<p>Every edge declares what it contracts, preserves, and '+
+    'generates — click an edge label.</p>'+
+    '<div class="flow">'+nodes.map(function(n,i){
+      return (i ? '<span class="arrow" data-e="'+(i-1)+
+        '" style="cursor:pointer" title="click">→</span>' : '')+
+        '<div class="block" style="border-color:var(--'+n[3]+')">'+
+        '<strong>'+n[0]+' '+n[1]+'</strong><div class="shape">'+
+        n[2]+'</div></div>'; }).join('')+'</div>'+
+    '<div class="card" id="edgecard">Click an arrow to read its '+
+    'operator contract.</div>'+
+    '<div class="controls"><button class="secondary" id="adj">'+
+    'Reverse adjoint direction</button></div>';
+  stage.querySelectorAll('[data-e]').forEach(function(a){
+    a.onclick = function(){
+      document.getElementById('edgecard').innerHTML =
+        '<b>Edge contract:</b> '+edges[+this.getAttribute('data-e')];
+      notify('Operator contract shown — no anonymous arrows.');
+    };
+  });
+  document.getElementById('adj').onclick = function(){
+    document.getElementById('edgecard').innerHTML =
+      '<b>Adjoint mode:</b> network error → path marginal cost → '+
+      'demand utility → tour/activity sensitivity → land-use '+
+      'sensitivity. The released package certifies hand adjoint ≡ '+
+      'autograd to 1e-9 on this chain.';
+  };
+  ins.t.textContent = 'Typed operator graph, not file coupling';
+  ins.x.textContent = 'Each edge is a declared tensor operation '+
+    'with units, projection, and certificate — the seams are '+
+    'where classical pipelines silently lose structure.';
+  ins.eq.innerHTML = '𝓛 → 𝓗 → 𝓐 → 𝓓 → 𝓕 → 𝓢 → Ŷ, '+
+    'feedback 𝓢 → accessibility → 𝓛';
+  setM(['7 typed blocks','all eight axis families','operator graph',
+    'observed outputs','declared per edge','contracts declared '+
+    'PASS']);
+  markDone('flow');
+}
+
+/* ================= ch.6 decomposition (real SVD) ============== */
+function svdvals(A){
+  var m = A.length, i, j, k;
+  var G = [];
+  for (i = 0; i < m; i++){ G.push([]);
+    for (j = 0; j < m; j++){
+      var s = 0;
+      for (k = 0; k < A[0].length; k++) s += A[i][k]*A[j][k];
+      G[i].push(s);
+    } }
+  for (var sweep = 0; sweep < 60; sweep++){
+    var off = 0;
+    for (i = 0; i < m; i++) for (j = i+1; j < m; j++)
+      off += G[i][j]*G[i][j];
+    if (off < 1e-18) break;
+    for (var p = 0; p < m; p++) for (var q = p+1; q < m; q++){
+      if (Math.abs(G[p][q]) < 1e-15) continue;
+      var th = 0.5*Math.atan2(2*G[p][q], G[p][p]-G[q][q]);
+      var c = Math.cos(th), sn = Math.sin(th);
+      for (k = 0; k < m; k++){
+        var gpk = G[p][k], gqk = G[q][k];
+        G[p][k] = c*gpk + sn*gqk; G[q][k] = -sn*gpk + c*gqk; }
+      for (k = 0; k < m; k++){
+        var gkp = G[k][p], gkq = G[k][q];
+        G[k][p] = c*gkp + sn*gkq; G[k][q] = -sn*gkp + c*gkq; }
+    }
+  }
+  var sv = [];
+  for (i = 0; i < m; i++) sv.push(Math.sqrt(Math.max(0, G[i][i])));
+  sv.sort(function(a,b){ return b-a; });
+  return sv;
+}
+var RANK = 2;
+function decomposition(){
+  var sv = svdvals(X48);
+  var F2 = sv.reduce(function(s,v){ return s+v*v; }, 0);
+  var err = Math.sqrt(sv.slice(RANK).reduce(function(s,v){
+    return s+v*v; }, 0));
+  stage.innerHTML = '<h2>Representation Lab — real singular values '+
+    'of the real tensor</h2>'+
+    '<p>The spatial unfolding X<sub>(s)×(gmτ)</sub> of the '+
+    'canonical demand tensor, factorized live (Jacobi SVD in your '+
+    'browser).</p>'+
+    '<table class="tt"><tr><th>σ₁</th><th>σ₂</th><th>σ₃</th>'+
+    '<th>σ₄</th></tr><tr>'+sv.map(function(v,i){
+      return '<td class="'+(i < RANK ? 'hot' : '')+'">'+
+        v.toFixed(3)+'</td>'; }).join('')+'</tr></table>'+
+    '<div class="controls"><label>kept rank r = <b id="rv">'+RANK+
+    '</b> <input type="range" id="rank" min="1" max="4" value="'+
+    RANK+'"></label></div>'+
+    '<div class="card"><b>Representation residual</b> '+
+    '‖𝓧 − 𝓧̂‖<sub>F</sub> = <b>'+err.toFixed(4)+'</b> ('+
+    (100*err/Math.sqrt(F2)).toFixed(1)+'% relative). '+
+    (RANK >= 3 ? 'Rank 3 is <b>exact</b>: the eight behavioral '+
+      'markets share only three independent spatial patterns — '+
+      'low rank is a transportation statement, not a numerical '+
+      'trick.' :
+      'Increase the rank: at r = 3 the error vanishes exactly.')+
+    '</div>'+
+    '<div class="card"><b>Three separate residuals (spec §11.6):'+
+    '</b> representation error (above) ≠ physical violations '+
+    '(none here: truncation can create negative entries at other '+
+    'data — check before trusting) ≠ equilibrium gap (not '+
+    'applicable to a demand tensor). The released rank-economy '+
+    'study measures where compression stops paying (K̄ ≈ 2.2).'+
+    '</div>';
+  document.getElementById('rank').oninput = function(){
+    RANK = +this.value; decomposition();
+  };
+  ins.t.textContent = 'Decomposition = alternative internal '+
+    'representation';
+  ins.x.textContent = 'The factor matrices map latent components '+
+    'to semantic axes; the kept rank is a modeling decision whose '+
+    'error is measured, never assumed.';
+  ins.eq.innerHTML = '𝓧 ≈ Σ<sub>r=1..'+RANK+'</sub> '+
+    'a<sub>r</sub><sup>(s)</sup> ∘ a<sub>r</sub><sup>(gmτ)</sup>'+
+    ' · &nbsp;r<sub>repr</sub> = '+err.toFixed(3);
+  setM(['4 × 8 unfolding','spatial × market','truncated SVD',
+    'rank '+RANK+' factors','not guaranteed under truncation',
+    'repr error '+err.toFixed(3)]);
+  markDone('decomposition');
+}
+
+/* ================= ch.7 sparse support ================= */
+var KEEP = 12;
+function sparseView(){
+  var entries = [];
+  for (var s = 0; s < 4; s++) for (var j = 0; j < 8; j++)
+    entries.push({ s: s, j: j, v: X48[s][j] });
+  var sorted = entries.slice().sort(function(a,b){
+    return b.v - a.v; });
+  var keepSet = {};
+  sorted.slice(0, KEEP).forEach(function(e){
+    keepSet[e.s+'_'+e.j] = 1; });
+  var kept = 0, dropped2 = 0, total = 0;
+  entries.forEach(function(e){
+    total += e.v;
+    if (keepSet[e.s+'_'+e.j]) kept += e.v;
+    else dropped2 += e.v*e.v;
+  });
+  var t = '<table class="tt"><tr><th></th>'+AKEYS.map(function(k){
+    return '<th style="font-size:.6rem">'+k.replace(/\|/g,',')+
+      '</th>'; }).join('')+'</tr>';
+  for (var s2 = 0; s2 < 4; s2++){
+    t += '<tr><th>'+SV[s2]+'</th>';
+    for (var j2 = 0; j2 < 8; j2++)
+      t += '<td class="'+(keepSet[s2+'_'+j2] ? 'hot' : '')+'">'+
+        X48[s2][j2]+'</td>';
+    t += '</tr>';
+  }
+  t += '</table>';
+  stage.innerHTML = '<h2>Sparse Support — ‖𝓧‖₀ ≤ s</h2>'+
+    '<p>Keep only the s largest entries (orange = active '+
+    'support). The ledger reports what the truncation costs.</p>'+
+    t+'<div class="controls"><label>active entries s = <b>'+KEEP+
+    '</b> / 32 <input type="range" id="keep" min="4" max="32" '+
+    'value="'+KEEP+'"></label></div>'+
+    '<div class="card">flow kept '+kept+' / '+total+' person-trips '+
+    '('+(100*kept/total).toFixed(1)+'%) · dropped-entry error '+
+    '‖·‖<sub>F</sub> = '+Math.sqrt(dropped2).toFixed(2)+
+    ' · <b>conservation is NOT preserved by hard thresholding</b> '+
+    '— a projection back onto Σ = '+total+' must follow (spec '+
+    '§12: the algorithm gallery pairs every sparsifier with its '+
+    'projection).</div>';
+  document.getElementById('keep').oninput = function(){
+    KEEP = +this.value; sparseView(); };
+  ins.t.textContent = 'Support is a modeling object';
+  ins.x.textContent = 'Real pools are sparse by construction '+
+    '(feasible paths, admissible activities). Thresholding is the '+
+    'crudest sparsifier — group sparsity by fiber, market, or '+
+    'path family respects semantics better.';
+  ins.eq.innerHTML = '‖𝓧‖₀ ≤ '+KEEP+', &nbsp; kept flow '+
+    (100*kept/total).toFixed(1)+'%';
+  setM(['4 × 8, 32 entries','all','hard threshold','support '+KEEP,
+    kept+' / '+total+' kept — FAIL until projected',
+    'needs Π (conservation)']);
+  markDone('sparse');
+}
+
+/* ================= ch.8 ADMM ================= */
+var AD = { k: 0, rho: 1, z: 18, u: [0,0,0], x: null,
+  a: [17.2,18.6,16.9], w: [1,1.2,1.5], hist: [] };
+function admmView(){
+  var zstar = (AD.w[0]*AD.a[0]+AD.w[1]*AD.a[1]+AD.w[2]*AD.a[2]) /
+    (AD.w[0]+AD.w[1]+AD.w[2]);
+  var last = AD.hist.length ? AD.hist[AD.hist.length-1] : null;
+  stage.innerHTML = '<h2>ADMM Tensor Consensus Studio</h2>'+
+    '<p>Three modules hold local copies of the same coordinate '+
+    '𝓧[s3, worker, auto, AM]. Watch consensus form — it is not '+
+    'an average.</p>'+
+    '<div class="admm">'+
+    '<div class="local" style="--c:var(--teal)"><strong>ABM local '+
+    '𝓧ᴬ</strong><div class="value">'+
+    (AD.x ? AD.x[0].toFixed(3) : AD.a[0].toFixed(1))+
+    '</div><small>schedule preference · u = '+AD.u[0].toFixed(3)+
+    '</small></div>'+
+    '<div class="consensus"><strong>Consensus 𝓩</strong>'+
+    '<div class="value">'+AD.z.toFixed(3)+'</div>'+
+    '<small>Π<sub>Ω</sub> nonneg · analytic z* = '+
+    zstar.toFixed(3)+'</small></div>'+
+    '<div class="local" style="--c:var(--blue)"><strong>Demand '+
+    'local 𝓧ᴰ</strong><div class="value">'+
+    (AD.x ? AD.x[1].toFixed(3) : AD.a[1].toFixed(1))+
+    '</div><small>OD balancing · u = '+AD.u[1].toFixed(3)+
+    '</small></div>'+
+    '<div class="local" style="--c:var(--orange)"><strong>DTA '+
+    'local 𝓧ᴺ</strong><div class="value">'+
+    (AD.x ? AD.x[2].toFixed(3) : AD.a[2].toFixed(1))+
+    '</div><small>network response · u = '+AD.u[2].toFixed(3)+
+    '</small></div></div>'+
+    '<div class="controls">'+
+    '<button class="primary" id="step">Run one step</button>'+
+    '<button class="secondary" id="run10">Run 10</button>'+
+    '<button class="secondary" id="avg">“It’s just averaging?” '+
+    '</button>'+
+    '<label>ρ <input id="rho" type="range" min="-2" max="2" '+
+    'step="0.1" value="'+Math.log10(AD.rho)+'"> <b id="rhov">'+
+    AD.rho.toFixed(2)+'</b></label>'+
+    '<button class="secondary" id="rst">Reset</button></div>'+
+    '<div class="card">iteration '+AD.k+
+    (last ? ' · r_pri '+last.p.toExponential(2)+' · r_dual '+
+      last.d.toExponential(2) : ' · not started')+'</div>';
+  function step(n){
+    for (var it = 0; it < n; it++){
+      var old = AD.z;
+      var x = AD.a.map(function(a,i){
+        return (AD.w[i]*a + AD.rho*(AD.z - AD.u[i])) /
+          (AD.w[i] + AD.rho); });
+      var z = Math.max(0,
+        (x[0]+AD.u[0] + x[1]+AD.u[1] + x[2]+AD.u[2])/3);
+      AD.u = AD.u.map(function(u,i){ return u + x[i] - z; });
+      AD.x = x; AD.z = z; AD.k += 1;
+      var p = Math.sqrt(x.reduce(function(s,v){
+        return s + (v-z)*(v-z); }, 0));
+      AD.hist.push({ p: p, d: AD.rho*Math.abs(z-old) });
+    }
+    admmView();
+    notify('Locals solved penalized problems; consensus projected; '+
+      'duals updated.');
+    markDone('admm');
+  }
+  document.getElementById('step').onclick = function(){ step(1); };
+  document.getElementById('run10').onclick = function(){ step(10); };
+  document.getElementById('avg').onclick = function(){
+    notify('Plain mean of preferences = '+
+      ((AD.a[0]+AD.a[1]+AD.a[2])/3).toFixed(3)+
+      '; ADMM converges to the weighted optimum '+zstar.toFixed(3)+
+      ' — the weights and duals matter.');
+  };
+  document.getElementById('rho').oninput = function(){
+    AD.rho = Math.pow(10, +this.value);
+    document.getElementById('rhov').textContent = AD.rho.toFixed(2);
+  };
+  document.getElementById('rst').onclick = function(){
+    AD.k = 0; AD.z = 18; AD.u = [0,0,0]; AD.x = null; AD.hist = [];
+    admmView();
+  };
+  ins.t.textContent = 'ADMM is coordinated tensor consensus';
+  ins.x.textContent = 'Each module solves a penalized local '+
+    'problem (closed form here); consensus averages locals PLUS '+
+    'duals, then projects onto Ω. Convergence certifies '+
+    'agreement, not transportation validity.';
+  ins.eq.innerHTML = '𝓩<sup>k+1</sup> = Π<sub>Ω</sub>[ ⅓ '+
+    'Σ<sub>q</sub>(𝓧<sub>q</sub><sup>k+1</sup> + '+
+    '𝓤<sub>q</sub><sup>k</sup>) ]';
+  setM(['3 local scalars (one coordinate)','shared coordinate',
+    'ADMM iteration '+AD.k,'consensus '+AD.z.toFixed(3),
+    'Π nonneg PASS', last ?
+      'r_pri '+last.p.toExponential(1) : 'run to certify']);
+}
+
+/* ================= ch.9 transformer bridge ================= */
+var MASKON = true;
+function transformer(){
+  /* real 4-token attention over the fiber, chain-adjacency mask */
+  var vals = FIB['worker|auto|AM'];
+  var emb = vals.map(function(v){ return v/10; });
+  var A = [], i, j;
+  for (i = 0; i < 4; i++){
+    var row = [], mx = -1e9;
+    for (j = 0; j < 4; j++){
+      var score = emb[i]*emb[j];
+      if (MASKON && Math.abs(i-j) > 1) score = -1e9;
+      row.push(score); if (score > mx) mx = score;
+    }
+    var sum = 0;
+    row = row.map(function(sc){ var e = Math.exp(sc-mx);
+      sum += e; return e; });
+    A.push(row.map(function(e){ return e/sum; }));
+  }
+  var t = '<table class="tt"><tr><th>α<sub>ij</sub></th>'+
+    SV.map(function(s){ return '<th>'+s+'</th>'; }).join('')+'</tr>';
+  for (i = 0; i < 4; i++){
+    t += '<tr><th>'+SV[i]+'</th>';
+    for (j = 0; j < 4; j++)
+      t += '<td'+(A[i][j] < 1e-6 ? ' style="color:#c8d2de">' : '>')+
+        A[i][j].toFixed(2)+'</td>';
+    t += '</tr>';
+  }
+  t += '</table>';
+  stage.innerHTML = '<h2>Structural ↔ Trainable Bridge</h2>'+
+    '<p>The two lanes interact but are not identical. Below: a '+
+    'REAL 4-token attention over the spatial fiber [10,14,18,8], '+
+    'with the network-adjacency mask '+(MASKON ? 'ON' : 'OFF')+
+    '.</p>'+
+    '<div class="dual-lane">'+
+    '<div class="lane" style="--c:var(--blue)"><h4>Structural '+
+    'lane</h4><div class="mini-flow"><span class="mini">typed '+
+    'tensor</span>→<span class="mini">exact contraction</span>→'+
+    '<span class="mini">conservation</span>→<span class="mini">'+
+    'equilibrium</span></div></div>'+
+    '<div class="merge">⊕<small>Π<sub>Ω</sub></small></div>'+
+    '<div class="lane" style="--c:var(--purple)"><h4>Trainable '+
+    'lane</h4><div class="mini-flow"><span class="mini">block '+
+    'embedding</span>→<span class="mini">masked attention</span>→'+
+    '<span class="mini">learned residual</span></div></div></div>'+
+    t+
+    '<div class="controls"><button class="primary" id="mask">'+
+    'Toggle feasibility mask</button></div>'+
+    '<div class="card"><b>Read the matrix:</b> with the mask on, '+
+    'row s1 attends only to s1 and s2 — non-adjacent influence is '+
+    'structurally impossible, not merely down-weighted. Rows '+
+    'always sum to 1 (softmax) — but note: <b>that normalizes '+
+    'attention, it does not conserve flow</b>. Conservation and '+
+    'equilibrium stay in the structural lane; the merge is '+
+    '𝓩* = Π<sub>Ω</sub>[𝓚<sub>struct</sub> + 𝓝<sub>θ</sub>].'+
+    '</div>';
+  document.getElementById('mask').onclick = function(){
+    MASKON = !MASKON; transformer();
+    notify(MASKON ? 'Mask ON: only network-adjacent blocks '+
+      'interact.' : 'Mask OFF: all-to-all attention — physically '+
+      'meaningless for a road network.');
+  };
+  ins.t.textContent = 'Attention = learned masked contraction';
+  ins.x.textContent = 'Tokens are computational views of tensor '+
+    'blocks; the tensor remains the state. Masks come from '+
+    'adjacency, causality, and availability — never '+
+    'hyperparameters.';
+  ins.eq.innerHTML = 'α<sub>ij</sub> = softmax<sub>j</sub>['+
+    'q<sub>i</sub>ᵀk<sub>j</sub>/√d + M<sup>net</sup>], &nbsp; '+
+    'h′<sub>i</sub> = Σ<sub>j</sub> α<sub>ij</sub> v<sub>j</sub>';
+  setM(['4 tokens (fiber cells)','space + latent','masked '+
+    'attention','4 × 4 α matrix','rows sum to 1 — NOT flow '+
+    'conservation','non-equivalences stated']);
+  markDone('transformer');
+}
+
+/* ================= router ================= */
+function render(view){
+  document.querySelectorAll('.chapter').forEach(function(x){
+    x.classList.toggle('active',
+      x.getAttribute('data-view') === view); });
+  if (view === 'foundation') foundation();
+  else if (view === 'unfold') unfold();
+  else if (view === 'mode') modeView();
+  else if (view === 'contraction') contraction();
+  else if (view === 'flow') flowView();
+  else if (view === 'decomposition') decomposition();
+  else if (view === 'sparse') sparseView();
+  else if (view === 'admm') admmView();
+  else transformer();
+}
+document.querySelectorAll('.chapter').forEach(function(x){
+  x.onclick = function(){ render(this.getAttribute('data-view')); };
+});
+document.getElementById('ask').onclick = function(){
+  var q = document.getElementById('prompt').value.toLowerCase();
+  var v = 'foundation';
+  if (/admm|consensus|dual/.test(q)) v = 'admm';
+  else if (/atten|transformer|neural|mask/.test(q))
+    v = 'transformer';
+  else if (/contract|demand|bmr/.test(q)) v = 'contraction';
+  else if (/unfold|matriciz|fold/.test(q)) v = 'unfold';
+  else if (/mode product|translat|zone/.test(q)) v = 'mode';
+  else if (/flow|path|link|lineage/.test(q)) v = 'flow';
+  else if (/tucker|cp|rank|decomp|svd/.test(q))
+    v = 'decomposition';
+  else if (/sparse|support|threshold/.test(q)) v = 'sparse';
+  else if (/fiber|slice|coordinate|block/.test(q)) v = 'foundation';
+  render(v);
+  notify('Prompt grounded in the active tensor graph → '+v+'.');
+};
+render('foundation');
+</script>
+</body>
+</html>

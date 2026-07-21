@@ -1,4 +1,28 @@
-# Explainer spec v1.0 — implementation status
+# Explainer specs — implementation status
+
+## Spec v2 (Visual Computing Studio) — `EXPLAINER_SPEC_v2_STUDIO.md`
+
+Deployed at `explainer/studio.html`, built directly on the author's
+interactive mockup (`tensormobility_visual_explorer_v2`), keeping its
+visual design and the eight-axis color system
+(`docs/studio_design_tokens.json`), with every view upgraded from
+illustrative to computed live:
+
+| chapter (spec §) | status | computed content |
+|---|---|---|
+| 1 coordinate/fiber/slice (§6) | live | real canonical tensor; click any of 16 cells → coordinate/fiber/slice/ledger update together |
+| 2 unfold/fold (§7) | live | real 4×8 unfolding, fold-back verified entry-by-entry, low-rank transportation reading |
+| 3 mode product (§8) | live | worked numbers + link to the dedicated Tensor+ADMM Lab |
+| 4 contraction studio (§9) | live | predict-shape gate → contract (D=[[18,11],[9,5]], conservation 43=43) → term-by-term entry inspection |
+| 5 block-flow canvas (§10) | live | 7 typed blocks; every edge click reveals its contract (contracts/preserves/generates); adjoint direction |
+| 6 CP/Tucker (§11) | live | **real Jacobi SVD in-browser**: σ = 41.96/3.73/1.17/0.00 — the canonical tensor is exactly rank 3; rank slider drives the true representation residual; three-residual separation stated |
+| 7 sparse (§12) | live | top-s support mask with kept-flow %, dropped-entry norm, and the warning that thresholding breaks conservation until projected |
+| 8 ADMM studio (§13) | live | real engine (same certified math as the Lab), ρ slider, "just averaging?" refutation (17.567 vs 17.532) |
+| 9 transformer bridge (§14) | live | **real 4-token masked attention** over the fiber with adjacency-mask toggle; softmax-normalization ≠ flow-conservation stated; non-equivalences listed |
+| prompt controller (§16) | partial | keyword grounding to chapters; full locate/highlight/execute protocol pending |
+| export, TRMG2 example (§21 ph.7) | pending | |
+
+## Spec v1.0 — implementation status
 
 Companion to `EXPLAINER_SPEC_v1.md`. Status after the 2026-07-22
 increment. Legend: **live** (deployed at
