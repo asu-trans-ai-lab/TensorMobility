@@ -1,5 +1,25 @@
 # Explainer specs — implementation status
 
+## Spec v3 (ABM–DTA Practice Studio) — `EXPLAINER_SPEC_v3_PRACTICE.md`
+
+Deployed at `explainer/practice.html`, built on the author's v3 mockup
+(design and eight views preserved) with the H017 fixture
+(`docs/practice_scenario.json`) and every hardcoded value replaced by
+live computation:
+
+| view | computed content |
+|---|---|
+| Tours & schedule | tour residuals \|exp−sched\|; the T3→T4 activity residual max(0, 544−520)=24 min; conflict outlines derived, not asserted |
+| Demand transfer | Vehicle Departure Ledger (§7.4) computed from trip records (9 person trips → 6 vehicle departures with the arithmetic shown); V1 overlap detection on scheduled AND experienced times; §7.5 certificates; a real two-step repair (P1→transit, then shift T4) that clears conflicts and demonstrates behavioral-response levels 3–4 |
+| DTA network | logit route shares computed from each traveler's VoT and tolls; reroute-on-experienced toggling; stale-cost certificate |
+| Dynamic skims | all cells computed from a time-dependent TT(τ); fixed vs sampled vs experienced methods disagree systematically near the 7:50 peak; §9.5 aggregation warning quantified |
+| Feedback & convergence | fixture residual record (k=0..3) + a computed direct-vs-MSA cobweb (direct oscillates, α=0.3 converges) |
+| Calibration | R² and MAPE computed from the observed/model table |
+
+Pending from v3: en-route rerouting, transit/TNC vehicle formation
+beyond the bus, warm/cold start comparison with real runs, export
+manifests (§22 #15).
+
 ## Spec v2 (Visual Computing Studio) — `EXPLAINER_SPEC_v2_STUDIO.md`
 
 Deployed at `explainer/studio.html`, built directly on the author's

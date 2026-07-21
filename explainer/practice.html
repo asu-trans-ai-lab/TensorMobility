@@ -1,0 +1,844 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TensorMobility ABM–DTA Practice Studio</title>
+<style>
+:root{
+ --bg:#edf2f7;--panel:#fff;--ink:#15243c;--muted:#667085;--line:#d7e1ec;
+ --navy:#173d70;--person:#168b83;--tour:#3a9a63;--space:#2f63b5;
+ --time:#e57922;--mode:#168eaa;--vehicle:#9163b6;--path:#c28d1a;
+ --state:#c64b52;--ok:#228b58;--warn:#b33c45;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+ font-family:Inter,Segoe UI,Arial,sans-serif}
+button,input,select{font:inherit}
+.top{min-height:64px;background:#fff;border-bottom:1px solid
+ var(--line);display:flex;align-items:center;gap:12px;
+ padding:8px 18px;position:sticky;top:0;z-index:5;flex-wrap:wrap}
+.brand{font-weight:800;color:var(--navy);white-space:nowrap}
+.brand small{display:block;font-weight:400;color:var(--muted);
+ font-size:11px}
+.prompt{display:flex;flex:1;max-width:680px;border:1px solid #b8c7d9;
+ border-radius:9px;overflow:hidden;min-width:220px}
+.prompt input{border:0;outline:0;padding:9px;flex:1}
+.prompt button{border:0;background:var(--navy);color:#fff;
+ padding:0 14px;cursor:pointer}
+.tag{font-size:11px;border-radius:12px;background:#edf3fb;
+ padding:5px 8px;color:#31547c}
+.tag a{color:inherit;text-decoration:none}
+.shell{display:grid;grid-template-columns:185px minmax(560px,1fr)
+ 290px;gap:12px;padding:12px;min-height:calc(100vh - 70px)}
+.rail,.main,.inspect,.ledger{background:#fff;
+ border:1px solid var(--line);border-radius:13px}
+.rail,.inspect{padding:12px}
+.rail h3,.inspect h3{font-size:12px;text-transform:uppercase;
+ letter-spacing:.07em;color:#52647a;margin:4px 5px 10px}
+.nav{padding:8px;border-radius:8px;margin:3px 0;cursor:pointer;
+ font-size:13px}
+.nav.active,.nav:hover{background:#eaf2ff;color:#173d70;
+ font-weight:700}
+.main{padding:13px;min-width:0}
+.stage{min-height:560px}
+.stage h2{margin:.2rem 0 .4rem;font-size:1.15rem}
+.stage>p{color:var(--muted);font-size:.88rem}
+.card{border:1px solid var(--line);border-radius:10px;padding:10px;
+ background:#fff;font-size:.87rem}
+.card h3,.card h4{margin:.1rem 0 .35rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.flow{display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+ justify-content:center;margin:16px 0}
+.block{border:2px solid var(--c);border-radius:10px;padding:8px;
+ background:#fff;min-width:118px;text-align:center;font-size:.82rem}
+.block strong{display:block;color:var(--c)}
+.arrow{font-size:20px;color:#55708d}
+.axes{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.axis{border:2px solid var(--c);color:var(--c);border-radius:14px;
+ padding:3px 7px;font-size:10px}
+.eq{font-family:Cambria Math,Georgia,serif;background:#f7f9fd;
+ border-left:4px solid var(--vehicle);padding:9px;border-radius:6px;
+ line-height:1.55;font-size:.9rem;overflow-x:auto}
+.person{border-left:5px solid var(--person);cursor:pointer}
+.person.active{background:#eafaf7}
+.person small,.tour small{color:var(--muted)}
+.person h4,.tour h4{margin:0 0 4px}
+.tour{border-left:5px solid var(--tour);cursor:pointer}
+.tour.active{background:#eefaf1}
+.timeline{position:relative;border:1px solid var(--line);
+ border-radius:9px;overflow:hidden;background:linear-gradient(to
+ right,#fafcff 0,#fafcff 24.9%,#f1f5fa 25%,#f1f5fa 49.9%,#fafcff
+ 50%,#fafcff 74.9%,#f1f5fa 75%);padding:9px}
+.ticks{display:grid;grid-template-columns:repeat(5,1fr);
+ font-size:10px;color:var(--muted)}
+.row{height:44px;position:relative;border-top:1px solid #e7edf4;
+ margin-top:4px}
+.row-label{position:absolute;left:4px;top:12px;font-size:11px;
+ font-weight:700}
+.bar{position:absolute;top:8px;height:26px;border-radius:6px;
+ padding:5px 6px;color:#fff;font-size:10px;overflow:hidden;
+ white-space:nowrap;cursor:pointer}
+.conflict{outline:3px solid #efb0b4}
+.ledgerline{display:grid;grid-template-columns:1.4fr repeat(5,1fr);
+ gap:5px;padding:5px;border-bottom:1px solid #e8eef5;font-size:11px}
+.ledgerline.head{font-weight:700;background:#f6f8fb}
+.network{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;
+ max-width:600px;margin:12px auto}
+.link{height:50px;border-radius:7px;
+ background:linear-gradient(135deg,#dce8f7,#aec8e9);
+ position:relative}
+.link.q1{background:linear-gradient(135deg,#f5d7af,#e8a452)}
+.link.q2{background:linear-gradient(135deg,#f1b7ba,#cf555d)}
+.link span{position:absolute;left:5px;bottom:4px;font-size:9px}
+.pathcard{border-top:5px solid var(--path);cursor:pointer}
+.pathcard.active{background:#fff8e8}
+.big{font-size:23px;font-weight:800}
+.warn{color:var(--warn)}
+.pass{color:var(--ok)}
+.matrix{display:grid;grid-template-columns:74px repeat(4,1fr);gap:3px}
+.mx{padding:7px 4px;border-radius:5px;text-align:center;
+ font-size:11px;background:#eaf1fa;
+ font-family:ui-monospace,Consolas,monospace}
+.mx.h{background:#f4f6f9;font-weight:700;font-family:inherit}
+.mx.hot{background:#ef8c72;color:#fff}
+.mx.med{background:#f7d6a3}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;
+ align-items:center;font-size:.85rem}
+.primary{border:0;background:var(--navy);color:#fff;border-radius:7px;
+ padding:8px 11px;cursor:pointer}
+.secondary{border:1px solid #a8bad0;background:#fff;color:#214c7e;
+ border-radius:7px;padding:7px 10px;cursor:pointer}
+.resrow{display:grid;grid-template-columns:1fr 2fr 66px;gap:8px;
+ align-items:center;margin:7px 0;font-size:11px}
+.track{height:9px;background:#e8edf3;border-radius:8px;
+ overflow:hidden}
+.fill{height:100%;background:var(--c);width:var(--w)}
+.inspect p{font-size:12px;line-height:1.5}
+.inspect .card{margin-top:10px}
+.ledger{grid-column:1/-1;padding:8px 12px;display:grid;
+ grid-template-columns:repeat(7,1fr);gap:5px}
+.metric{padding:3px 8px;border-right:1px solid var(--line)}
+.metric:last-child{border:0}
+.metric small{display:block;color:var(--muted);font-size:10px}
+.metric strong{font-size:13px}
+.toast{position:fixed;right:16px;bottom:16px;background:#18263d;
+ color:#fff;border-radius:8px;padding:10px 13px;opacity:0;
+ transition:.2s;max-width:440px;pointer-events:none;font-size:.85rem}
+.toast.show{opacity:1}
+.mono{font-family:ui-monospace,Consolas,monospace;font-size:.8rem}
+svg.cob{width:100%;max-width:430px;display:block;margin:6px auto}
+@media(max-width:1100px){.shell{grid-template-columns:165px 1fr}
+ .inspect{grid-column:1/-1}
+ .ledger{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:760px){.shell{display:block}
+ .rail,.main,.inspect,.ledger{margin-bottom:10px}
+ .grid2,.grid3{display:block}.card{margin-bottom:8px}
+ .ledger{display:grid;grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="top">
+ <div class="brand">ABM–DTA Practice Studio
+  <small>household H017 · every number computed live</small></div>
+ <div class="prompt"><input id="prompt"
+  value="Show tours that become infeasible after DTA">
+  <button id="ask">Run</button></div>
+ <span class="tag"><a href="./">← Explainer</a></span>
+ <span class="tag"><a href="studio.html">Tensor Studio</a></span>
+ <span class="tag">Iteration <b id="itTop">1</b></span>
+</div>
+<div class="shell">
+ <aside class="rail">
+  <h3>Integrated practice</h3>
+  <div class="nav active" data-v="system">System map</div>
+  <div class="nav" data-v="passengers">Passengers</div>
+  <div class="nav" data-v="tours">Tours &amp; schedule</div>
+  <div class="nav" data-v="transfer">Demand transfer</div>
+  <div class="nav" data-v="dta">DTA network</div>
+  <div class="nav" data-v="skims">Dynamic skims</div>
+  <div class="nav" data-v="feedback">Feedback &amp; convergence</div>
+  <div class="nav" data-v="calibration">Calibration</div>
+ </aside>
+
+ <main class="main"><section class="stage" id="stage"></section></main>
+
+ <aside class="inspect">
+  <h3>Active inspector</h3>
+  <div class="card"><h4 id="insTitle"></h4><p id="insText"></p></div>
+  <div class="card"><h4>Typed axes</h4>
+    <div class="axes" id="axes"></div></div>
+  <div class="card"><h4>Equation / rule</h4>
+    <div class="eq" id="eq"></div></div>
+  <div class="card"><h4>Certificate</h4>
+    <p id="cert" class="pass"></p></div>
+ </aside>
+
+ <footer class="ledger">
+  <div class="metric"><small>Household</small><strong>H017</strong>
+    </div>
+  <div class="metric"><small>Persons</small><strong>3</strong></div>
+  <div class="metric"><small>Tours</small><strong>5</strong></div>
+  <div class="metric"><small>Person trips</small>
+    <strong id="mPT"></strong></div>
+  <div class="metric"><small>Vehicle departures</small>
+    <strong id="mVD"></strong></div>
+  <div class="metric"><small>Route gap</small>
+    <strong id="mGap"></strong></div>
+  <div class="metric"><small>Vehicle conflicts</small>
+    <strong id="mConf"></strong></div>
+ </footer>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+/* ============ fixture (practice_scenario.json, H017) ============ */
+var PEOPLE = [
+ {id:'P1',name:'Alex',type:'Full-time worker',vot:28,license:true},
+ {id:'P2',name:'Morgan',type:'Part-time worker',vot:18,license:true},
+ {id:'P3',name:'Sam',type:'K–12 student',vot:8,license:false}];
+/* trips: [tour, persons, mode, dep, vehicle, legLabel] */
+var TOURS = [
+ {id:'T1',people:['P1'],type:'Mandatory',purpose:'Work',
+  mode:'auto_driver',veh:'V1',start:450,end:1050,exp:1066,
+  schedTT:28,expTT:44},
+ {id:'T2',people:['P1'],type:'Work subtour',purpose:'Meal',
+  mode:'walk',veh:null,start:720,end:780,exp:780,schedTT:8,expTT:8},
+ {id:'T3',people:['P2','P3'],type:'Joint',purpose:'Escort/school',
+  mode:'auto_driver',veh:'V1',start:455,end:530,exp:544,
+  schedTT:22,expTT:36},
+ {id:'T4',people:['P2'],type:'Maintenance',purpose:'Shopping',
+  mode:'auto_driver',veh:'V1',start:520,end:650,exp:667,
+  schedTT:18,expTT:31},
+ {id:'T5',people:['P3'],type:'Mandatory',purpose:'School return',
+  mode:'school_bus',veh:'BUS12',start:900,end:950,exp:953,
+  schedTT:26,expTT:29}];
+var PATHS = [
+ {id:'PTH1',name:'Freeway',expected:28,experienced:44,toll:0,
+  queue:18},
+ {id:'PTH2',name:'Arterial',expected:34,experienced:38,toll:0,
+  queue:8},
+ {id:'PTH3',name:'Managed lane',expected:24,experienced:26,toll:4.5,
+  queue:2}];
+var RES = [
+ {k:0,route:.123,skim:.180,trip:.142,inf:12},
+ {k:1,route:.071,skim:.094,trip:.081,inf:7},
+ {k:2,route:.043,skim:.051,trip:.028+.018,inf:4},
+ {k:3,route:.029,skim:.031,trip:.028,inf:2}];
+
+var stage = document.getElementById('stage');
+var toastEl = document.getElementById('toast');
+function note(s){ toastEl.textContent = s;
+ toastEl.classList.add('show');
+ setTimeout(function(){ toastEl.classList.remove('show'); }, 3200); }
+function setAxes(items){
+ document.getElementById('axes').innerHTML = items.map(function(x){
+  return '<span class="axis" style="--c:'+x[1]+'">'+x[0]+
+   '</span>'; }).join(''); }
+function setIns(t,txt,e,c){
+ document.getElementById('insTitle').textContent = t;
+ document.getElementById('insText').textContent = txt;
+ document.getElementById('eq').innerHTML = e;
+ var el = document.getElementById('cert');
+ el.textContent = c || 'PASS — active constraints satisfied';
+ el.className = (c || 'PASS').indexOf('PASS') === 0 ?
+  'pass' : 'warn'; }
+function hm(m){ return Math.floor(m/60)+':'+
+ ('0'+Math.round(m%60)).slice(-2); }
+
+var iteration = 1, skimMethod = 'fixed', repaired = 0;
+
+/* ======= COMPUTED: person trips / vehicle departures ledger ===== */
+function tripRecords(){
+ /* legs: outbound + return (T5 return only) */
+ var recs = [];
+ TOURS.forEach(function(t){
+  var legs = (t.id === 'T5') ? 1 : 2;
+  for (var l = 0; l < legs; l++)
+   recs.push({ tour: t.id, persons: t.people.slice(),
+    mode: t.mode, veh: t.veh, leg: l ? 'return' : 'outbound' });
+ });
+ return recs;
+}
+function ledgerCounts(){
+ var recs = tripRecords();
+ var pt = 0, walk = 0, bus = 0, pax = 0, vd = 0;
+ recs.forEach(function(r){
+  pt += r.persons.length;
+  if (r.mode === 'walk') walk += r.persons.length;
+  else if (r.mode === 'school_bus') bus += r.persons.length;
+  else { /* auto: one driver, rest passengers */
+   vd += 1; pax += r.persons.length - 1; }
+ });
+ return { pt: pt, walk: walk, bus: bus, pax: pax, vd: vd };
+}
+
+/* ======= COMPUTED: household-vehicle conflict detection ========= */
+function vehicleConflicts(useExperienced){
+ var iv = TOURS.filter(function(t){ return t.veh === 'V1'; })
+  .map(function(t){ return { id: t.id, a: t.start,
+   b: useExperienced ? t.exp : t.end }; });
+ var conf = [];
+ for (var i = 0; i < iv.length; i++)
+  for (var j = i+1; j < iv.length; j++){
+   var ov = Math.min(iv[i].b, iv[j].b) -
+            Math.max(iv[i].a, iv[j].a);
+   if (ov > 0) conf.push({ a: iv[i].id, b: iv[j].id, ov: ov });
+  }
+ return conf;
+}
+function conflictTourIds(){
+ var s = {};
+ vehicleConflicts(true).forEach(function(c){
+  s[c.a] = 1; s[c.b] = 1; });
+ return s;
+}
+
+/* ================= views ================= */
+function activate(v){
+ document.querySelectorAll('[data-v]').forEach(function(x){
+  x.classList.toggle('active', x.getAttribute('data-v') === v); });
+ ({system:system, passengers:passengers, tours:tourView,
+   transfer:transfer, dta:dta, skims:skims, feedback:feedback,
+   calibration:calibration}[v] || system)();
+}
+
+function system(){
+ stage.innerHTML = '<h2>True ABM–DTA Integrated System Map</h2>'+
+  '<p>The flow preserves household and tour lineage while exposing '+
+  'typed tensor blocks. Multi-rate: paths/queues fastest; '+
+  'tours/schedules slower; ownership/locations slowest.</p>'+
+  '<div class="flow">'+
+  '<div class="block" style="--c:var(--person)"><strong>Synthetic '+
+  'population</strong><small>households + persons</small></div>'+
+  '<span class="arrow">→</span>'+
+  '<div class="block" style="--c:var(--tour)"><strong>Person-day '+
+  '&amp; tours</strong><small>patterns, purposes, stops</small>'+
+  '</div><span class="arrow">→</span>'+
+  '<div class="block" style="--c:var(--mode)"><strong>Trips &amp; '+
+  'vehicles</strong><small>mode, occupancy, time</small></div>'+
+  '<span class="arrow">→</span>'+
+  '<div class="block" style="--c:var(--path)"><strong>Path choice'+
+  '</strong><small>VoT, toll, information</small></div>'+
+  '<span class="arrow">→</span>'+
+  '<div class="block" style="--c:var(--state)"><strong>Dynamic '+
+  'loading</strong><small>queues, spillback</small></div>'+
+  '<span class="arrow">→</span>'+
+  '<div class="block" style="--c:var(--vehicle)"><strong>Dynamic '+
+  'skims</strong><small>time, cost, reliability</small></div>'+
+  '<span class="arrow">↺</span></div>'+
+  '<div class="grid2">'+
+  '<div class="card"><h3>Companion pages</h3><p>The tensor '+
+  'mathematics behind every block lives in the '+
+  '<a href="studio.html">Visual Computing Studio</a>; the '+
+  'network-equilibrium engine in the '+
+  '<a href="./">living GridCity</a>.</p></div>'+
+  '<div class="card"><h3>This studio</h3><p>One fully-worked '+
+  'household (H017) traced end to end: schedule → vehicle '+
+  'conflict after DTA delay → repair → feedback — with computed '+
+  'certificates at every interface.</p></div></div>';
+ setAxes([['household/person','var(--person)'],
+  ['tour/stop','var(--tour)'],['mode/vehicle','var(--mode)'],
+  ['OD/path','var(--space)'],['departure τ / sim t','var(--time)'],
+  ['link/queue','var(--state)']]);
+ setIns('Integrated ABM–DTA system','Fast route/DTA loop, middle '+
+  'tour/schedule loop, slow long-term loop — separated explicitly.',
+  '𝓗 → 𝓐 → 𝓣 → 𝓡 → 𝓓<sup>V</sup> → 𝓕 → 𝓢 → 𝓒 → 𝓐<sup>+</sup>');
+}
+
+function passengers(){
+ stage.innerHTML = '<h2>Household and Passenger Explorer</h2>'+
+  '<div class="card"><h3>Household H017</h3><p>Medium income · '+
+  'Zone 3 · one household vehicle (V1) · three persons</p></div>'+
+  '<div class="grid3">'+PEOPLE.map(function(p){
+   return '<div class="card person" data-person="'+p.id+'">'+
+    '<h4>'+p.name+' · '+p.id+'</h4><small>'+p.type+'</small>'+
+    '<p>VoT $'+p.vot+'/hr · '+(p.license ? 'licensed' :
+    'not licensed')+'</p></div>'; }).join('')+'</div>'+
+  '<div class="card"><h3>Why heterogeneity matters downstream</h3>'+
+  '<p>Click a person, then open <b>DTA network</b>: route shares '+
+  'are computed from each traveler’s value of time — Alex ($28/hr) '+
+  'and Morgan ($18/hr) split differently over the tolled managed '+
+  'lane. Sam cannot drive: the school-bus return is an availability '+
+  'constraint, not a choice.</p></div>';
+ stage.querySelectorAll('[data-person]').forEach(function(el){
+  el.onclick = function(){
+   stage.querySelectorAll('[data-person]').forEach(function(x){
+    x.classList.remove('active'); });
+   el.classList.add('active');
+   var p = PEOPLE.find(function(x){
+    return x.id === el.getAttribute('data-person'); });
+   setIns(p.name+' — '+p.type,'Attributes drive participation, '+
+    'availability, toll sensitivity, and route response.',
+    '𝓗<sub>H017,'+p.id+',r,i,a,v,ℓ</sub> · VoT = $'+p.vot+'/hr',
+    p.license ? 'PASS — licensed driver' :
+    'PASS — non-driver: modes restricted to passenger/bus/walk');
+  };
+ });
+ setAxes([['household h','var(--person)'],['person p',
+  'var(--person)'],['type r','var(--person)'],
+  ['income i','var(--vehicle)'],['auto a','var(--mode)'],
+  ['VoT v','var(--path)']]);
+ setIns('Heterogeneous decision makers','Different activity needs, '+
+  'availability constraints, values of time, and toll responses.',
+  '𝓗<sub>h,p,r,i,a,v,ℓ</sub>');
+}
+
+function barPos(m){ return 10 + m/1440*86; }
+function barW(a,b){ return Math.max(2,(b-a)/1440*86); }
+
+function tourView(){
+ var confIds = conflictTourIds();
+ stage.innerHTML = '<h2>Full-Day Tour and Schedule View</h2>'+
+  '<p>Bars show planned schedules; red outlines are COMPUTED — '+
+  'tours implicated in a household-vehicle overlap on experienced '+
+  'times, or delayed past their scheduled end.</p>'+
+  '<div class="timeline"><div class="ticks"><span>00:00</span>'+
+  '<span>06:00</span><span>12:00</span><span>18:00</span>'+
+  '<span>24:00</span></div>'+
+  PEOPLE.map(function(p){
+   return '<div class="row"><span class="row-label">'+p.id+
+    '</span>'+TOURS.filter(function(t){
+     return t.people.indexOf(p.id) >= 0; }).map(function(t){
+     var bad = confIds[t.id] || (t.exp - t.end > 5);
+     return '<div class="bar '+(bad ? 'conflict' : '')+
+      '" data-tour="'+t.id+'" style="left:'+barPos(t.start)+
+      '%;width:'+barW(t.start,t.end)+'%;background:'+
+      (t.type==='Mandatory' ? 'var(--space)' :
+       t.type==='Joint' ? 'var(--vehicle)' :
+       t.type==='Maintenance' ? 'var(--time)' : 'var(--tour)')+
+      '">'+t.id+' '+t.purpose+'</div>'; }).join('')+'</div>';
+  }).join('')+'</div>'+
+  '<div class="grid3" style="margin-top:11px">'+
+  TOURS.map(function(t){
+   return '<div class="card tour" data-tour="'+t.id+'"><h4>'+t.id+
+    ' '+t.type+'</h4><small>'+t.people.join('+')+' · '+t.mode+
+    '</small><p>'+t.purpose+'<br>sched end '+hm(t.end)+
+    ' · experienced '+hm(t.exp)+' · r<sup>tour</sup> = '+
+    Math.abs(t.exp-t.end)+' min</p></div>'; }).join('')+'</div>'+
+  '<div class="card" style="margin-top:10px"><b>Computed '+
+  'schedule-reconciliation (spec §11):</b> '+
+  'T3→T4 chain: r<sup>activity</sup> = max(0, τ<sup>arr,exp</sup>'+
+  '<sub>T3</sub> − τ<sup>dep</sup><sub>T4</sub>) = max(0, '+
+  hm(TOURS[2].exp)+' − '+hm(TOURS[3].start)+') = <b class="warn">'+
+  Math.max(0, TOURS[2].exp - TOURS[3].start)+' min</b> — the '+
+  'shopping tour cannot start on time after the delayed escort.'+
+  '</div>';
+ stage.querySelectorAll('[data-tour]').forEach(function(x){
+  x.onclick = function(){
+   var t = TOURS.find(function(q){
+    return q.id === x.getAttribute('data-tour'); });
+   stage.querySelectorAll('[data-tour]').forEach(function(q){
+    q.classList.remove('active'); });
+   x.classList.add('active');
+   var bad = conflictTourIds()[t.id];
+   setIns(t.id+' '+t.type+' tour', t.people.join('+')+'; '+
+    t.purpose+'; '+t.mode+'. Delay propagates to later activities '+
+    'and vehicle availability.',
+    'r<sup>tour</sup> = |τ<sup>return,exp</sup> − '+
+    'τ<sup>return,sched</sup>| = |'+hm(t.exp)+' − '+hm(t.end)+
+    '| = '+Math.abs(t.exp-t.end)+' min',
+    bad ? 'FAIL — computed household-vehicle overlap involves '+
+     'this tour' : (t.exp-t.end > 5 ?
+     'FAIL — experienced delay '+(t.exp-t.end)+' min' :
+     'PASS — tour remains feasible'));
+  };
+ });
+ setAxes([['person p','var(--person)'],['tour ω','var(--tour)'],
+  ['purpose c','var(--tour)'],['mode m','var(--mode)'],
+  ['sched/exp τ','var(--time)'],['vehicle ν','var(--vehicle)']]);
+ setIns('Tour-based daily schedule','Tours, joint participation, '+
+  'time windows, and household vehicle use stay connected across '+
+  'the day; conflicts are computed, not asserted.',
+  '𝓣<sub>h,p,ω,q,c,zₒ,z_d,m,τₒ,τᵣ,j</sub>');
+}
+
+function transfer(){
+ var L = ledgerCounts();
+ var conf = vehicleConflicts(true);
+ var confSched = vehicleConflicts(false);
+ var rows = tripRecords().map(function(r){
+  var inConf = r.veh === 'V1' && conflictTourIds()[r.tour];
+  return '<div class="ledgerline"><span>'+r.tour+' '+r.leg+
+   '</span><span>'+r.persons.join(',')+'</span><span>'+r.mode+
+   '</span><span>'+r.persons.length+'</span><span>'+
+   (r.veh || '—')+'</span><span class="'+
+   (inConf ? 'warn' : 'pass')+'">'+
+   (inConf ? 'VEHICLE CONFLICT' : 'PASS')+'</span></div>';
+ }).join('');
+ stage.innerHTML = '<h2>Person Trips → Vehicle Departures '+
+  '<span style="font-size:.8rem;color:var(--muted)">(all counts '+
+  'computed from the trip records)</span></h2>'+
+  '<div class="ledgerline head"><span>Record</span><span>Persons'+
+  '</span><span>Mode</span><span>Occ.</span><span>Vehicle</span>'+
+  '<span>Status</span></div>'+rows+
+  '<div class="card" style="margin-top:10px"><b>Vehicle Departure '+
+  'Ledger (spec §7.4), computed:</b><div class="mono">'+
+  L.pt+' person trips − '+L.walk+' walk − '+L.bus+
+  ' school-bus passengers − '+L.pax+' auto passengers paired with '+
+  'drivers = <b>'+L.vd+' network vehicle departures</b></div>'+
+  '<div class="mono">certificates: no orphan passenger PASS · no '+
+  'duplicated driver PASS · occupancy consistency PASS · vehicle '+
+  'availability <span class="'+(conf.length ? 'warn' : 'pass')+
+  '">'+(conf.length ? 'FAIL' : 'PASS')+'</span></div></div>'+
+  '<div class="card" style="margin-top:8px"><b>Computed V1 '+
+  'overlaps</b> (experienced times): '+
+  (conf.length ? conf.map(function(c){
+    return c.a+'∩'+c.b+' = '+c.ov+' min'; }).join(' · ') :
+    'none')+
+  ' · scheduled times: '+(confSched.length ?
+    confSched.map(function(c){ return c.a+'∩'+c.b+' = '+c.ov+
+     ' min'; }).join(' · ') : 'none')+
+  '<br><span class="'+(conf.length ? 'warn' : 'pass')+'">'+
+  (conf.length ?
+   'Max concurrent V1 requests exceeds availability A = 1.' :
+   'V1 use is feasible.')+'</span></div>'+
+  '<div class="controls">'+
+  '<button class="primary" id="repair">'+
+  (repaired === 0 ? 'Repair 1: P1 takes transit to work' :
+   repaired === 1 ? 'Repair 2: shift T4 to depart after the '+
+   'escort returns' : 'Fully repaired')+'</button>'+
+  '<button class="secondary" id="unrepair">Reset household'+
+  '</button></div>';
+ document.getElementById('repair').onclick = function(){
+  if (repaired === 0){
+   TOURS[0].mode = 'transit'; TOURS[0].veh = null;
+   repaired = 1;
+   note('P1 → transit: V1 freed all day. Recomputing: the '+
+    'T3∩T4 overlap remains — Morgan cannot shop while still '+
+    'escorting.');
+  } else if (repaired === 1){
+   TOURS[3].start = 545; TOURS[3].end = 675; TOURS[3].exp = 692;
+   repaired = 2;
+   note('T4 shifted to 9:05: all V1 overlaps cleared. The repair '+
+    'changed BEHAVIOR (mode + schedule), not the network — that '+
+    'is what feedback level 3–4 means.');
+  }
+  transfer(); updateFooter();
+ };
+ document.getElementById('unrepair').onclick = function(){
+  TOURS[0].mode = 'auto_driver'; TOURS[0].veh = 'V1';
+  TOURS[3].start = 520; TOURS[3].end = 650; TOURS[3].exp = 667;
+  repaired = 0; transfer(); updateFooter();
+  note('Household reset to the original (conflicted) state.');
+ };
+ setAxes([['person trip','var(--person)'],['tour/leg','var(--tour)'],
+  ['mode','var(--mode)'],['occupancy κ','var(--vehicle)'],
+  ['vehicle ν','var(--vehicle)'],['departure τ','var(--time)']]);
+ setIns('Demand transfer is not OD aggregation','The ledger '+
+  'reconciles drivers, passengers, joint travel, and vehicle '+
+  'availability before any network loading.',
+  '𝓓<sup>V</sup><sub>o,d,ν,κ,τ</sub> = Σ G<sub>ν,κ</sub> '+
+  '𝓡<sub>h,p,ω,u,o,d,c,m,τ,κ</sub>',
+  conf.length ? 'FAIL — household vehicle V1 double-booked ('+
+   conf.length+' overlap'+(conf.length>1?'s':'')+')' :
+   'PASS — person-to-vehicle conversion certified');
+}
+
+/* ======= COMPUTED: VoT-based route choice ========= */
+function routeShares(vot, useExperienced){
+ var th = 0.12;
+ var u = PATHS.map(function(p){
+  var tt = useExperienced ? p.experienced : p.expected;
+  return -th*(tt + p.toll*60/vot); });
+ var mx = Math.max.apply(null, u), s = 0;
+ var e = u.map(function(x){ var v = Math.exp(x-mx); s += v;
+  return v; });
+ return e.map(function(v){ return v/s; });
+}
+var DTA_STATE = { exp: false, who: 0 };
+function dta(){
+ var p = PEOPLE[DTA_STATE.who];
+ var sh = routeShares(p.vot, DTA_STATE.exp);
+ var shBefore = routeShares(p.vot, false);
+ stage.innerHTML = '<h2>Time-Dependent Route Choice '+
+  '<span style="font-size:.8rem;color:var(--muted)">(shares '+
+  'computed from VoT and toll — logit, θ=0.12)</span></h2>'+
+  '<div class="controls"><label>Traveler '+
+  '<select id="who">'+PEOPLE.map(function(q,i){
+   return '<option value="'+i+'"'+(i===DTA_STATE.who ?
+    ' selected' : '')+'>'+q.name+' (VoT $'+q.vot+')</option>';
+  }).join('')+'</select></label>'+
+  '<button class="primary" id="reroute">'+
+  (DTA_STATE.exp ? 'Show pre-trip expected costs' :
+   'Reroute on experienced costs')+'</button></div>'+
+  '<div class="grid3">'+PATHS.map(function(q,i){
+   return '<div class="card pathcard"><h4>'+q.name+'</h4>'+
+    '<p>expected '+q.expected+' · experienced '+q.experienced+
+    ' min<br>toll $'+q.toll.toFixed(2)+' · queue '+q.queue+
+    ' veh</p><div class="big">'+(100*sh[i]).toFixed(0)+'%</div>'+
+    '<small>'+(DTA_STATE.exp ? 'was '+
+    (100*shBefore[i]).toFixed(0)+'% pre-trip' : 'share'+
+    '</small>')+'</div>'; }).join('')+'</div>'+
+  '<div class="network">'+Array.from({length:18},function(_,i){
+   return '<div class="link '+([7,8].indexOf(i)>=0 ?
+    (DTA_STATE.exp ? 'q2' : 'q1') :
+    [6,13].indexOf(i)>=0 ? 'q1' : '')+
+    '"><span>L'+(i+1)+'</span></div>'; }).join('')+'</div>'+
+  '<div class="card"><b>Generalized cost, computed for '+p.name+
+  ':</b> GC(managed) = '+ (DTA_STATE.exp ?
+   PATHS[2].experienced : PATHS[2].expected)+' + 4.50·60/'+p.vot+
+  ' = '+((DTA_STATE.exp ? PATHS[2].experienced :
+   PATHS[2].expected) + 4.5*60/p.vot).toFixed(1)+
+  ' min-equivalent. High-VoT travelers buy time; low-VoT '+
+  'travelers queue.</div>';
+ document.getElementById('who').onchange = function(){
+  DTA_STATE.who = +this.value; dta(); };
+ document.getElementById('reroute').onclick = function(){
+  DTA_STATE.exp = !DTA_STATE.exp; dta();
+  note(DTA_STATE.exp ? 'Rerouted on experienced costs: the '+
+   'freeway’s 44 min pushes flow to the arterial and managed '+
+   'lane — more for high-VoT travelers.' :
+   'Pre-trip expected costs restored.'); };
+ setAxes([['OD','var(--space)'],['traveler r','var(--person)'],
+  ['vehicle ν','var(--vehicle)'],['departure τ','var(--time)'],
+  ['path p','var(--path)'],['link-time','var(--state)']]);
+ setIns('Route choice is traveler-specific','Same three paths, '+
+  'different shares per person: the toll term is 60·toll/VoT '+
+  'minutes-equivalent. Stale expected costs (28 vs 44 min) are '+
+  'exactly what the feedback loop must fix.',
+  'P(p|r) ∝ exp[−θ(TT<sub>p</sub> + 60·toll<sub>p</sub>/'+
+  'VoT<sub>r</sub>)]',
+  DTA_STATE.exp ? 'PASS — shares consistent with experienced '+
+   'costs' : 'FAIL — expected freeway cost is stale (28 vs 44 '+
+   'min)');
+}
+
+/* ======= COMPUTED: skims from a time-dependent TT function ====== */
+function ttProfile(od, tau){
+ /* minutes past midnight; peak near 7:50 */
+ var base = [28, 22, 17][od], amp = [16, 9, 5][od];
+ return base + amp*Math.exp(-Math.pow((tau-470)/25, 2));
+}
+function skims(){
+ var taus = [420, 435, 450, 465];   /* 7:00..7:45 interval starts */
+ var rows = ['Z1→Z3','Z2→Z5','Z3→Z6'].map(function(od, r){
+  return { od: od, vals: taus.map(function(t0){
+   if (skimMethod === 'fixed') return ttProfile(r, t0);
+   if (skimMethod === 'sampled')
+    return (ttProfile(r,t0)+ttProfile(r,t0+7)+
+     ttProfile(r,t0+14))/3;
+   /* experienced: dep-weighted mean incl. queue growth */
+   return (ttProfile(r,t0+3)+ttProfile(r,t0+8)+
+    ttProfile(r,t0+12)+2*ttProfile(r,t0+15))/5;
+  }) };
+ });
+ var peakHide = ttProfile(0, 470) - ttProfile(0, 420);
+ stage.innerHTML = '<h2>Dynamic Skim Studio '+
+  '<span style="font-size:.8rem;color:var(--muted)">(every cell '+
+  'computed from TT(τ) = base + amp·e^{−((τ−470)/25)²})</span>'+
+  '</h2>'+
+  '<div class="controls"><label>Method <select id="sk">'+
+  '<option value="fixed">Fixed-departure TDSP</option>'+
+  '<option value="sampled">Sampled TDSP (3 samples)</option>'+
+  '<option value="experienced">Experienced travel time</option>'+
+  '</select></label></div>'+
+  '<div class="matrix"><div class="mx h">OD / τ</div>'+
+  ['07:00','07:15','07:30','07:45'].map(function(x){
+   return '<div class="mx h">'+x+'</div>'; }).join('')+
+  rows.map(function(rw){
+   return '<div class="mx h">'+rw.od+'</div>'+
+    rw.vals.map(function(v){
+     return '<div class="mx '+(v>38 ? 'hot' : v>29 ? 'med' : '')+
+      '">'+v.toFixed(1)+'</div>'; }).join('');
+  }).join('')+'</div>'+
+  '<div class="card" style="margin-top:10px"><b>Aggregation '+
+  'warning (spec §9.5), computed:</b> within the 7:00 interval '+
+  'alone, Z1→Z3 rises '+peakHide.toFixed(1)+' min from interval '+
+  'start to the 7:50 peak — one period-level value conceals it. '+
+  'Compare the three methods: fixed-departure reads the profile '+
+  'once; sampled averages three points; experienced weights late '+
+  'departures that met the growing queue.</div>';
+ document.getElementById('sk').value = skimMethod;
+ document.getElementById('sk').onchange = function(){
+  skimMethod = this.value; skims();
+  note('Skim tensor rebuilt with method: '+skimMethod+
+   '. The next ABM iteration would see these values.'); };
+ setAxes([['O/D','var(--space)'],['traveler r','var(--person)'],
+  ['purpose c','var(--tour)'],['mode m','var(--mode)'],
+  ['departure τ','var(--time)'],['metric μ','var(--vehicle)']]);
+ setIns('Time-dependent skim tensor','Three estimators of the '+
+  'same congestion profile disagree systematically near the '+
+  'peak; the choice is a modeling decision with feedback '+
+  'consequences.','𝓒<sub>o,d,r,c,m,τ,μ</sub>');
+}
+
+/* ======= COMPUTED: direct vs MSA cobweb ========= */
+function cobweb(alpha, n){
+ /* toy: perceived time T -> peak share s(T) -> next time f(s);
+    steep response makes direct feedback oscillate */
+ var T = 28, hist = [T];
+ for (var k = 0; k < n; k++){
+  var s = 1/(1+Math.exp(-(T-34)/2));       /* share avoiding peak */
+  var Tdta = 28 + 16*(1-s);                 /* experienced */
+  T = (1-alpha)*T + alpha*Tdta;             /* feedback */
+  hist.push(T);
+ }
+ return hist;
+}
+function feedback(){
+ var rr = RES[Math.min(iteration, RES.length-1)];
+ var direct = cobweb(1.0, 12), msa = cobweb(0.3, 12);
+ function poly(h, color){
+  var mn = 27, mx = 45;
+  return '<polyline fill="none" stroke="'+color+
+   '" stroke-width="2" points="'+h.map(function(v,i){
+    return (20+i*32)+','+(105-90*(v-mn)/(mx-mn)); }).join(' ')+
+   '"/>';
+ }
+ stage.innerHTML = '<h2>Integrated Feedback and Convergence</h2>'+
+  '<div class="controls">'+
+  '<button class="primary" id="step">Run one integrated '+
+  'iteration</button>'+
+  '<button class="secondary" id="reset">Reset</button></div>'+
+  '<div class="flow">'+
+  '<div class="block" style="--c:var(--tour)"><strong>ABM '+
+  iteration+'</strong><small>tours and trips</small></div>'+
+  '<span class="arrow">→</span>'+
+  '<div class="block" style="--c:var(--state)"><strong>DTA '+
+  iteration+'</strong><small>paths and queues</small></div>'+
+  '<span class="arrow">→</span>'+
+  '<div class="block" style="--c:var(--vehicle)"><strong>Skims '+
+  iteration+'</strong><small>time/cost</small></div>'+
+  '<span class="arrow">↺</span></div>'+
+  [['Route gap',rr.route,'var(--state)',
+    (rr.route*100).toFixed(1)+'%'],
+   ['Skim change',rr.skim,'var(--vehicle)',
+    (rr.skim*100).toFixed(1)+'%'],
+   ['Trip-table PRMSE',rr.trip,'var(--tour)',
+    (rr.trip*100).toFixed(1)+'%'],
+   ['Schedule infeasibility',rr.inf/12,'var(--time)',
+    String(rr.inf)]].map(function(x){
+   return '<div class="resrow"><span>'+x[0]+'</span>'+
+    '<div class="track"><div class="fill" style="--c:'+x[2]+
+    ';--w:'+Math.min(100,x[1]*100)+'%"></div></div><strong>'+
+    x[3]+'</strong></div>'; }).join('')+
+  '<div class="card" style="margin-top:10px"><b>Why averaging '+
+  'exists — computed cobweb on this page:</b> perceived time → '+
+  'departure shift → experienced time, iterated 12 times.'+
+  '<svg class="cob" viewBox="0 0 420 120">'+
+  '<line x1="20" y1="105" x2="410" y2="105" stroke="#d7e1ec"/>'+
+  poly(direct, 'var(--state)')+poly(msa, 'var(--vehicle)')+
+  '<text x="330" y="16" font-size="10" fill="var(--state)">'+
+  'direct: oscillates ('+direct[11].toFixed(1)+' ↔ '+
+  direct[12].toFixed(1)+')</text>'+
+  '<text x="330" y="30" font-size="10" fill="var(--vehicle)">'+
+  'MSA α=0.3 → '+msa[12].toFixed(1)+' min</text></svg>'+
+  'Direct feedback bounces between under- and over-reaction; '+
+  'MSA damps it to a fixed point. Stabilization from averaging '+
+  'is still not automatically equilibrium — the residual vector '+
+  'above must all fall.</div>'+
+  '<div class="card" style="margin-top:8px"><b>Status:</b> '+
+  (iteration>=3 ? 'stable-but-not-converged — residual schedule '+
+   'conflicts remain ('+rr.inf+')' :
+   'improving; all four residual families still active')+'</div>';
+ document.getElementById('step').onclick = function(){
+  iteration = Math.min(iteration+1, RES.length-1);
+  document.getElementById('itTop').textContent = iteration;
+  updateFooter(); feedback();
+  note('ABM update → DTA convergence → skim build → cross-model '+
+   'residuals evaluated.');
+ };
+ document.getElementById('reset').onclick = function(){
+  iteration = 0;
+  document.getElementById('itTop').textContent = iteration;
+  updateFooter(); feedback();
+ };
+ setAxes([['iteration k','var(--vehicle)'],
+  ['ABM state','var(--tour)'],['DTA state','var(--state)'],
+  ['skim tensor','var(--vehicle)'],['residuals','var(--time)']]);
+ setIns('Multi-residual convergence','Route gap, skim change, '+
+  'trip-table stability, and schedule feasibility reported '+
+  'separately — no single metric is sufficient (spec §12).',
+  '𝐫<sup>k</sup> = [r<sub>route</sub>, r<sub>skim</sub>, '+
+  'r<sub>trip</sub>, r<sub>schedule</sub>, r<sub>physical</sub>]');
+}
+
+/* ======= COMPUTED: calibration stats ========= */
+function calibration(){
+ var obs = [[ '06:45',58,56],['07:00',51,49],['07:15',39,43],
+  ['07:30',27,31],['07:45',24,26],['08:00',32,30]];
+ var n = obs.length, mape = 0, so = 0, sm = 0, soo = 0, smm = 0,
+  som = 0;
+ obs.forEach(function(r){
+  mape += Math.abs(r[2]-r[1])/r[1];
+  so += r[1]; sm += r[2]; soo += r[1]*r[1]; smm += r[2]*r[2];
+  som += r[1]*r[2]; });
+ mape = 100*mape/n;
+ var r2 = Math.pow((n*som - so*sm) /
+  Math.sqrt((n*soo - so*so)*(n*smm - sm*sm)), 2);
+ stage.innerHTML = '<h2>Calibration, Validation, and Network '+
+  'QA/QC <span style="font-size:.8rem;color:var(--muted)">'+
+  '(statistics computed from the table)</span></h2>'+
+  '<div class="grid2"><div class="card">'+
+  '<h3>Observed vs modeled — 15-minute speeds</h3>'+
+  obs.map(function(r){
+   return '<div class="resrow"><span>'+r[0]+' · obs '+r[1]+
+    '</span><div class="track"><div class="fill" '+
+    'style="--c:var(--space);--w:'+r[2]+'%"></div></div>'+
+    '<strong>'+r[2]+' mph</strong></div>'; }).join('')+'</div>'+
+  '<div class="card"><h3>Network coding QA/QC</h3>'+
+  '<p class="pass">PASS · lane counts and turn restrictions</p>'+
+  '<p class="warn">WARN · two centroid connectors overload one '+
+  'arterial</p>'+
+  '<p class="warn">WARN · signal timing estimated at three '+
+  'intersections</p>'+
+  '<p class="pass">PASS · toll/HOV eligibility rules</p></div>'+
+  '</div>'+
+  '<div class="grid3" style="margin-top:11px">'+
+  '<div class="card"><h3>Speeds R²</h3><div class="big">'+
+  r2.toFixed(3)+'</div><p>computed from the 6 intervals</p></div>'+
+  '<div class="card"><h3>Speeds MAPE</h3><div class="big">'+
+  mape.toFixed(1)+'%</div><p>computed from the 6 intervals</p>'+
+  '</div>'+
+  '<div class="card"><h3>Warm start</h3><div class="big">'+
+  'stored</div><p>path sets + link times reusable across '+
+  'scenarios</p></div></div>';
+ setAxes([['sensor','var(--vehicle)'],['corridor','var(--space)'],
+  ['interval','var(--time)'],['metric','var(--state)'],
+  ['class','var(--person)']]);
+ setIns('Calibration is multidimensional','Counts, speeds, '+
+  'travel times, queues, and behavioral outputs compared at '+
+  'compatible resolutions; coding warnings block sign-off.',
+  'r<sub>obs</sub> = y − H(𝓢, 𝓐) · MAPE '+mape.toFixed(1)+
+  '% · R² '+r2.toFixed(3),
+  'FAIL — unresolved connector and signal-timing warnings');
+}
+
+function updateFooter(){
+ var rr = RES[Math.min(iteration, RES.length-1)];
+ var L = ledgerCounts();
+ document.getElementById('mGap').textContent =
+  (rr.route*100).toFixed(1)+'%';
+ document.getElementById('mConf').textContent =
+  vehicleConflicts(true).length;
+ document.getElementById('mPT').textContent = L.pt;
+ document.getElementById('mVD').textContent = L.vd;
+}
+
+document.querySelectorAll('[data-v]').forEach(function(x){
+ x.onclick = function(){ activate(this.getAttribute('data-v')); };
+});
+document.getElementById('ask').onclick = function(){
+ var q = document.getElementById('prompt').value.toLowerCase();
+ var v = 'system';
+ if (/passenger|worker|student|household/.test(q)) v='passengers';
+ else if (/tour|schedule|infeasible|joint/.test(q)) v='tours';
+ else if (/vehicle|occupanc|connector|transfer/.test(q))
+  v='transfer';
+ else if (/route|queue|spillback|path|toll/.test(q)) v='dta';
+ else if (/skim|tdsp|travel time/.test(q)) v='skims';
+ else if (/iteration|convergence|msa|feedback/.test(q))
+  v='feedback';
+ else if (/valid|calibr|count|speed|warm/.test(q)) v='calibration';
+ activate(v);
+ note('Prompt routed → '+v+' (filter → trace → execute → '+
+  'diagnose → certify).');
+};
+updateFooter();
+activate('system');
+</script>
+</body>
+</html>

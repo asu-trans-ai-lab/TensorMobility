@@ -1,0 +1,167 @@
+{
+  "household": {
+    "id": "H017",
+    "income": "medium",
+    "home_zone": "Z3",
+    "vehicles": [
+      {
+        "id": "V1",
+        "class": "car",
+        "available_from": 0,
+        "available_to": 1440
+      }
+    ],
+    "persons": [
+      {
+        "id": "P1",
+        "name": "Alex",
+        "type": "full_time_worker",
+        "value_of_time": 28,
+        "license": true
+      },
+      {
+        "id": "P2",
+        "name": "Morgan",
+        "type": "part_time_worker",
+        "value_of_time": 18,
+        "license": true
+      },
+      {
+        "id": "P3",
+        "name": "Sam",
+        "type": "k12_student",
+        "value_of_time": 8,
+        "license": false
+      }
+    ]
+  },
+  "tours": [
+    {
+      "id": "T1",
+      "person_ids": [
+        "P1"
+      ],
+      "type": "mandatory",
+      "purpose": "work",
+      "mode": "auto_driver",
+      "start": 450,
+      "end": 1050,
+      "experienced_end": 1066,
+      "scheduled_tt": 28,
+      "experienced_tt": 44
+    },
+    {
+      "id": "T2",
+      "person_ids": [
+        "P1"
+      ],
+      "type": "work_subtour",
+      "purpose": "meal",
+      "mode": "walk",
+      "start": 720,
+      "end": 780,
+      "experienced_end": 780,
+      "scheduled_tt": 8,
+      "experienced_tt": 8
+    },
+    {
+      "id": "T3",
+      "person_ids": [
+        "P2",
+        "P3"
+      ],
+      "type": "joint",
+      "purpose": "escort_school",
+      "mode": "auto",
+      "start": 455,
+      "end": 530,
+      "experienced_end": 544,
+      "scheduled_tt": 22,
+      "experienced_tt": 36
+    },
+    {
+      "id": "T4",
+      "person_ids": [
+        "P2"
+      ],
+      "type": "maintenance",
+      "purpose": "shopping",
+      "mode": "auto",
+      "start": 520,
+      "end": 650,
+      "experienced_end": 667,
+      "scheduled_tt": 18,
+      "experienced_tt": 31
+    },
+    {
+      "id": "T5",
+      "person_ids": [
+        "P3"
+      ],
+      "type": "mandatory",
+      "purpose": "school_return",
+      "mode": "school_bus",
+      "start": 900,
+      "end": 950,
+      "experienced_end": 953,
+      "scheduled_tt": 26,
+      "experienced_tt": 29
+    }
+  ],
+  "paths": [
+    {
+      "id": "PTH1",
+      "label": "Freeway",
+      "expected": 28,
+      "experienced": 44,
+      "toll": 0.0,
+      "queue": 18
+    },
+    {
+      "id": "PTH2",
+      "label": "Arterial",
+      "expected": 34,
+      "experienced": 38,
+      "toll": 0.0,
+      "queue": 8
+    },
+    {
+      "id": "PTH3",
+      "label": "Managed lane",
+      "expected": 24,
+      "experienced": 26,
+      "toll": 4.5,
+      "queue": 2
+    }
+  ],
+  "iterations": [
+    {
+      "k": 0,
+      "route_gap": 0.123,
+      "skim_change": 0.18,
+      "trip_prmse": 0.142,
+      "schedule_infeasible": 12
+    },
+    {
+      "k": 1,
+      "route_gap": 0.071,
+      "skim_change": 0.094,
+      "trip_prmse": 0.081,
+      "schedule_infeasible": 7
+    },
+    {
+      "k": 2,
+      "route_gap": 0.043,
+      "skim_change": 0.051,
+      "trip_prmse": 0.046,
+      "schedule_infeasible": 4
+    },
+    {
+      "k": 3,
+      "route_gap": 0.029,
+      "skim_change": 0.031,
+      "trip_prmse": 0.028,
+      "schedule_infeasible": 2
+    }
+  ]
+}
