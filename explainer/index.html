@@ -589,8 +589,11 @@ function scrubbedV(){
 var PRESETS = {
   mono: { central: 90, dem: 12000, beta: 0.2, subs: [],
     narr: 'Monocentric rush hour: watch the center cross saturate — '+
-      'orange, then magenta. The certificate takes longer: '+
-      'congestion makes equilibrium harder.' },
+      'orange, then magenta. Under this much congestion MSA’s '+
+      '1/k step stalls near gap 1e-3 and may never light the badge: '+
+      'a real lesson, not a bug — it is why the framework '+
+      'carries an engine ladder (averaging → Anderson → '+
+      'stiff-block Newton) above plain MSA.' },
   town: { central: 15, dem: 8000, beta: 0.3, subs: [],
     narr: 'Balanced town: jobs everywhere, trips short, roads teal. '+
       'Equilibrium is nearly free — the network is barely coupled.' },
