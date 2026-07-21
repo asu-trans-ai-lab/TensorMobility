@@ -36,8 +36,11 @@ report asked for — ready to drop into the paper as the E3 centerpiece.
   volume) → full-space-priced gap **2.4e-5 in 49 s** (network lightly
   congested at AM volumes — free-flow paths nearly optimal; the honest
   reading, stated in RESULTS).
-- **F2 full (all 1,039,117 ODs)**: launched; result appends to
-  `outputs/trmg2/RESULTS.md` when finished.
+- **F2 FULL (all 1,039,117 ODs)**: certified full-space gap
+  **4.4e-7 in 2 pricing rounds, 115 s**, 1,063,642 columns,
+  feasibility 1.8e-15 — a certified million-OD regional assignment in
+  under two minutes, single-threaded. (AM network lightly congested;
+  free-flow paths near-optimal — stated honestly.)
 
 **Paper impact:** E4/F1 flipped from [architectural] to
 [demonstrated] in the integrated draft (§12.5), recompiled clean.
@@ -55,8 +58,8 @@ carries the TRMG2 F1 numbers.
 
 ## Decisions waiting for you
 1. Rank-economy figure → paper E3 figure slot (recommended yes).
-2. Full-OD TRMG2 result: fold into paper §12.5 wording once you read
-   the number.
+2. Full-OD TRMG2 result: DONE — folded into paper §12.5 (E4 F1–F2
+   now [demonstrated]).
 3. Next agentic targets, in my recommended order: F2 super-zone warm
    starts (F2 proper), scale-table runner (D5), typed STBState master
    loop (review P0.3), corridor PINN training (JSQE face).
