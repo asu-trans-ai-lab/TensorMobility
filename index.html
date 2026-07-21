@@ -271,7 +271,7 @@ detector inflow)</span></h3>
 <div class="row">
 <div class="col">
   <div class="ctl"><label>demand pulse height (veh/min)</label>
-    <input type="range" id="pulse" min="0" max="60" step="2" value="35">
+    <input type="range" id="pulse" min="0" max="60" step="2" value="36">
     <span class="val" id="pulsev"></span></div>
   <div class="ctl"><label>capacity cut during incident</label>
     <input type="range" id="cut" min="0" max="70" step="5" value="30">
@@ -470,19 +470,20 @@ logitUpdate();
 
 /* ---------- demo 2: MSA fixed point with certificate ---------- */
 var EQ = { t0:[10,12,15], cap:[40,50,60], v:[0,0,0], it:0, gaps:[],
-           timer:null };
+           timer:null, done:false };
 function bpr(k, v){
   var x = v / EQ.cap[k];
   return EQ.t0[k] * (1 + 0.15 * Math.pow(x, 4));
 }
 function eqReset(){
   var d = +$('dem').value;
-  EQ.v = [d/3, d/3, d/3]; EQ.it = 0; EQ.gaps = [];
+  EQ.v = [d/3, d/3, d/3]; EQ.it = 0; EQ.gaps = []; EQ.done = false;
   if (EQ.timer){ clearInterval(EQ.timer); EQ.timer = null; }
   $('certbadge').classList.remove('on');
   eqDraw(null);
 }
 function eqStep(){
+  if (EQ.done) return;
   var d = +$('dem').value, c = [0,1,2].map(function(k){
     return bpr(k, EQ.v[k]); });
   var best = c.indexOf(Math.min.apply(null, c));
@@ -497,6 +498,7 @@ function eqStep(){
   }
   EQ.gaps.push(Math.max(gap, 1e-12));
   if (gap < 1e-4){
+    EQ.done = true;
     $('certbadge').classList.add('on');
     if (EQ.timer){ clearInterval(EQ.timer); EQ.timer = null; }
   }
