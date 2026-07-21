@@ -50,7 +50,10 @@ def build_route_family_atoms(instance: STBInstance) -> AtomRepresentation:
     atom_group: list[int] = []
     labels: list[str] = []
     singleton: list[int | None] = []
-    ff = instance.columns["total_free_flow_cost"].to_numpy(dtype=float)
+    cols = instance.columns
+    ff_col = ("total_free_flow_cost" if "total_free_flow_cost" in cols
+              else "free_flow_path_time")
+    ff = cols[ff_col].to_numpy(dtype=float)
 
     for g, idx in enumerate(instance.group_columns):
         frame = instance.columns.loc[idx]
