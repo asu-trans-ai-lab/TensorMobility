@@ -950,10 +950,12 @@ function skims(){
 
 function feedback(){
  var hist = CITY.fbHist;
- stage.innerHTML = '<h2>Feedback — retiming heals the city '+
+ stage.innerHTML = '<h2>Feedback — peak-shifting heals the city '+
   '<span style="font-size:.8rem;color:var(--muted)">(each step: '+
-  '30% of infeasible tours shift out of the peak, then the city '+
-  'is re-assigned)</span></h2>'+
+  '30% of infeasible tours LEAVE the AM peak — honest scope: the '+
+  'shoulder period is not simulated, so shifted tours are removed '+
+  'from this assignment and their mass is reported below)</span>'+
+  '</h2>'+
   '<div class="controls">'+
   '<button class="primary" id="fbstep">Run one feedback '+
   'iteration</button>'+
@@ -970,7 +972,10 @@ function feedback(){
     '</td><td style="text-align:center">'+h.del.toFixed(1)+
     ' min</td><td style="text-align:center">'+
     h.gap.toExponential(1)+'</td><td style="text-align:center">'+
-    (h.moved*VEH_PER_TOUR).toLocaleString()+'</td></tr>';
+    (h.moved*VEH_PER_TOUR).toLocaleString()+
+    '</td><td style="text-align:center">'+
+    (h.dchg !== undefined ? (100*h.dchg).toFixed(1)+'%' : '—')+
+    '</td></tr>';
   }).join('')+'</table>'+
   (hist.length === 0 ? '<div class="card">No iterations yet — '+
    'current state: '+(CITY.cf.n*VEH_PER_TOUR).toLocaleString()+
@@ -995,10 +1000,13 @@ function feedback(){
     if ((idx++ % 10) < 3){ t.retimed = true; moved += 1; }
    }
   });
+  var beforeAuto = CITY.cf.autoN;
   CITY.fb += 1;
   recompute();
   CITY.fbHist.push({ k: CITY.fb, inf: CITY.cf.n,
-   del: CITY.cf.meanDelay, gap: CITY.res.gap, moved: moved });
+   del: CITY.cf.meanDelay, gap: CITY.res.gap, moved: moved,
+   dchg: beforeAuto > 0 ?
+    Math.abs(beforeAuto - CITY.cf.autoN)/beforeAuto : 0 });
   feedback();
   note(moved ? (moved*VEH_PER_TOUR)+' tours retimed out of the '+
    'peak; city re-assigned; H017 recomputed.' :

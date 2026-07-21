@@ -1,5 +1,6 @@
 {
  "name": "gridcity_small",
+ "schema_version": "1.0",
  "generator": "cases/export_scenario.py",
  "mode": "certified_replay_source",
  "network": {

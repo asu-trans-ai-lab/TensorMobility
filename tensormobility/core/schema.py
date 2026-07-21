@@ -70,6 +70,8 @@ class OperatorContract:
     outputs: dict
     axis_use: dict = field(default_factory=dict)
     certificates: tuple = ()
+    fidelity: str = 'unspecified'   # e.g. static-bpr, point-queue,
+                                    # event-queue, ctm, external-dnl
 
     def validate(self):
         """Contract consistency: every contracted axis appears in an

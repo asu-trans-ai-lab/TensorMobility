@@ -69,6 +69,7 @@ def main():
 
     scenario = {
         'name': 'gridcity_small',
+        'schema_version': '1.0',
         'generator': 'cases/export_scenario.py',
         'mode': 'certified_replay_source',
         'network': {
@@ -110,7 +111,10 @@ def main():
     }
     out = OUT / 'gridcity_small.json'
     out.write_text(json.dumps(scenario, indent=1), encoding='utf-8')
-    print(f'wrote {out}')
+    js = OUT / 'gridcity_small.js'
+    js.write_text('window.TM_SCENARIO = '
+                  + json.dumps(scenario) + ';\n', encoding='utf-8')
+    print(f'wrote {out} and {js.name} (file:// loadable)')
     print(f"gap {res.relative_gap:.2e} · conservation "
           f"{cons['residual']:.1e} · all_passed "
           f"{scenario['certificates']['all_passed']}")
