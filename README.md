@@ -3,6 +3,13 @@
 **Mobility systems as flow-through tensors — space, time, and behavior
 in one certified computational graph.**
 
+**Live interactive pages** (run in your browser, nothing to install):
+**[Living GridCity](https://asu-trans-ai-lab.github.io/TensorMobility/explainer/)** ·
+**[Visual Computing Studio](https://asu-trans-ai-lab.github.io/TensorMobility/explainer/studio.html)** ·
+**[Tensor + ADMM Lab](https://asu-trans-ai-lab.github.io/TensorMobility/explainer/tensor-admm.html)** ·
+[home](https://asu-trans-ai-lab.github.io/TensorMobility/) ·
+[demo dashboard](https://asu-trans-ai-lab.github.io/TensorMobility/public_gui/demo_dashboard.html)
+
 **Get started in three lines** (Python ≥ 3.10; not yet on PyPI):
 
 ```bash
