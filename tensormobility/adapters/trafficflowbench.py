@@ -162,6 +162,126 @@ def validate_path_incidence(case: UnifiedCase) -> int:
     return len(released)
 
 
+def rebuild_contiguous_paths(case: UnifiedCase) -> dict:
+    """REBUILD the path-link incidence as contiguous walks.
+
+    Measured on I405N: 2068/2145 released link_seq chains are
+    non-contiguous and 1547 are not even ordered along the corridor --
+    they are detector-incidence records for ODME scoring, and some
+    anchor sets (mainline + branch links) cannot lie on one directed
+    walk at all. Rebuild policy, reported not hidden:
+
+      1. sort each path's anchor links by free-flow network distance
+         from the path origin (graph order, not milepost order);
+      2. greedily chain anchors, inserting the shortest free-flow
+         connector sequence between consecutive reachable anchors;
+      3. anchors unreachable from the running walk head are DROPPED
+         and counted (anchors_dropped);
+      4. every rebuilt walk is verified contiguous link-by-link.
+
+    Returns dict(path_table, incidence, stats) where stats reports
+    n_paths, n_contiguous, anchors_total, anchors_kept,
+    links_inserted, coverage = anchors_kept / anchors_total.
+    """
+    net = case.network
+    n = net.n_nodes
+    from scipy import sparse as _sp
+    from scipy.sparse.csgraph import dijkstra as _dij
+    fp, tp = net.from_pos, net.to_pos
+    w = net.free_flow_time
+    G = _sp.csr_matrix((w, (fp, tp)), shape=(n, n))
+    link_of: dict = {}
+    for i in range(net.n_links):
+        key = (int(fp[i]), int(tp[i]))
+        if key not in link_of or w[i] < w[link_of[key]]:
+            link_of[key] = i
+
+    _cache: dict = {}
+
+    def sp_from(s):
+        if s not in _cache:
+            d, pr = _dij(G, indices=s, return_predecessors=True)
+            _cache[s] = (d, pr)
+        return _cache[s]
+
+    def connector(s, t):
+        d, pr = sp_from(s)
+        if not np.isfinite(d[t]):
+            return None
+        links = []
+        node = t
+        while node != s:
+            pnode = int(pr[node])
+            if pnode < 0:
+                return None
+            links.append(link_of[(pnode, node)] + 1)
+            node = pnode
+        return list(reversed(links))
+
+    pos = net.node_id_to_pos
+    pt = case.extras['path_table']
+    tfb_ids = case.extras['tfb_link_ids']
+    rows, inc_rows = [], []
+    anchors_total = anchors_kept = links_inserted = n_contig = 0
+    for r in pt.itertuples(index=False):
+        seq = list(dict.fromkeys(r.links))       # dedupe, keep order
+        anchors_total += len(seq)
+        o_pos = pos[int(r.origin_node_id)]
+        d0, _ = sp_from(o_pos)
+        # graph order from the origin; unreachable-from-origin anchors
+        # sort to the end and get dropped by the chaining step
+        seq.sort(key=lambda li: (not np.isfinite(d0[int(fp[li - 1])]),
+                                 d0[int(fp[li - 1])]))
+        full = None
+        kept = []
+        for li in seq:
+            if full is None:
+                if np.isfinite(d0[int(fp[li - 1])]):
+                    lead = connector(o_pos, int(fp[li - 1]))
+                    if lead is None:
+                        continue
+                    full = lead + [li]
+                    kept.append(li)
+                continue
+            head = int(tp[full[-1] - 1])
+            if head == int(fp[li - 1]):
+                full.append(li)
+                kept.append(li)
+                continue
+            c = connector(head, int(fp[li - 1]))
+            if c is None:
+                continue                          # branch anchor: drop
+            links_inserted += len(c)
+            full.extend(c)
+            full.append(li)
+            kept.append(li)
+        if full is None or not kept:
+            continue
+        anchors_kept += len(kept)
+        contiguous = all(int(tp[full[i] - 1]) == int(fp[full[i + 1] - 1])
+                         for i in range(len(full) - 1))
+        if contiguous:
+            n_contig += 1
+        rows.append(dict(
+            path_id=r.path_id,
+            origin_node_id=r.origin_node_id,
+            destination_node_id=int(
+                net.links.iloc[full[-1] - 1].to_node_id)
+            if hasattr(net.links.iloc[full[-1] - 1], 'to_node_id')
+            else r.destination_node_id,
+            anchors=tuple(kept), links=tuple(full), volume=r.volume))
+        for li in full:
+            inc_rows.append((r.path_id, tfb_ids[li - 1]))
+    rebuilt = pd.DataFrame(rows)
+    incidence = pd.DataFrame(inc_rows, columns=['path_id', 'link_id'])
+    return dict(path_table=rebuilt, incidence=incidence,
+                stats=dict(n_paths=len(rebuilt), n_contiguous=n_contig,
+                           anchors_total=anchors_total,
+                           anchors_kept=anchors_kept,
+                           coverage=anchors_kept / max(anchors_total, 1),
+                           links_inserted=links_inserted))
+
+
 def departure_profile(case: UnifiedCase, day_type: str | None = None
                       ) -> pd.DataFrame:
     """The simple departure-time profile: normalized mean mainline flow

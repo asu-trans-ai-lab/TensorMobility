@@ -65,10 +65,14 @@ Certified now (5 tests, local-data skip in CI):
 
 **Measured data characteristic, reported not hidden**: 2,068 of 2,145
 released link_seq chains are detector-incidence sequences, NOT
-contiguous walks; and some endpoint pairs are not graph-routable. The
-adapter keeps the incidence face exact for ODME-style use and drops
-unroutable ODs for the DTA face *with counts*
-(`n_self_od_dropped`, `n_unroutable_od_dropped`).
+contiguous walks (1,547 not even ordered along the corridor), and some
+anchor sets cannot lie on one directed walk. The adapter therefore
+carries BOTH faces: the released incidence exactly (ODME face), and
+`rebuild_contiguous_paths()` — graph-ordered anchors, shortest-connector
+stitching, branch anchors dropped with counts — which rebuilds ALL
+2,145 paths as verified contiguous walks at 76.9% anchor coverage
+(28,435/36,980; 47,879 connector links inserted). Unroutable/self ODs
+in the raw endpoint aggregation are likewise dropped with counts.
 
 ## 4. Integration roadmap (JSQE face on TFB data)
 

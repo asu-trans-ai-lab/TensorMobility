@@ -77,3 +77,26 @@ def test_departure_profile_first_behavior_step(case):
     peak = prof.loc[prof.share.idxmax(), 'time_of_day']
     hour = int(str(peak).split(':')[0])
     assert 5 <= hour <= 20
+
+
+def test_rebuilt_incidence_is_contiguous_with_coverage(case):
+    """The rebuild certificate: every released path becomes a verified
+    contiguous walk; anchors kept are a subset of the released
+    incidence; coverage of anchors is reported honestly (branch anchors
+    that cannot lie on one directed walk are dropped with counts)."""
+    rb = tfb.rebuild_contiguous_paths(case)
+    st = rb['stats']
+    assert st['n_paths'] == 2145
+    assert st['n_contiguous'] == st['n_paths']      # 100% contiguous
+    assert st['coverage'] > 0.75                    # honest, not 100%
+    # kept anchors are released pairs
+    import pandas as pd
+    inc_rel = pd.read_csv(case.extras['path_link_incidence_file'])
+    rel = set(zip(inc_rel.path_id, inc_rel.link_id))
+    tfb_ids = case.extras['tfb_link_ids']
+    for r in rb['path_table'].head(200).itertuples(index=False):
+        for li in r.anchors:
+            assert (r.path_id, tfb_ids[li - 1]) in rel
+    # rebuilt walks give a routable column pool: endpoints connected
+    # along their own links by construction
+    assert rb['path_table'].volume.sum() > 0
