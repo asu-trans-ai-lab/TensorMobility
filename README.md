@@ -7,7 +7,7 @@ in one certified computational graph.**
 **[Living GridCity](https://asu-trans-ai-lab.github.io/TensorMobility/explainer/)** ·
 **[Visual Computing Studio](https://asu-trans-ai-lab.github.io/TensorMobility/explainer/studio.html)** ·
 **[Tensor + ADMM Lab](https://asu-trans-ai-lab.github.io/TensorMobility/explainer/tensor-admm.html)** ·
-**[ABM–DTA Practice Studio](https://asu-trans-ai-lab.github.io/TensorMobility/explainer/practice.html)** ·
+**[ABM–DTA Practice Studio](https://asu-trans-ai-lab.github.io/TensorMobility/explainer/practice.html)** (grid size & tours as controls; emergent vehicle conflicts; retiming feedback; **land-use annual loop** with exact household conservation) ·
 [home](https://asu-trans-ai-lab.github.io/TensorMobility/) ·
 [demo dashboard](https://asu-trans-ai-lab.github.io/TensorMobility/public_gui/demo_dashboard.html)
 
