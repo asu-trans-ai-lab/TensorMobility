@@ -22,6 +22,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 import numpy as np
+import pandas as pd
+from scipy import sparse
 
 
 @dataclass
@@ -129,6 +131,37 @@ class ChoiceGraph:
         def B(costs):
             return self.logit_chain_shares(theta, cost_to_utils(costs))
         return B
+
+
+    # ---- explicit data structures (the tensor face) --------------
+    def column_table(self) -> pd.DataFrame:
+        """The behavioral columns as an explicit table: one row per
+        complete chain with its stage sequence and base utility."""
+        rows = []
+        for j, chain in enumerate(self.chains()):
+            rows.append(dict(
+                chain_id=j,
+                nodes=' > '.join(chain),
+                stages=' > '.join(self.nodes[n] or n for n in chain),
+                n_arcs=len(chain) - 1,
+                base_utility=self.chain_utility(chain)))
+        return pd.DataFrame(rows)
+
+    def arc_incidence(self):
+        """Sparse arc-by-chain incidence A[arc, chain] -- the typed
+        operator that contracts the chain axis of an STBTensor into arc
+        loads (target <- source orientation)."""
+        arcs = sorted(self.arcs)
+        aidx = {a: i for i, a in enumerate(arcs)}
+        rows, cols = [], []
+        for j, chain in enumerate(self.chains()):
+            for i in range(len(chain) - 1):
+                rows.append(aidx[(chain[i], chain[i + 1])])
+                cols.append(j)
+        A = sparse.csr_matrix(
+            (np.ones(len(rows)), (rows, cols)),
+            shape=(len(arcs), len(self.chains())))
+        return arcs, A
 
 
 def park_and_ride_example() -> ChoiceGraph:

@@ -13,6 +13,19 @@ jobs:
       - run: pip install torch --index-url https://download.pytorch.org/whl/cpu
       - run: pip install -e .[dev]
       - run: python -m pytest -q
+  wheel-install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: pip install build && python -m build --wheel
+      - run: pip install dist/*.whl
+      - run: |
+          cd /tmp
+          python -c "from tensormobility import load_case; c=load_case('sioux_falls'); assert c.network.n_links==76"
+          python -c "from tensormobility import load_case; c=load_case('chicago_sketch', top_od=50); assert len(c.demand)==50"
+          tm version
   demos:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest

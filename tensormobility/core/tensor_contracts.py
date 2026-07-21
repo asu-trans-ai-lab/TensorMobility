@@ -142,6 +142,22 @@ class TypedOperator:
         return int(self.matrix.data.nbytes + self.matrix.indices.nbytes + self.matrix.indptr.nbytes)
 
 
+def operator_from_source_target_table(table, *, name: str,
+                                      source_axis, target_axis,
+                                      description: str = ""):
+    """ORIENTATION ADAPTER (canonical rule: y_target = M[target<-source]
+    x_source). Many imported tables (row-stochastic splits, TCG chains,
+    flow_through legacy operators) are stored source-by-target; this is
+    the ONE sanctioned place to transpose them. Raw .T on operators in
+    application code is a review defect (docs/ORIENTATION.md)."""
+    import numpy as _np
+    M = _np.asarray(table, dtype=float).T
+    return M, dict(name=name, orientation='target<-source',
+                   source=str(source_axis), target=str(target_axis),
+                   description=description or
+                   'adapted from source-by-target storage')
+
+
 def compose(left: TypedOperator, right: TypedOperator, *, name: str, description: str = "") -> TypedOperator:
     """Return left o right, preserving explicit axis order.
 

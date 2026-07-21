@@ -5,7 +5,12 @@ from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
+import os as _os
 import torch
+# small scientific workloads: default to 1 thread; oversubscription on
+# many-core CPUs stalls the grouped training loops (review P0.6)
+torch.set_num_threads(int(_os.environ.get(
+    'TENSORMOBILITY_TORCH_THREADS', '1')))
 from torch import nn
 
 from tensormobility.dta.algorithms import AlgorithmResult, fw_gap, initial_flow, relative_gap

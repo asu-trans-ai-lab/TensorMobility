@@ -92,3 +92,30 @@ def test_coopetition_is_an_equilibrium_sign():
     x_good, _, _ = solve(-5.0)          # improved feeder transfer
     assert x_good[pr] > x_bad[pr]           # cooperation with bus
     assert x_good[drive] < x_bad[drive]     # competition with drive
+
+
+def test_explicit_data_structure_and_tensor_contraction():
+    """column_table = the explicit behavioral-column table; the arc
+    incidence is a typed operator contracting the chain axis of an
+    STBTensor into arc loads (mass conserved per chain length)."""
+    from tensormobility.core.stb_tensor import STBTensor
+    from tensormobility.core.axes import (extend_axes, CANONICAL_AXES,
+                                          AxisSpec, Status, Semiring)
+    g = park_and_ride_example()
+    tab = g.column_table()
+    assert len(tab) == 4
+    assert set(tab.columns) >= {'chain_id', 'nodes', 'base_utility'}
+    arcs, A = g.arc_incidence()
+    shares = g.logit_chain_shares(0.2)
+    demand = 1000.0
+    reg = extend_axes(dict(CANONICAL_AXES), {
+        'chain': AxisSpec('chain', 'behavioral chain', Status.CONTRACTED,
+                          Semiring.SUM_PRODUCT, 'S_mech'),
+        'arc': AxisSpec('arc', 'choice-graph arc', Status.CONTRACTED,
+                        Semiring.SUM_PRODUCT, 'S_mech')})
+    F = STBTensor(shares * demand, axes=('chain',), measure='persons',
+                  registry=reg)
+    loads = F.contract('chain', A.toarray(), new_axis='arc')
+    # each person traverses n_arcs(chain) arcs
+    expected = float((tab.n_arcs.to_numpy() * shares * demand).sum())
+    assert abs(loads.total() - expected) < 1e-9

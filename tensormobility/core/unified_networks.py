@@ -31,7 +31,7 @@ from tensormobility.core.grid_network import build_grid_case
 
 import os
 
-_DATA_ROOT = Path(__file__).resolve().parents[2] / 'data'
+_DATA_ROOT = Path(__file__).resolve().parents[1] / 'data'
 SF_DIR = Path(os.environ.get('TENSORMOBILITY_SF_DATA',
                              _DATA_ROOT / 'sioux_falls_tcglite'))
 CHICAGO_DIR = Path(os.environ.get('TENSORMOBILITY_CHICAGO_DATA',

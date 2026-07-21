@@ -123,9 +123,19 @@ def solve_mage(case: UnifiedCase, cfg: MAGEConfig,
                 dem = D_kx[(k, x)].sum()                # persons/period
                 # fleet needed for target rate (period = 60 min)
                 need[x] = cfg.headroom * dem * cycle / 60.0
-            n_av = min(need['AV'], comp.av_cap * comp.fleet)
-            n_hv = min(need['HV'], comp.fleet - n_av)
-            fleet_alloc[k] = {'AV': n_av, 'HV': n_hv}
+            # allocate the CHEAPER-to-operate type first (this is where
+            # op_cost_equiv_min enters: cost-ordered priority, with the
+            # AV-share cap binding only the AV pool)
+            order_x = sorted(('AV', 'HV'),
+                             key=lambda x: comp.op_cost_equiv_min[x])
+            remaining = comp.fleet
+            alloc = {}
+            for xk in order_x:
+                cap_x = (comp.av_cap * comp.fleet if xk == 'AV'
+                         else remaining)
+                alloc[xk] = min(need[xk], cap_x, remaining)
+                remaining -= alloc[xk]
+            fleet_alloc[k] = alloc
             for x in ('AV', 'HV'):
                 z_new = 60.0 * fleet_alloc[k][x] / cycle      # pers/period
                 if z_prev is not None:
@@ -224,6 +234,63 @@ def solve_mage(case: UnifiedCase, cfg: MAGEConfig,
         if res < 1e-5 and it > 3:
             break
 
+    # ---------------- final-state consistency pass ------------------
+    # One COMPLETE evaluation x* -> D* -> z* -> w* -> T* -> x*' after
+    # termination, so every reported certificate refers to the same
+    # (final) state and the closure residuals are explicit:
+    #   r_x (shares), r_z (service capacity), r_T (experienced times).
+    D_opt = shares * base_demand[:, None]
+    D_kx = {(k, x): D_opt[:, _opt_col(opts, k, x)]
+            for k in range(len(cfg.companies)) for x in ('AV', 'HV')}
+    wbar_t = float(np.average(t_od, weights=np.maximum(base_demand,
+                                                       1e-9)))
+    cyc_f = (1.0 + cfg.pickup_factor) * wbar_t
+    z_f, fleet_alloc = {}, {}
+    for k, comp in enumerate(cfg.companies):
+        need = {x: cfg.headroom * float(D_kx[(k, x)].sum()) * cyc_f / 60.0
+                for x in ('AV', 'HV')}
+        order_x = sorted(('AV', 'HV'),
+                         key=lambda x: comp.op_cost_equiv_min[x])
+        remaining = comp.fleet
+        alloc = {}
+        for xk in order_x:
+            cap_x = (comp.av_cap * comp.fleet if xk == 'AV'
+                     else remaining)
+            alloc[xk] = min(need[xk], cap_x, remaining)
+            remaining -= alloc[xk]
+        fleet_alloc[k] = alloc
+        for x in ('AV', 'HV'):
+            z_f[(k, x)] = 60.0 * alloc[x] / cyc_f
+    r_z = max(abs(z_f[key] - z[key]) / max(z[key], 1e-9) for key in z_f)
+    served, unserved_total = {}, np.zeros(n_od)
+    for k, comp in enumerate(cfg.companies):
+        for x in ('AV', 'HV'):
+            dem = D_kx[(k, x)]
+            tot = float(dem.sum())
+            frac = 1.0 if tot <= z_f[(k, x)] \
+                else z_f[(k, x)] / max(tot, 1e-12)
+            served[(k, x)] = dem * frac
+            unserved_total += dem * (1.0 - frac)
+    solo = D_opt[:, 0] + unserved_total
+    service = sum(served.values())
+    net.demand = solo + (1.0 + cfg.pickup_factor) * service
+    r = solve_fw(net, max_rounds=cfg.fw_rounds, tolerance=cfg.fw_tol)
+    t_f, _ = price_all_ods(net, link_time(net, r.link_flow))
+    r_T = float(np.abs(t_f - t_od).max()) / max(float(t_od.mean()),
+                                                1e-9)
+    t_od = t_f          # closures (shares_given_w / wait_residual)
+    z = z_f             # now see the FINAL state
+    eng_f = solve_fixed_point(wait_map, w_vec, engine=cfg.inner_engine,
+                              tol=1e-11,
+                              bounds=(0.0, cfg.patience_min))
+    w_vec = np.clip(eng_f.x, 0.0, cfg.patience_min)
+    shares_f = shares_given_w(w_vec)
+    r_x = float(np.abs(shares_f - shares).max())
+    shares = shares_f
+    w_match = {key: float(w_vec[i]) for i, key in enumerate(rh_keys)}
+    D_opt = shares * base_demand[:, None]
+    final_consistency = dict(r_x=r_x, r_z=float(r_z), r_T=r_T)
+
     # ---------------- certificates at the fixed point --------------
     conservation = float(np.abs(D_opt.sum(axis=1) - base_demand).max())
     patience_viol = max((w - cfg.patience_min
@@ -258,6 +325,7 @@ def solve_mage(case: UnifiedCase, cfg: MAGEConfig,
                               / max(sum(d.sum() for d in D_kx.values()),
                                     1e-12)),
         t_od=t_od, outer_iterations=it,
+        final_consistency=final_consistency,
         inner_engine=inner_engine_used,
         inner_escalations=inner_escalations,
         inner_cycle=inner_cycle,

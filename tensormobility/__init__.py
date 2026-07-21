@@ -19,4 +19,4 @@ from tensormobility.engines.equilibrium_engines import solve_fixed_point
 from tensormobility.core.stb_tensor import STBTensor
 from tensormobility.neural import router_is_logit, softmax_router, logit_choice
 
-__version__ = "0.6.1"
+__version__ = "0.6.2"

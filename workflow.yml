@@ -1,10 +1,10 @@
 # TensorMobility workflow registry (source of truth).
 # docs/workflow.html is the rendered view; CI, notebooks, and the CLI
 # resolve workflow and pipeline names from this file.
-version: 0.7.0
+version: 0.6.2
 conventions:
   interchange: GMNS CSV folders            # the only inter-tool contract
-  certificate_sidecar: certificates.json   # lab-wide, rendered by gui4gmns
+  certificate_sidecar: certificates.json   # lab-wide convention; emitted by the CLI (tm demo) -- W5 renderer integration planned
   path_schema: route_assignment.csv        # GMNS path/route exchange file
 
 workflows:

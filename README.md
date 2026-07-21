@@ -34,7 +34,7 @@ meaning and exact verification.**
 The axes are real objects (`STBTensor`, named-axis contraction with
 Kronecker-lifted spectators), the correspondence is executable
 (`tensormobility.neural`, equality-tested), and every equilibrium claim
-is certificate-checked (**55 tests**). See
+is certificate-checked (**66 tests**). See
 [docs/TENSOR_AXES.md](docs/TENSOR_AXES.md) — *what the mobility,
 behavior, time, and space axes are* — the front door of the framework.
 TensorMobility is the software home of the STB-FTT research line and
@@ -58,7 +58,7 @@ assert router_is_logit(costs, theta=2.0)          # identity, not analogy
 | **TensorMobility.DTA** | `tensormobility.dta` | the DTA core: column generation, full-space-certified sparse assignment, latent atoms, classical special cases (logit SUE ↔ UE) |
 | **TensorMobility.Dynamics** | `tensormobility.dynamics` | fluid point queues, path/cohort queue loading (the time seam) |
 | **TensorMobility.Behavior** | `tensormobility.behavior` | **the Choice Graph** (layered DAG; chains = behavioral columns; recursive-logit face ≡ column face, tested), activity chains, activity-DTA coupling, bounded learning residuals |
-| **TensorMobility.Engines** | `tensormobility.engines` | the equilibrium engine escalation ladder (Picard → MSA → Anderson → stiff-block Newton → NCP/VI) with cycle detection |
+| **TensorMobility.Engines** | `tensormobility.engines` | the equilibrium engine escalation ladder (Picard → MSA → Anderson → stiff-block Newton; NCP/VI **declared, not yet executable**) with cycle detection |
 | **TensorMobility.Profiles** | `tensormobility.profiles` | layered equilibria: passenger–vehicle service coupling `Rx ≤ Sy`, mixed-autonomy ride-hailing (MAGE) |
 | **TensorMobility.Harness** | `tensormobility.harness` | experiment harnesses, analytical anchors, well-posedness maps |
 
@@ -84,7 +84,7 @@ all-origin Dijkstra, never over the enumerated pool.
 ## Run
 
 ```bash
-python -m pytest -q                  # 55 tests: tensor+neural identity, contracts, closure, profiles
+python -m pytest -q                  # 66 tests: tensor+neural identity, contracts, closure, profiles
 python cases/run_mage_grid.py        # mixed-autonomy equilibrium + sweeps
 python cases/run_unified_grid_harness.py
 python cases/run_passenger_vehicle_harness.py
@@ -100,9 +100,9 @@ python cases/run_passenger_vehicle_harness.py
 - Chicago Sketch full network: CG Frank–Wolfe gap 8.3e-5 in 7.4 s;
   link flows correlate 1.0000 with reference volumes; the atom
   compression boundary (K̄ ≈ 2.2 ⇒ atoms cannot pay) reported honestly.
-- Two-layer passenger–freight price consensus certified against exact
-  LP duals (gap 3.3e-4, price agreement ≤1.6%); BPR version: congestion
-  alone prices freight out with no explicit dual.
+- Two-layer passenger–freight price consensus (companion archive
+  `STB_multilayer_benchmark`, 7 tests; being ported into this package
+  in v0.7 — not yet a claim of THIS package).
 - MAGE mixed-autonomy profile: 4-outer-iteration equilibrium; patience,
   complementarity, fleet-cap violations 0; the engine ladder's honest
   negative (Picard limit-cycles, detected) is part of the suite.
