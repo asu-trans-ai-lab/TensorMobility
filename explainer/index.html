@@ -87,6 +87,26 @@
       background:var(--chip);padding:.05rem .3rem;border-radius:.3rem}
   .topnav{font-size:.85rem;color:var(--muted);margin-bottom:.6rem}
   .topnav a{color:var(--flow)}
+  .arc{font-family:Georgia,serif;font-size:.95rem;text-align:center;
+      color:var(--muted);margin:.2rem 0 .8rem}
+  .arc b{color:var(--flow)}
+  .navmap{display:flex;flex-wrap:wrap;gap:.35rem;margin:.2rem 0 1rem}
+  .navmap span{font-size:.76rem;padding:.18rem .55rem;
+      border-radius:.45rem;border:1px solid var(--line);
+      color:var(--muted);background:var(--chip)}
+  .navmap span.live{border-color:var(--ok);color:var(--ok);
+      font-weight:600}
+  .navmap span.part{border-color:var(--cost);color:var(--cost)}
+  .tabs{display:flex;gap:.15rem;margin:0 0 .5rem;flex-wrap:wrap}
+  .tabs button{font:inherit;font-size:.8rem;padding:.25rem .65rem;
+      border:1px solid var(--line);background:transparent;
+      color:var(--muted);border-radius:.45rem .45rem 0 0;
+      cursor:pointer;border-bottom:none}
+  .tabs button.on{background:var(--paper);color:var(--flow);
+      border-color:var(--flow);font-weight:600}
+  #insbody{min-height:9.5rem}
+  .ledger td{font-family:ui-monospace,Consolas,monospace;
+      font-size:.8rem}
 </style>
 </head>
 <body>
@@ -97,12 +117,31 @@ concept cards live on the home page; this is the full living
 GridCity.</div>
 
 <h1>TensorMobility Explainer — a living GridCity</h1>
+<div class="arc"><b>Represent</b> → <b>Conserve</b> →
+<b>Connect</b> → <b>Stabilize</b> → <b>Scale</b> →
+<b>Transfer</b></div>
 <p class="sub">The whole pipeline — land use → demand → route choice →
 equilibrium — runs <em>live in your browser</em> on a real grid
 network, with the same full-network-priced certificate reported for
 the 1,039,117-OD regional model. Edit the city; watch the mathematics
 respond. Format inspired by the
 <a href="https://poloclub.github.io/">Polo Club</a> explainers.</p>
+<div class="navmap" title="Concept map — spec §3.2. Green: live here
+or on the home page. Orange: partial. Gray: planned.">
+  <span class="live">1 System Overview</span>
+  <span class="part">2 Axis &amp; Tensor Lab</span>
+  <span class="part">3 Operator Lab</span>
+  <span class="live">4 Conservation Lab</span>
+  <span class="part">5 ABM Lab</span>
+  <span class="live">6 BN-DTA Lab</span>
+  <span>7 ADMM Consensus</span>
+  <span class="part">8 Compression &amp; Scaling</span>
+  <span class="part">9 PINN Traffic-State</span>
+  <span class="part">10 Neural Connections</span>
+  <span>11 Regional Hierarchy</span>
+  <span>12 Integration Debugger</span>
+  <span class="part">13 Certification Center</span>
+</div>
 
 <div class="scene">
 <div>
@@ -150,7 +189,16 @@ respond. Format inspired by the
       subcenter · hover a zone for its desire lines · click a road for
       its live congestion math.</div>
   </div>
-  <div class="panel" id="detail" style="margin-top:.8rem"></div>
+  <div class="panel" style="margin-top:.8rem">
+    <div class="tabs" id="instabs">
+      <button data-t="what" class="on">What</button>
+      <button data-t="why">Why</button>
+      <button data-t="math">Math</button>
+      <button data-t="compute">Compute</button>
+      <button data-t="verify">Verify</button>
+    </div>
+    <div id="insbody"></div>
+  </div>
 </div>
 </div>
 
@@ -328,6 +376,7 @@ function rebuildCity(){
 
 function iterate(){
   if (S.done) return null;
+  var t_start = performance.now();
   var net = S.net, od = S.dem.od, L = net.links.length;
   var cost = net.links.map(function(l){ return bpr(l, S.v[l.id]); });
   var byO = new Map();
@@ -365,11 +414,15 @@ function iterate(){
       cs2[z2].aon = false;
     }
   }
+  S.iterMs = performance.now() - t_start;
   S.hist.push({ gap: gap, v: S.v.slice() });
   if (S.it > 1 && gap < 1e-3){
     S.done = true;
     $('cert').classList.add('on');
     if (S.timer){ clearInterval(S.timer); S.timer = null; }
+    reveal();
+  } else if (S.it >= 120){
+    reveal();
   }
   $('scrub').disabled = false;
   $('scrub').max = S.hist.length - 1;
@@ -455,49 +508,175 @@ function desireFrom(z){
   return flows.slice(0, 8);
 }
 
-/* ================= detail panel ================= */
-function detailDefault(){
-  $('detail').innerHTML = '<b>The scene</b><div class="note">' +
-    S.dem.od.length + ' OD pairs formed by the gravity kernel. Roads ' +
-    'through the center cross are arterials (capacity 900/hr); the ' +
-    'rest carry 500/hr. Run the solver, then click any road to see ' +
-    'its live BPR mathematics and who uses it.</div>';
+/* ============ right inspector: What/Why/Math/Compute/Verify ====== */
+var INS = { entity: 'scene', link: -1, tab: 'what' };
+
+function ledger(){
+  /* conservation ledger (spec 5.4), computed live */
+  var Q = 0, i, k, z;
+  for (k = 0; k < S.dem.od.length; k++) Q += S.dem.od[k].q;
+  var colQ = 0;
+  var vc = new Array(S.net.links.length).fill(0);
+  for (k = 0; k < S.cols.length; k++)
+    for (z = 0; z < S.cols[k].length; z++){
+      var c = S.cols[k][z];
+      colQ += c.flow;
+      for (i = 0; i < c.links.length; i++) vc[c.links[i]] += c.flow;
+    }
+  var dev = 0;
+  for (i = 0; i < vc.length; i++)
+    dev = Math.max(dev, Math.abs(vc[i] - S.v[i]));
+  /* node flow: outflow - inflow = production - attraction */
+  var n = S.net.N*S.net.N;
+  var bal = new Array(n).fill(0);
+  for (i = 0; i < S.net.links.length; i++){
+    var l = S.net.links[i];
+    bal[l.from] += S.v[i]; bal[l.to] -= S.v[i];
+  }
+  for (k = 0; k < S.dem.od.length; k++){
+    var w = S.dem.od[k];
+    bal[w.o] -= w.q; bal[w.d] += w.q;
+  }
+  var nodeRes = 0;
+  for (i = 0; i < n; i++) nodeRes = Math.max(nodeRes, Math.abs(bal[i]));
+  return { Q: Q, colQ: colQ, dev: dev, nodeRes: nodeRes };
 }
-function detailLink(i){
-  var l = S.net.links[i], v = S.v[i], vc = v/l.cap;
-  var t = bpr(l, v);
-  var users = [];
-  for (var k = 0; k < S.cols.length; k++)
-    for (var z = 0; z < S.cols[k].length; z++){
+
+function insScene(tab){
+  var g;
+  if (tab === 'what') return '<b>The scene — one urban state</b>' +
+    '<div class="note">𝒵 = {ℒ, ℋ, 𝒜, 𝒟, ℱ, 𝒮, 𝒴}: land use (job ' +
+    'shading, household dots), demand 𝒟 (' + S.dem.od.length +
+    ' OD pairs from the gravity kernel), path flows ℱ (the column ' +
+    'pool, ' + countCols() + ' columns), network state 𝒮 (road ' +
+    'widths/colors). Click a road or a zone to inspect one entity; ' +
+    'every tab updates.</div>';
+  if (tab === 'why') return '<b>Why one state, not files</b>' +
+    '<div class="note">When ABM writes trip tables and DTA reads ' +
+    'them, conservation is not enforced across the seam and no ' +
+    'quantity certifies the coupled system. Here every arrow is a ' +
+    'typed operator on the same state — so the ledger in Verify can ' +
+    'audit the whole chain at once. Omit the typing and the Verify ' +
+    'tab has nothing to check.</div>';
+  if (tab === 'math') return '<b>The unified equation</b>' +
+    '<div class="eq">𝒵★ = Π<sub>Ω</sub>[𝒦<sub>struct</sub>(𝒵★,𝒰) + ' +
+    '𝒩<sub>θ</sub>(𝒵★,𝒰)]</div>' +
+    '<div class="note">This page runs 𝒦<sub>struct</sub> only: ' +
+    'gravity kernel 𝒟 = ∫K<sub>LA</sub>ℒ, then the equilibrium ' +
+    'fixed point ℱ★ with Π<sub>Ω</sub> = demand-conservation ' +
+    'projection (MSA blend keeps Σ<sub>p</sub>ℱ = 𝒟 exactly).' +
+    '</div>';
+  if (tab === 'compute') return '<b>Engine</b>' +
+    '<div class="note mono">' + S.dem.od.length + ' OD pairs · ' +
+    countCols() + ' columns · iteration = all-origin Dijkstra (' +
+    S.net.N*S.net.N + ' origins × O(V²)) + O(L) blend · ' +
+    (S.iterMs ? S.iterMs.toFixed(1) + ' ms/iteration measured' :
+      'run to measure ms/iteration') +
+    ' · history stored for scrubbing (' + S.hist.length +
+    ' × ' + S.net.links.length + ' floats)</div>' +
+    '<div class="note">The identical contract (column generation, ' +
+    'full-space pricing) certifies 1,039,117 ODs in ~3.5 min ' +
+    'single-thread in the released package.</div>';
+  /* verify */
+  g = ledger();
+  var gap = S.hist.length ? S.hist[S.hist.length-1].gap : null;
+  return '<b>Conservation ledger</b>' +
+    '<table class="ledger">' +
+    '<tr><th>invariant</th><th>value</th></tr>' +
+    '<tr><td>total demand Σ𝒟</td><td>' + g.Q.toFixed(1) +
+    ' veh/hr</td></tr>' +
+    '<tr><td>column flow Σ<sub>p</sub>ℱ</td><td>' +
+    g.colQ.toFixed(1) + ' veh/hr</td></tr>' +
+    '<tr><td>max |Σ<sub>p</sub>ℱδ − x| (link loading)</td><td>' +
+    g.dev.toExponential(1) + '</td></tr>' +
+    '<tr><td>max node imbalance</td><td>' +
+    g.nodeRes.toExponential(1) + '</td></tr>' +
+    '<tr><td>relative gap (certificate)</td><td>' +
+    (gap === null ? 'not run' : gap.toExponential(2)) + '</td></tr>' +
+    '</table>' +
+    '<div class="note">' + (S.done ?
+      'Certified: gap < 1e-3 with exact conservation.' :
+      (S.it > 0 ? 'Not yet certified — the ledger holds even before ' +
+        'equilibrium; conservation is enforced by construction, ' +
+        'optimality is what the gap must earn.' :
+        'Run the solver; conservation will hold from iteration 1, ' +
+        'the certificate only at convergence.')) + '</div>';
+}
+
+function insLink(i, tab){
+  var l = S.net.links[i], v = S.v[i], vcr = v/l.cap;
+  if (tab === 'what') return '<b>Road ' + l.from + ' → ' + l.to +
+    '</b> <span class="note">(capacity ' + l.cap + '/hr' +
+    (l.cap > 500 ? ' — arterial' : '') + ')</span>' +
+    '<div class="note">One directed cell of the link–time state ' +
+    '𝒮[a,ℓ,t,ρ] (this static face shows one time slice). Width = ' +
+    'flow; color = v/c regime.</div>';
+  if (tab === 'why') return '<b>Why this road matters</b>' +
+    '<div class="note">Congestion lives on links: the volume–delay ' +
+    'function makes cost depend on everyone’s choices, coupling ' +
+    'all travelers into one fixed point. Without it, assignment ' +
+    'decouples into independent shortest paths and equilibrium is ' +
+    'trivial. Arterials (center cross) attract flow until congestion ' +
+    'prices them back.</div>';
+  if (tab === 'math') return '<b>Live volume–delay</b>' +
+    '<div class="eq">t = t₀(1 + 0.15 (v/c)⁴) = ' + l.t0.toFixed(1) +
+    ' × (1 + 0.15 (' + v.toFixed(0) + '/' + l.cap + ')⁴) = <b>' +
+    bpr(l, v).toFixed(2) + ' min</b></div>' +
+    '<div class="mono">v/c = ' + vcr.toFixed(2) + '</div>' +
+    '<div class="vc"><div style="width:' +
+    Math.min(100, 100*vcr).toFixed(0) + '%;background:' +
+    vcColor(vcr) + '"></div></div>';
+  if (tab === 'compute') return '<b>Compute</b>' +
+    '<div class="note">Stored as one entry of a flat link array; ' +
+    'cost evaluation O(1); relaxed once per origin per iteration in ' +
+    'Dijkstra; its flow is a convex combination of the ' +
+    'all-or-nothing targets (MSA), rebuilt each render from the ' +
+    'column pool for the Verify audit.</div>';
+  /* verify */
+  var users = [], k, z;
+  for (k = 0; k < S.cols.length; k++)
+    for (z = 0; z < S.cols[k].length; z++){
       var c = S.cols[k][z];
       if (c.flow > 1 && c.links.indexOf(i) >= 0)
         users.push({ od: S.dem.od[k], f: c.flow });
     }
   users.sort(function(a,b){ return b.f - a.f; });
+  var vcol = 0;
+  for (k = 0; k < users.length; k++) vcol += users[k].f;
   var rows = '';
-  for (var u = 0; u < Math.min(4, users.length); u++){
-    var w = users[u];
-    rows += '<tr><td>zone '+w.od.o+' → zone '+w.od.d+
-      '</td><td>'+w.f.toFixed(0)+'</td></tr>';
-  }
-  $('detail').innerHTML =
-    '<b>Road '+l.from+' → '+l.to+'</b> ' +
-    '<span class="note">(capacity '+l.cap+'/hr'+
-    (l.cap > 500 ? ' — arterial' : '')+')</span>' +
-    '<div class="eq">t = t₀ (1 + 0.15 (v/c)⁴) = ' +
-    l.t0.toFixed(1)+' × (1 + 0.15 ('+v.toFixed(0)+'/'+l.cap+
-    ')⁴) = <b>'+t.toFixed(2)+' min</b></div>' +
-    '<div class="mono">v/c = '+vc.toFixed(2)+'</div>' +
-    '<div class="vc"><div style="width:'+
-    Math.min(100, 100*vc).toFixed(0)+'%;background:'+vcColor(vc)+
-    '"></div></div>' +
-    (rows ? '<table><tr><th>used by (top columns)</th><th>veh/hr</th>'+
-      '</tr>'+rows+'</table>'
-      : '<div class="note">run the solver to populate users</div>') +
-    (vc > 1 ? '<div class="note" style="color:var(--ctrl)">over '+
-      'capacity: in the dynamic layers this road grows a queue — '+
-      'see the fluid-queue card on the home page.</div>' : '');
+  for (var u = 0; u < Math.min(4, users.length); u++)
+    rows += '<tr><td>zone ' + users[u].od.o + ' → zone ' +
+      users[u].od.d + '</td><td>' + users[u].f.toFixed(0) +
+      '</td></tr>';
+  return '<b>Verify this road</b>' +
+    '<div class="mono">flow x = ' + v.toFixed(1) +
+    ' · Σ columns through it = ' + vcol.toFixed(1) +
+    ' · residual ' + Math.abs(vcol - v).toExponential(1) + '</div>' +
+    (rows ? '<table><tr><th>used by (top columns)</th><th>veh/hr</th>' +
+      '</tr>' + rows + '</table>' :
+      '<div class="note">run the solver to populate users</div>') +
+    (vcr > 1 ? '<div class="note" style="color:var(--ctrl)">over ' +
+      'capacity: static BPR only prices this; the dynamic layers ' +
+      'grow a queue here (fluid-queue card on the home page).</div>'
+      : '');
 }
+
+function renderInspector(){
+  $('insbody').innerHTML = (INS.entity === 'link' && INS.link >= 0)
+    ? insLink(INS.link, INS.tab) : insScene(INS.tab);
+  document.querySelectorAll('#instabs button').forEach(function(b){
+    b.classList.toggle('on', b.getAttribute('data-t') === INS.tab);
+  });
+}
+document.querySelectorAll('#instabs button').forEach(function(b){
+  b.addEventListener('click', function(){
+    INS.tab = this.getAttribute('data-t');
+    renderInspector();
+  });
+});
+function detailDefault(){ INS.entity = 'scene'; renderInspector(); }
+function detailLink(i){ INS.entity = 'link'; INS.link = i;
+  renderInspector(); }
 
 /* ================= narration (slow motion) ================= */
 var NARR = [
@@ -541,7 +720,7 @@ $('runbtn').addEventListener('click', function(){
   if (S.timer || S.done) return;
   S.timer = setInterval(function(){
     iterate(); render(S.v);
-    if (S.selLink >= 0) detailLink(S.selLink);
+    renderInspector();
     if (S.it > 120 && S.timer){ clearInterval(S.timer); S.timer=null; }
   }, 90);
 });
@@ -588,24 +767,62 @@ function scrubbedV(){
 
 var PRESETS = {
   mono: { central: 90, dem: 12000, beta: 0.2, subs: [],
-    narr: 'Monocentric rush hour: watch the center cross saturate — '+
-      'orange, then magenta. Under this much congestion MSA’s '+
-      '1/k step stalls near gap 1e-3 and may never light the badge: '+
-      'a real lesson, not a bug — it is why the framework '+
-      'carries an engine ladder (averaging → Anderson → '+
-      'stiff-block Newton) above plain MSA.' },
+    narr: '<b>Predict first:</b> at 12,000 trips into one CBD, does '+
+      'the center cross stay under capacity — and does plain MSA '+
+      'ever light the certificate? Run to check.',
+    reveal: function(){
+      var over = 0, i;
+      for (i = 0; i < S.net.links.length; i++)
+        if (S.v[i] > S.net.links[i].cap) over += 1;
+      return '<b>Observed:</b> ' + over + ' roads over capacity '+
+        '(magenta). ' + (S.done ?
+        'Certified in ' + S.it + ' iterations.' :
+        'And MSA’s 1/k step stalled near gap ' +
+        S.hist[S.hist.length-1].gap.toExponential(1) +
+        ' — a real lesson, not a bug: it is why the framework '+
+        'carries an engine ladder (averaging → Anderson → '+
+        'stiff-block Newton) above plain MSA.');
+    } },
   town: { central: 15, dem: 8000, beta: 0.3, subs: [],
-    narr: 'Balanced town: jobs everywhere, trips short, roads teal. '+
-      'Equilibrium is nearly free — the network is barely coupled.' },
+    narr: '<b>Predict first:</b> with jobs everywhere and light '+
+      'congestion, how many iterations should the certificate take '+
+      '— more or fewer than 20? Run to check.',
+    reveal: function(){
+      return '<b>Observed:</b> certified in ' + S.it +
+        ' iterations. Weak coupling ⇒ the fixed point is nearly '+
+        'a one-shot computation.';
+    } },
   sub:  { central: 70, dem: 10000, beta: 0.2, subs: [0, 24],
-    narr: 'Subcenter shift: two corner job centers pull demand off '+
-      'the CBD. Compare the flow pattern with monocentric.' }
+    narr: '<b>Predict first:</b> do the two corner job centers '+
+      'relieve the CBD cross — or just create new hotspots on '+
+      'their own approach roads? Run to check.',
+    reveal: function(){
+      var mid = Math.floor(S.N/2), cbd = 0, i;
+      for (i = 0; i < S.net.links.length; i++){
+        var l = S.net.links[i];
+        var onCross = (Math.floor(l.from/S.N) === mid &&
+                       Math.floor(l.to/S.N) === mid) ||
+                      (l.from%S.N === mid && l.to%S.N === mid);
+        if (onCross) cbd = Math.max(cbd, S.v[i]/l.cap);
+      }
+      return '<b>Observed:</b> peak arterial v/c = ' +
+        cbd.toFixed(2) + ' — compare with monocentric to see how '+
+        'much the subcenters bought. Land use is a congestion '+
+        'policy.';
+    } }
 };
+var activePreset = null;
+function reveal(){
+  var p = PRESETS[activePreset];
+  if (p && p.reveal) $('narr').innerHTML = p.reveal();
+  renderInspector();
+}
 document.querySelectorAll('#presets button, article a[data-p]')
   .forEach(function(el){
     el.addEventListener('click', function(){
       var p = PRESETS[this.getAttribute('data-p')];
       if (!p) return;
+      activePreset = this.getAttribute('data-p');
       document.querySelectorAll('#presets button').forEach(function(b){
         b.classList.toggle('active',
           b.getAttribute('data-p') === el.getAttribute('data-p'));
