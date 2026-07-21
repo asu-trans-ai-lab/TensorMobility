@@ -7,6 +7,11 @@ interfaces second, roadmap third — iterate on any of them.*
 
 ## 0. The one-picture design
 
+Named workflows (rendered in `workflow.html`): **W1 generate · W2
+assign · W3 import · W4 calibrate · W5 visualize · W6 teach ·
+W7 profile**; pipelines quickstart/MPO/corridor/research/classroom
+compose them.
+
 ```
                      ┌──────────────────────────────────┐
                      │        TensorMobility            │

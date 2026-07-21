@@ -75,6 +75,21 @@ fluid queues → pool audit → compression boundary → prices as
 synchronization → mixed autonomy + engines). See
 [teaching/README.md](teaching/README.md).
 
+## Workflows
+
+Seven named workflows compose every use of the package — see
+[docs/workflow.html](docs/workflow.html) (self-contained, open locally)
+and [docs/ECOSYSTEM_DESIGN.md](docs/ECOSYSTEM_DESIGN.md):
+
+**W1 generate** (self-contained networks) · **W2 assign** (certified
+DTA core) · **W3 import** (external kernel audit: TAPLite/DTALite) ·
+**W4 calibrate** (dynamic ODME profile) · **W5 visualize** (gui4gmns
+dashboards + certificate panel) · **W6 teach** (executable notebook
+ladder) · **W7 profile** (layered equilibria).
+
+Pipelines: quickstart W1→W2→W5 · MPO W1→W3→W5 · corridor
+W1→W3→W4→W5 · research W1→W7→W5 · classroom W6.
+
 ## Papers & docs
 
 - `paper/main_v06.tex` — the framework wrap-up draft (compiles clean).

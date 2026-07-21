@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TensorMobility — Named Workflows</title>
+<style>
+  :root{
+    --ink:#0e1726; --paper:#ffffff; --muted:#5b6b7c; --line:#d8dee6;
+    --core:#1f7a8c; --kernel:#c77b32; --cal:#b23a6e; --viz:#3a7d44;
+    --chip:#f2f5f8;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --ink:#e8edf3; --paper:#101722; --muted:#93a3b4;
+           --line:#2a3644; --chip:#1a2432; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:2rem 1rem 4rem;background:var(--paper);
+       color:var(--ink);font:15px/1.55 system-ui,Segoe UI,Roboto,sans-serif;
+       max-width:980px;margin-inline:auto}
+  h1{font-size:1.6rem;margin:.2rem 0 0}
+  .sub{color:var(--muted);margin:0 0 1.6rem}
+  h2{font-size:1.05rem;margin:2rem 0 .6rem;display:flex;gap:.5rem;
+     align-items:baseline}
+  .wid{font-family:ui-monospace,Consolas,monospace;font-weight:700;
+       padding:.05rem .45rem;border-radius:.4rem;color:#fff}
+  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:.35rem;
+        margin:.4rem 0 .5rem}
+  .stage{background:var(--chip);border:1px solid var(--line);
+         border-radius:.55rem;padding:.35rem .6rem;white-space:nowrap}
+  .stage b{font-weight:600}
+  .arrow{color:var(--muted)}
+  .meta{color:var(--muted);font-size:.85rem;margin:.15rem 0 0}
+  .meta code{font-family:ui-monospace,Consolas,monospace;
+             background:var(--chip);padding:.05rem .3rem;
+             border-radius:.3rem}
+  .cert{border-left:3px solid var(--core);padding:.1rem 0 .1rem .6rem;
+        margin-top:.35rem;font-size:.85rem;color:var(--muted)}
+  .pipes{border:1px solid var(--line);border-radius:.7rem;
+         padding: .9rem 1rem;margin-top:2.2rem;background:var(--chip)}
+  .pipes h2{margin-top:.2rem}
+  table{border-collapse:collapse;width:100%;font-size:.9rem}
+  td,th{padding:.35rem .5rem;border-bottom:1px solid var(--line);
+        text-align:left;vertical-align:top}
+  th{color:var(--muted);font-weight:600}
+  .k-core{background:var(--core)} .k-kernel{background:var(--kernel)}
+  .k-cal{background:var(--cal)}   .k-viz{background:var(--viz)}
+</style>
+</head>
+<body>
+
+<h1>TensorMobility — named workflows</h1>
+<p class="sub">Every workflow: stages &rarr; GMNS contract &rarr;
+certificate. Files on disk are the only interface;
+<code>certificates.json</code> rides beside every output folder.
+Companion to <code>docs/ECOSYSTEM_DESIGN.md</code>.</p>
+
+<h2><span class="wid k-core">W1</span> generate — self-contained networks</h2>
+<div class="flow">
+  <span class="stage"><b>grid / SF / Chicago</b> case spec</span>
+  <span class="arrow">&rarr;</span>
+  <span class="stage">unified loader (<b>StaticNetwork</b> contract)</span>
+  <span class="arrow">&rarr;</span>
+  <span class="stage">GMNS folder <b>node / link / demand</b></span>
+</div>
+<p class="meta">in: nothing (grid) or <code>data/</code> registry &nbsp;·&nbsp; out: <code>node.csv link.csv demand.csv</code></p>
+<div class="cert">certificate: contract validation (positive times/capacities, zone mapping, demand columns)</div>
+
+<h2><span class="wid k-core">W2</span> assign — certified DTA core</h2>
+<div class="flow">
+  <span class="stage">GMNS folder</span><span class="arrow">&rarr;</span>
+  <span class="stage"><b>column generation</b> (FW / GP / atoms)</span>
+  <span class="arrow">&rarr;</span>
+  <span class="stage">full-space <b>Dijkstra pricing audit</b></span>
+  <span class="arrow">&rarr;</span>
+  <span class="stage"><b>path.csv</b> + link_performance.csv</span>
+</div>
+<p class="meta">engines escalate on cycling: Picard &rarr; MSA &rarr; Anderson &rarr; stiff-block Newton &rarr; NCP/VI</p>
+<div class="cert">certificate: relative gap (never pool-restricted), conservation, engine + escalation log</div>
+
+<h2><span class="wid k-kernel">W3</span> import — external kernel audit</h2>
+<div class="flow">
+  <span class="stage"><b>TAPLite4MPO</b> / DTALite run</span>
+  <span class="arrow">&rarr;</span>
+  <span class="stage">parse <code>link_performance.csv</code></span>
+  <span class="arrow">&rarr;</span>
+  <span class="stage"><b>audit</b>: gap at kernel times, conservation</span>
+  <span class="arrow">&rarr;</span>
+  <span class="stage"><b>re-price columns</b> &rarr; path.csv</span>
+</div>
+<p class="meta">kernels compute; TensorMobility certifies. Cross-validation vs W2 (gap-vs-gap, flow correlation) for free.</p>
+<div class="cert">certificate: kernel gap, flow correlation vs internal solver, materialized-column coverage</div>
+
+<h2><span class="wid k-cal">W4</span> calibrate — dynamic ODME profile</h2>
+<div class="flow">
+  <span class="stage">counts / speeds (+ registry corridor)</span>
+  <span class="arrow">&rarr;</span>
+  <span class="stage"><b>observability gate</b> (G0)</span>
+  <span class="arrow">&rarr;</span>
+  <span class="stage">departure profile &phi;(t) + bounded low-rank &Delta;OD</span>
+  <span class="arrow">&rarr;</span>
+  <span class="stage">typed-chain projected gradient</span>
+</div>
+<p class="meta">the dynamic-odme-lab structure (A = M&middot;&Delta;&middot;R) as a TensorMobility profile; stages 0&ndash;6 are the benchmark ladder</p>
+<div class="cert">certificate: observability rank, FD-checked gradient, synthetic-recovery gate before any real-data claim</div>
+
+<h2><span class="wid k-viz">W5</span> visualize — gui4gmns dashboards</h2>
+<div class="flow">
+  <span class="stage">any run folder</span><span class="arrow">&rarr;</span>
+  <span class="stage"><code>export_gmns()</code> MOE / OD / space-time layers</span>
+  <span class="arrow">&rarr;</span>
+  <span class="stage"><b>gui4gmns</b> HTML / Qt / GL</span>
+  <span class="arrow">&rarr;</span>
+  <span class="stage">dashboard + <b>certificate panel</b></span>
+</div>
+<div class="cert">certificate: rendered, not just stored — the dashboard shows its own audit table</div>
+
+<h2><span class="wid k-core">W6</span> teach — executable ladder</h2>
+<div class="flow">
+  <span class="stage">notebooks <b>T1&ndash;T7</b></span>
+  <span class="arrow">&rarr;</span>
+  <span class="stage">run &rarr; certify &rarr; explain</span>
+  <span class="arrow">&rarr;</span>
+  <span class="stage">CI (<code>nbmake</code>) keeps them honest</span>
+</div>
+<p class="meta">T4 pool audit, T5 compression boundary, T7 cycling engine lesson are deliberate failure-mode classes</p>
+
+<h2><span class="wid k-kernel">W7</span> profile — layered equilibria</h2>
+<div class="flow">
+  <span class="stage">extension axes (company / vtype / stage / match&hellip;)</span>
+  <span class="arrow">&rarr;</span>
+  <span class="stage">blocks + shared cells + <b>price sync</b></span>
+  <span class="arrow">&rarr;</span>
+  <span class="stage">Rx &le; Sy &middot; MAGE &middot; multilayer freight</span>
+</div>
+<div class="cert">certificate: complementarity + patience/fleet feasibility + multi-start spread; duality gaps reported, never assumed zero</div>
+
+<div class="pipes">
+<h2>Composed pipelines</h2>
+<table>
+  <tr><th>pipeline</th><th>composition</th><th>demonstrates</th></tr>
+  <tr><td><b>quickstart</b></td><td>W1 &rarr; W2 &rarr; W5</td>
+      <td>self-contained grid to certified dashboard, zero external data</td></tr>
+  <tr><td><b>MPO</b></td><td>W1 &rarr; W3 &rarr; W5</td>
+      <td>TAPLite kernel speed with TensorMobility certificates</td></tr>
+  <tr><td><b>corridor</b></td><td>W1 &rarr; W3 &rarr; W4 &rarr; W5</td>
+      <td>corridor-by-corridor ODME from the data registry</td></tr>
+  <tr><td><b>research</b></td><td>W1 &rarr; W7 &rarr; W5</td>
+      <td>mixed-autonomy / multi-layer equilibria on any network</td></tr>
+  <tr><td><b>classroom</b></td><td>W6 over all of the above</td>
+      <td><code>pip install tensormobility[demo]</code> + notebooks</td></tr>
+</table>
+</div>
+
+</body>
+</html>
