@@ -3,6 +3,27 @@
 **Mobility systems as flow-through tensors — space, time, and behavior
 in one certified computational graph.**
 
+**Get started in three lines** (Python ≥ 3.10; not yet on PyPI):
+
+```bash
+git clone https://github.com/asu-trans-ai-lab/TensorMobility
+cd TensorMobility && pip install -e ".[dev]"
+python cases/run_demo_suite.py     # first success: grid 10x10 certified in ~0.2 s
+```
+
+**For practitioners:** a full regional model — 1,039,117 OD pairs,
+33,963 nodes — reaches a full-network-priced equilibrium gap of
+4.4e-7 in ~3.5 minutes on a single thread, GMNS files in, link-flow
+CSVs + a machine-readable certificate out. A *certificate* attests
+convergence, conservation, and feasibility — it is **not** calibration
+or validation against counts; those remain your model's job (Chicago
+Sketch link flows correlate 1.0000 with released reference volumes;
+count-based validation for the regional case is planned). Current
+solver coverage, honestly: BPR volume–delay (other VDFs planned),
+multi-class demand as stacked OD tables (that is how the regional
+sov/hov2/hov3 case runs), no turn penalties yet, CSV demand in (OMX
+planned), all reported timings single-thread by protocol.
+
 The principal contribution of TensorMobility is **not** the use of
 tensor notation or of neural networks. It is a scalable mathematical
 and computational architecture in which multidimensional urban states,
@@ -35,8 +56,9 @@ conservation operators are they connected?*
 Doing frontier work here requires the full stack, connected — not a
 neural network bolted onto an existing model. Each layer below carries
 an **executable certified witness in this repository**, not a lecture
-claim. Reproduce them all with `python -m pytest -q` (76 tests) and
-`python cases/run_demo_suite.py`.
+claim. Reproduce them all with `python -m pytest -q` (82 tests; 8
+skip without the local-only IEEE/TRMG2 data, see the note under the
+scalability table) and `python cases/run_demo_suite.py`.
 
 | # | layer | certified witness in this repo |
 |---|---|---|
@@ -128,6 +150,11 @@ shortest paths — never over the enumerated pool. Live dashboard:
 | Chicago Sketch (full) | 933 | 2,950 | 93,135 | 198,683 | 9.8e-5 | 12 s |
 | **TRMG2 AM (full regional)** | 33,963 | 75,939 | **1,039,117** | 1,063,642 | **4.4e-7** | 209 s |
 
+External-data note: the IEEE corridor and TRMG2 rows require local
+datasets that are **not** in this repo — set
+`TENSORMOBILITY_TFB_DATA` / `TENSORMOBILITY_TRMG2_DATA` to your
+copies; without them those two demos and 8 tests skip cleanly.
+
 The IEEE corridor is the **PINN data face**: the released path–link
 incidence is reconstructed exactly (36,980 pairs), all 2,145 released
 chains rebuilt into contiguous walks, the queue core runs on a real
@@ -187,7 +214,7 @@ print(result.relative_gap)                  # ~1e-4 in ~12 s
 ```
 
 ```bash
-python -m pytest -q                  # 76 tests
+python -m pytest -q                  # 82 tests (8 skip without local data)
 python cases/run_demo_suite.py       # the four-scale demonstration above
 python cases/run_rank_economy.py     # the compression-economy measurement
 python cases/run_mage_grid.py        # mixed-autonomy equilibrium + sweeps
@@ -199,6 +226,7 @@ Seven named workflows compose every use of the package
 ([workflow.yml](workflow.yml) is the machine-readable source of
 truth). Rendered pages (gui4gmns-style, self-contained):
 
+- **[Interactive explainer](https://asu-trans-ai-lab.github.io/TensorMobility/)** — five live GridCity cards (land use → scheduling → choice → equilibrium → queues); format inspired by the [Polo Club](https://poloclub.github.io/) explainer family ([CNN Explainer](https://poloclub.github.io/cnn-explainer/), [Transformer Explainer](https://poloclub.github.io/transformer-explainer/)); our design rules in [docs/EXPLAINER_DESIGN.md](docs/EXPLAINER_DESIGN.md)
 - **[Workflow map](https://asu-trans-ai-lab.github.io/TensorMobility/public_gui/workflow.html)** — W1 generate · W2 assign · W3 import · W4 calibrate · W5 visualize · W6 teach · W7 profile
 - **[Demo dashboard](https://asu-trans-ai-lab.github.io/TensorMobility/public_gui/demo_dashboard.html)** — the fresh certified scalability run
 - Pipelines: quickstart W1→W2→W5 · MPO W1→W3→W5 · corridor W1→W3→W4→W5 · research W1→W7→W5 · classroom W6

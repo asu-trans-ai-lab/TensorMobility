@@ -12,6 +12,14 @@ arc-additive. So the choice graph is simultaneously a sequential
 (Markovian, forward/backward) model and a column (flat) model; which
 face you use is a computational choice, not a behavioral one.
 
+Scope of the identity (behavioral caveat): it requires arc-additive
+utilities with ONE global scale theta. Stage-specific scales (nested
+logit, the activity-based-modeling standard) make the two faces
+diverge, and flat chain-level MNL imposes IIA across whole activity
+patterns; no nesting or path/link-overlap correction (path-size /
+C-logit) is implemented here yet. Where those matter behaviorally,
+the identity is the starting point, not the model.
+
 Plugs directly into the master fixed point x = B_theta(L(x)): the
 choice graph is B_theta; any loading operator (BPR, DNL, kernel import)
 is L. Cross-mode competition vs cooperation is then an EQUILIBRIUM

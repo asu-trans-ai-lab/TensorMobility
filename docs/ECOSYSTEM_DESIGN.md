@@ -57,8 +57,9 @@ grid, SF, Chicago, or any imported kernel run.
 **P4 — Every demonstration is a notebook that CI executes.** The
 teaching ladder (T1–T7) and every case become Jupyter notebooks run by
 `nbmake` in CI: load → solve → certify → visualize (gui4gmns HTML
-embedded inline). `pip install tensormobility[demo]` is the classroom
-install.
+embedded inline). `git clone` + `pip install -e .[dev]` is the
+classroom install (the package is not yet on PyPI; a `demo` extra is
+planned for the PyPI release).
 
 **P5 — Dynamic ODME is a calibration profile of the same chain.** The
 dynamic-odme-lab formulation is already ours in different notation:

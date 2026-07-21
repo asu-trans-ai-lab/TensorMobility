@@ -26,6 +26,10 @@ from tensormobility.core.network_core import build_static_network
 from tensormobility.core import unified_networks as _un
 from tensormobility.core.unified_networks import UnifiedCase
 
+# Regional model data stay OUTSIDE the repo. Point
+# TENSORMOBILITY_TRMG2_DATA at your local TRMG2 GMNS bundle; the
+# hardcoded fallback is the maintainer's layout and is harmless on
+# other machines (data_available() -> False, dependent tests skip).
 TRMG2_ROOT = Path(os.environ.get(
     'TENSORMOBILITY_TRMG2_DATA',
     r'C:\source_codes\0_source_code_new\compressed_optimization'

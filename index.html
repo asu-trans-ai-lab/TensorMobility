@@ -195,8 +195,12 @@ are demand flowing through the chain</span></h2>
 <p class="note">Five live computations in pipeline order
 (ℒ land use → 𝒜 behavior → choice → equilibrium → queues) — the same
 operators that run at regional scale, small enough to touch. Each card
-names its chapter in the TensorMobility course book; every computation
-is an executable identity in the test suite, not an analogy.</p>
+names its chapter in the TensorMobility course book. Cards 3–5 run
+computations that are executable identities in the package's test
+suite; cards 1–2 are illustrative browser-only teaching toys (their
+Python counterparts are on the roadmap). Getting started:
+<code>git clone</code> the repo, <code>pip install -e ".[dev]"</code>,
+then <code>python cases/run_demo_suite.py</code>.</p>
 
 <div class="demo">
 <h3>1 · Land use is the boundary condition of demand
@@ -211,12 +215,17 @@ is an executable identity in the test suite, not an analogy.</p>
       value="0.2"><span class="val" id="impbv"></span></div>
   <p class="note">A 5×5 GridCity: households (blue dots) favor the
   periphery; the centralization slider moves jobs (orange) into the
-  CBD. Demand forms by the gravity kernel
-  T<sub>ij</sub> = P<sub>i</sub> · e<sub>j</sub>
-  e<sup>−βc<sub>ij</sub></sup> ⁄ Σ<sub>k</sub> e<sub>k</sub>
-  e<sup>−βc<sub>ik</sub></sup> — an instance of
-  𝒟 = ∫ K<sub>LA</sub> ℒ. <b>Click any zone</b> to plant an
-  employment subcenter and watch the desire lines re-route.</p>
+  CBD. Demand forms by the gravity model you already know —
+  production-constrained, T<sub>ij</sub> ∝ P<sub>i</sub> e<sub>j</sub>
+  e<sup>−βc<sub>ij</sub></sup> — which is <em>identically</em> a
+  multinomial-logit destination choice with utility
+  V<sub>j</sub> = ln e<sub>j</sub> − βc<sub>ij</sub>, and, written as
+  an operator, an instance of the kernel 𝒟 = ∫ K<sub>LA</sub> ℒ.
+  (Singly-constrained: planted subcenters attract trips without
+  doubly-constrained balancing. In the released package, OD demand is
+  exogenous — making it land-use-responsive is the book's Ch. 4
+  program.) <b>Click any zone</b> to plant an employment subcenter
+  and watch the desire lines re-route.</p>
   <div class="readout" id="luread"></div>
 </div>
 <div class="col">
@@ -226,8 +235,8 @@ is an executable identity in the test suite, not an analogy.</p>
 </div>
 
 <div class="demo">
-<h3>2 · Activity scheduling: when to leave home
-<span class="hint">(book Ch. 6 · explainer panel 5 · the departure
+<h3>2 · Activity scheduling: schedule-delay (β–γ) preferences
+<span class="hint">(book Ch. 6 · course-book panel 5 · the departure
 axis τ)</span></h3>
 <div class="row">
 <div class="col">
@@ -244,11 +253,17 @@ axis τ)</span></h3>
     <input type="range" id="congl" min="0" max="1.5" step="0.1"
       value="0.8"><span class="val" id="conglv"></span></div>
   <p class="note">One agent's chain Home → Work with preferred arrival
-  8:30. Each 15-min departure interval is a <b>behavioral column</b>;
-  its cost is travel time + β·(early) + γ·(late) (Vickrey scheduling),
-  and the profile is the logit over columns. Because being late hurts
-  more than being early (γ &gt; β), the profile leans <em>early</em> —
-  drag γ down to watch the asymmetry vanish.</p>
+  8:30. Each 15-min departure interval is a <b>behavioral column</b> —
+  one complete choice alternative, the same object a route or an
+  activity pattern is in the framework; its cost is travel time +
+  β·(early minutes) + γ·(late minutes), the classic schedule-delay
+  preference. Because being late hurts more than being early
+  (γ &gt; β), the profile leans <em>early</em> — drag γ down to watch
+  the asymmetry vanish. (Honest scope: congestion here is a
+  <em>fixed</em> profile; in Vickrey's bottleneck model the queue is
+  endogenous — departures create the congestion they respond to. That
+  equilibrium feedback is exactly the fixed point of card 4, and the
+  book's Ch. 9–10 program.)</p>
   <div class="readout" id="abmread"></div>
 </div>
 <div class="col">
@@ -295,12 +310,15 @@ watch the certificate go to zero)</span></h3>
   <div class="ctl"><label>OD demand d (veh/min)</label>
     <input type="range" id="dem" min="40" max="160" step="5" value="110">
     <span class="val" id="demv"></span></div>
-  <p class="note">Three BPR routes (t₀ = 10, 12, 15; capacities 40,
-  50, 60). Each step: price routes at current flows → all-or-nothing
-  to the cheapest → averaging step toward it (MSA). The
-  <b>relative gap</b> is the equilibrium certificate — the same
-  full-space-priced quantity reported for Chicago (9.8e-5) and TRMG2
-  (4.4e-7).</p>
+  <p class="note">Three routes with BPR congestion (travel time grows
+  with the fourth power of volume/capacity; t₀ = 10, 12, 15 min,
+  capacities 40, 50, 60). Each step: price routes at current flows →
+  send everything to the cheapest (all-or-nothing) → average toward it
+  (the method of successive averages, MSA). The <b>relative gap</b> —
+  how much total cost could still fall by switching to best paths —
+  is the equilibrium <b>certificate</b>: a machine-checked convergence
+  guarantee, the same full-network-priced quantity reported for
+  Chicago (9.8e-5) and the regional model (4.4e-7).</p>
   <p>
     <button id="stepbtn">step</button>
     <button id="runbtn">run to 1e-4</button>
@@ -327,7 +345,7 @@ watch the certificate go to zero)</span></h3>
 
 <div class="demo">
 <h3>5 · Conservation: the fluid queue <span class="hint">(book Ch. 9 ·
-explainer panel 6 · certified ≤ 7e-5 vs the closed form, and run on
+course-book panel 6 · certified ≤ 7e-5 vs the closed form, and run on
 real IEEE detector inflow)</span></h3>
 <div class="row">
 <div class="col">
@@ -366,12 +384,12 @@ its certified witness in this repo</span></h2>
   conservation &amp; physical structure</summary><div class="w">
   Network flow, cumulative flow, queue propagation, capacity,
   incidence, activity-time conservation. Witnesses: chain mass
-  conservation 1e-13; fluid-queue pulse ≤ 7e-5 vs closed form (demo 3
+  conservation 1e-13; fluid-queue pulse ≤ 7e-5 vs closed form (card 5
   above); queue causality on real detector inflow.</div></details>
 <details class="layer"><summary><span class="n">3</span>
   variational equilibrium &amp; fixed points</summary><div class="w">
   UE/SUE, variational inequalities, complementarity, demand–supply
-  closure. Witnesses: entropy-master KKT ≡ logit (exact — demo 1);
+  closure. Witnesses: entropy-master KKT ≡ logit (exact — card 3);
   τ→0 ladder to deterministic UE; mixed-autonomy closure with
   final-state consistency residuals.</div></details>
 <details class="layer"><summary><span class="n">4</span>
@@ -379,7 +397,7 @@ its certified witness in this repo</span></h2>
   projection, ADMM, column generation, major/minor decomposition —
   the <b>solver layer</b>, chosen after state, operators, and
   conservation are fixed. Witnesses: Chicago 93,135 ODs @ 9.8e-5 in
-  12 s; TRMG2 1,039,117 ODs @ 4.4e-7 (demo 2 is this machinery in
+  12 s; TRMG2 1,039,117 ODs @ 4.4e-7 (card 4 is this machinery in
   miniature); the engine-escalation ladder with its measured
   stiff-block lesson.</div></details>
 <details class="layer"><summary><span class="n">5</span>
@@ -432,7 +450,7 @@ Single-process, single-thread.</p>
     dashboard</b><span>the fresh certified four-scale run</span></a>
   <a class="card"
     href="https://github.com/asu-trans-ai-lab/TensorMobility">
-    <b>Source on GitHub</b><span>76 tests · GMNS interfaces ·
+    <b>Source on GitHub</b><span>82 tests · GMNS interfaces ·
     certificates.json beside every output</span></a>
   <a class="card" href="https://asu-trans-ai-lab.github.io/gui4gmns/">
     <b>gui4gmns</b><span>companion GMNS visualization — the W5
@@ -495,7 +513,7 @@ function showStage(k){
   showStage('F');
 })();
 
-/* ---------- demo 1: land use -> gravity demand ---------- */
+/* ---------- card 1: land use -> gravity demand ---------- */
 var LU = { N: 5, sub: {} };   /* sub: clicked subcenter zones */
 function luUpdate(){
   var central = +$('central').value / 100, beta = +$('impb').value;
@@ -567,7 +585,7 @@ $('lusvg').addEventListener('click', function(ev){
 });
 luUpdate();
 
-/* ---------- demo 2: activity scheduling / departure choice ------- */
+/* ---------- card 2: activity scheduling / departure choice ----- */
 function abmUpdate(){
   var bE = +$('earlyp').value, gL = +$('latep').value;
   var th = +$('abmtheta').value, cg = +$('congl').value;
@@ -626,7 +644,7 @@ function abmUpdate(){
   $(id).addEventListener('input', abmUpdate); });
 abmUpdate();
 
-/* ---------- demo 3: logit = softmax router ---------- */
+/* ---------- card 3: logit = softmax router ---------- */
 function logitUpdate(){
   var t = [ +$('t1').value, +$('t2').value, +$('t3').value ];
   var th = +$('theta').value;
@@ -660,7 +678,7 @@ function logitUpdate(){
   $(id).addEventListener('input', logitUpdate); });
 logitUpdate();
 
-/* ---------- demo 2: MSA fixed point with certificate ---------- */
+/* ---------- card 4: MSA fixed point with certificate ---------- */
 var EQ = { t0:[10,12,15], cap:[40,50,60], v:[0,0,0], it:0, gaps:[],
            timer:null, done:false };
 function bpr(k, v){
@@ -735,7 +753,7 @@ $('resetbtn').addEventListener('click', eqReset);
 $('dem').addEventListener('input', eqReset);
 eqReset();
 
-/* ---------- demo 3: fluid queue ---------- */
+/* ---------- card 5: fluid queue ---------- */
 function queueUpdate(){
   var pulse = +$('pulse').value, cut = +$('cut').value;
   $('pulsev').textContent = pulse.toFixed(0);
