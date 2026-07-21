@@ -33,8 +33,9 @@ meaning and exact verification.**
 
 The axes are real objects (`STBTensor`, named-axis contraction with
 Kronecker-lifted spectators), the correspondence is executable
-(`tensormobility.neural`, equality-tested), and every equilibrium claim
-is certificate-checked (**66 tests**). See
+(`tensormobility.neural`; **5 of 8 rows equality-tested, 3 structural**
+— see docs/DESIGN_UPDATE_RANK_ECONOMY.md), and every equilibrium claim
+is certificate-checked (**67 tests**). See
 [docs/TENSOR_AXES.md](docs/TENSOR_AXES.md) — *what the mobility,
 behavior, time, and space axes are* — the front door of the framework.
 TensorMobility is the software home of the STB-FTT research line and
@@ -84,7 +85,7 @@ all-origin Dijkstra, never over the enumerated pool.
 ## Run
 
 ```bash
-python -m pytest -q                  # 66 tests: tensor+neural identity, contracts, closure, profiles
+python -m pytest -q                  # 67 tests: tensor+neural identity, contracts, closure, profiles
 python cases/run_mage_grid.py        # mixed-autonomy equilibrium + sweeps
 python cases/run_unified_grid_harness.py
 python cases/run_passenger_vehicle_harness.py

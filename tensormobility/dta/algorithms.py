@@ -103,7 +103,7 @@ def solve_exact_fw(
     final_value = obj.value(f)
     final_gap, _ = fw_gap(f, obj.gradient(f), instance.group_columns, instance.demands)
     return AlgorithmResult(
-        name="exact_fw",
+        name="reference_fw",   # was exact_fw: NOT the certificate (looser than certified_fw)
         flow=f,
         history=pd.DataFrame(rows),
         objective=final_value,
@@ -196,7 +196,7 @@ def solve_fw_gp(
     value = obj.value(f)
     gap, _ = fw_gap(f, obj.gradient(f), instance.group_columns, instance.demands)
     return AlgorithmResult(
-        name="fw_gp",
+        name="certified_fw",   # was fw_gp: full-space priced certificate
         flow=f,
         history=pd.DataFrame(rows),
         objective=value,

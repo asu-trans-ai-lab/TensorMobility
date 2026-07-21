@@ -88,7 +88,7 @@ def run_suite(output_dir: str | Path, seed: int = 7) -> pd.DataFrame:
     summary.to_csv(output / "algorithm_comparison.csv", index=False)
 
     certified = (
-        summary[summary["algorithm"].isin(["exact_fw", "fw_gp"])]
+        summary[summary["algorithm"].isin(["reference_fw", "certified_fw"])]
         .groupby("scenario", as_index=False)["objective"]
         .min()
         .rename(columns={"objective": "certified_full_space_objective"})
