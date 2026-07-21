@@ -52,9 +52,14 @@ Suite: 93 tests passing (82 prior + 11 new).
   the 25-chapter plan go to the author as the next book milestone;
   the current 16+13 build remains valid content to redistribute.
 
-## Needs an author decision
+## Author decisions received (2026-07-22) and executed
 
-1. **§2.2 network-science layer** (`tensormobility/network/`):
+1. **§2.2** — APPROVED as recommended and IMPLEMENTED: `tensormobility/network/` with native sparse incidence/Laplacian (certified: A·x−b = 7e-13 on equilibrium flows; Laplacian PSD, zero row sums; Fiedler value positive iff connected) and networkx-backed centrality/communities (betweenness ranks the arterial cross, matching where the assignment loads). 5 tests.
+2. **§6.1 zero-install sequencing** — APPROVED and step 1 IMPLEMENTED: `cases/export_scenario.py` writes the authoritative `explainer/scenarios/gridcity_small.json` (certified flows + certificates + canonical tensor fixture + H017); pages migrate to read it next, then shared algorithms, no framework.
+
+## Still needs an author decision
+
+1. ~~**§2.2 network-science layer**~~ (decided above; original text kept for the record:) **§2.2 network-science layer** (`tensormobility/network/`):
    agreed in principle; whether to wrap `networkx` (already a
    dependency) or implement incidence/Laplacian natively affects the
    differentiability path (§8.9 backend abstraction). Recommend:
