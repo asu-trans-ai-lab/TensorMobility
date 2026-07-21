@@ -4,7 +4,7 @@
 BL="dev_internal_research_paper/BLOCKLIST.txt"
 [ -f "$BL" ] || exit 0
 HITS=$(git diff --cached -U0 | grep '^+' | grep -v '^+++' \
-  | grep -n -F -f "$BL")
+  | grep -n -w -F -f "$BL")
 STAGED_INTERNAL=$(git diff --cached --name-only \
   | grep -c '^dev_internal_research_paper/' )
 if [ -n "$HITS" ]; then
