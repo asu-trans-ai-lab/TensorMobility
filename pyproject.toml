@@ -25,3 +25,12 @@ include = ["tensormobility*"]
 
 [tool.setuptools.package-data]
 tensormobility = ["data/**/*.csv"]
+
+[tool.pytest.ini_options]
+markers = [
+  "unit: fast isolated tests",
+  "integration: multi-module tests",
+  "slow: long-running tests",
+  "external_data: requires local-only datasets (IEEE/TRMG2)",
+  "regional: full regional runs",
+]
