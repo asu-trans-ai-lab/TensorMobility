@@ -1,0 +1,29 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<title>TensorMobility demo suite</title><style>
+body{font:15px/1.5 system-ui;max-width:900px;margin:2rem auto;
+padding:0 1rem;color:#0e1726}
+table{border-collapse:collapse;width:100%}
+td,th{padding:.4rem .6rem;border-bottom:1px solid #d8dee6;
+text-align:right}
+td:first-child,th:first-child{text-align:left}
+h1{font-size:1.4rem} .note{color:#5b6b7c}
+@media(prefers-color-scheme:dark){body{background:#101722;
+color:#e8edf3}td,th{border-color:#2a3644}}
+</style></head><body>
+<h1>TensorMobility — demonstration suite</h1>
+<p class="note">Fresh certified run; every relative gap is priced over
+the full network by all-origin shortest paths. One solver, one
+certificate, from a generated 100-node grid to a 1,039,117-OD
+regional model.</p>
+<table><tr><th>demo</th><th>nodes</th><th>links</th><th>OD pairs</th>
+<th>columns</th><th>full-space gap</th><th>wall (s)</th></tr>
+<tr><td>grid 10x10</td><td>100</td><td>360</td><td>20</td><td>280</td><td>8.01e-05</td><td>0.2</td></tr>
+<tr><td>grid 20x20</td><td>400</td><td>1,520</td><td>60</td><td>2,750</td><td>9.79e-05</td><td>1.8</td></tr>
+<tr><td>grid 50x50</td><td>2,500</td><td>9,800</td><td>200</td><td>16,041</td><td>2.44e-04</td><td>36.2</td></tr>
+<tr><td>IEEE I405N corridor</td><td>225</td><td>313</td><td>1,058</td><td>1,058</td><td>-1.63e-16</td><td>0.0</td></tr>
+<tr><td>Chicago Sketch full</td><td>933</td><td>2,950</td><td>93,135</td><td>198,683</td><td>9.76e-05</td><td>11.7</td></tr>
+<tr><td>TRMG2 AM full</td><td>33,963</td><td>75,939</td><td>1,039,117</td><td>1,063,642</td><td>4.40e-07</td><td>209.0</td></tr></table>
+<p class="note">Companions: IEEE corridor queue/PINN face and released
+-incidence rebuild in cases/outputs/demo_suite/RESULTS.md; rank
+economy in cases/outputs/rank_economy/; TRMG2 F1 validation in
+cases/outputs/trmg2/.</p></body></html>
