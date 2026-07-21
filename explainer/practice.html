@@ -174,6 +174,7 @@ svg.cob{width:100%;max-width:430px;display:block;margin:6px auto}
   <div class="nav" data-v="dta">DTA network</div>
   <div class="nav" data-v="skims">Dynamic skims</div>
   <div class="nav" data-v="feedback">Feedback &amp; convergence</div>
+  <div class="nav" data-v="landuse">Land use (annual)</div>
   <div class="nav" data-v="calibration">Calibration</div>
  </aside>
 
@@ -262,14 +263,18 @@ function tracePath(net, prev, dst){
   p.push(l.id); v = l.from; }
  return p.reverse();
 }
-function genTours(N, M, seed){
+function baseHomeWeights(N){
+ var mid = (N-1)/2, w = [];
+ for (var i = 0; i < N; i++) for (var j = 0; j < N; j++)
+  w.push(1+0.35*(Math.abs(i-mid)+Math.abs(j-mid)));
+ return w;
+}
+function genTours(N, M, seed, homeWeights){
  var rnd = lcg(seed);
- var mid = (N-1)/2, cbd = Math.floor(N/2)*(N+1);
- var zones = [], wsum = 0;
- for (var i = 0; i < N; i++) for (var j = 0; j < N; j++){
-  var dc = Math.abs(i-mid)+Math.abs(j-mid);
-  zones.push(1+0.35*dc); wsum += 1+0.35*dc;
- }
+ var cbd = Math.floor(N/2)*(N+1);
+ var zones = homeWeights || baseHomeWeights(N);
+ var wsum = 0;
+ for (var zz = 0; zz < zones.length; zz++) wsum += zones[zz];
  var tours = [];
  for (var t = 0; t < M; t++){
   var x = rnd()*wsum, home = 0;
@@ -369,9 +374,88 @@ function delayOf(o, d){
 }
 function rebuildCity(){
  CITY.net = buildGrid(CITY.N);
- CITY.tours = genTours(CITY.N, CITY.M, CITY.seed);
+ /* land-use state: household stocks (the slow clock) and jobs */
+ var w = baseHomeWeights(CITY.N), ws = 0, i;
+ for (i = 0; i < w.length; i++) ws += w[i];
+ CITY.H = w.map(function(x){ return 1000*x/ws*w.length; });
+ CITY.Hcap = CITY.H.map(function(h){ return h*1.6; });
+ var mid = (CITY.N-1)/2;
+ CITY.E = [];
+ for (i = 0; i < CITY.N*CITY.N; i++){
+  var dc = Math.abs(Math.floor(i/CITY.N)-mid)+
+           Math.abs(i%CITY.N-mid);
+  CITY.E.push(0.3 + Math.exp(-1.2*dc)*8);
+ }
+ CITY.year = 0; CITY.luHist = [];
+ CITY.tours = genTours(CITY.N, CITY.M, CITY.seed, CITY.H);
  CITY.fb = 0; CITY.fbHist = [];
  recompute();
+}
+
+/* ============ land-use annual loop (review §6.4) ============ */
+function accessibilityAll(betaA){
+ /* logsum accessibility per zone from CONGESTED times — the same
+    kernel as tensormobility/landuse/accessibility.py, with the
+    assignment's costs closing the S -> accessibility -> L loop */
+ var n = CITY.N*CITY.N, A = new Array(n), z, j;
+ for (z = 0; z < n; z++){
+  var d = dijkstra(CITY.net, z, CITY.res.congCost).dist;
+  var m = -Infinity, s = 0;
+  for (j = 0; j < n; j++){
+   var u = betaA*(Math.log(CITY.E[j]) - d[j]*MPU/10);
+   if (u > m){ s = s*Math.exp(m-u)+1; m = u; }
+   else s += Math.exp(u-m);
+  }
+  A[z] = (m + Math.log(s))/betaA;
+ }
+ return A;
+}
+function advanceYear(rho, betaA){
+ /* relocation: fraction rho of households relocate by logit over
+    accessibility + log housing headroom, rationed by capacity —
+    mirrors landuse/location_choice.py incl. exact conservation */
+ var n = CITY.N*CITY.N, z, j;
+ var A = accessibilityAll(betaA);
+ var movers = CITY.H.map(function(h){ return h*rho; });
+ var stay = CITY.H.map(function(h, i){ return h - movers[i]; });
+ var head = CITY.Hcap.map(function(c, i){
+  return Math.max(1e-6, c - stay[i]); });
+ var util = [], m = -Infinity;
+ for (j = 0; j < n; j++){
+  util[j] = 1.5*A[j] + Math.log(head[j]);
+  if (util[j] > m) m = util[j];
+ }
+ var e = util.map(function(u){ return Math.exp(u-m); });
+ var es = e.reduce(function(a,b){ return a+b; }, 0);
+ var totalMovers = movers.reduce(function(a,b){ return a+b; }, 0);
+ var want = e.map(function(x){ return totalMovers*x/es; });
+ /* proportional rationing against headroom */
+ var placed = want.map(function(w2, i){
+  return Math.min(w2, head[i]); });
+ var overflow = totalMovers -
+  placed.reduce(function(a,b){ return a+b; }, 0);
+ /* spread overflow to remaining headroom */
+ var rem = head.map(function(h, i){ return h - placed[i]; });
+ var remSum = rem.reduce(function(a,b){ return a+b; }, 0);
+ if (overflow > 1e-9 && remSum > 1e-9)
+  placed = placed.map(function(p, i){
+   return p + overflow*rem[i]/remSum; });
+ var Hnew = stay.map(function(s2, i){ return s2 + placed[i]; });
+ var before = CITY.H.reduce(function(a,b){ return a+b; }, 0);
+ var after = Hnew.reduce(function(a,b){ return a+b; }, 0);
+ var moved = 0;
+ for (z = 0; z < n; z++) moved += Math.abs(Hnew[z]-CITY.H[z])/2;
+ CITY.H = Hnew;
+ CITY.year += 1;
+ /* the middle clock: demand regenerates from the new stocks */
+ CITY.tours = genTours(CITY.N, CITY.M, CITY.seed + CITY.year,
+  CITY.H);
+ recompute();
+ var meanA = A.reduce(function(a,b){ return a+b; }, 0)/n;
+ CITY.luHist.push({ y: CITY.year, meanA: meanA, moved: moved,
+  delay: CITY.cf.meanDelay, gap: CITY.res.gap,
+  consRes: Math.abs(after-before) });
+ return { conserved: Math.abs(after-before) < 1e-6 };
 }
 function recompute(){
  CITY.res = assignCity(CITY.net, CITY.tours, 40);
@@ -550,7 +634,7 @@ function activate(v){
   x.classList.toggle('active', x.getAttribute('data-v') === v); });
  ({system:system, passengers:passengers, tours:tourView,
    transfer:transfer, dta:dta, skims:skims, feedback:feedback,
-   calibration:calibration}[v] || system)();
+   landuse:landuseView, calibration:calibration}[v] || system)();
 }
 
 function system(){
@@ -932,6 +1016,89 @@ function feedback(){
   '𝓐<sup>k+1</sup> = retime(𝓐<sup>k</sup>, delays(𝓕<sup>k</sup>))');
 }
 
+function landuseView(){
+ var n = CITY.N*CITY.N;
+ var A = accessibilityAll(0.8);
+ var hmax = Math.max.apply(null, CITY.H);
+ /* city SVG with household-stock shading */
+ var PAD = 20, W = 420, CELL = (W-2*PAD)/CITY.N, i;
+ var s = '';
+ for (i = 0; i < n; i++){
+  var x = PAD+(i%CITY.N)*CELL, y = PAD+Math.floor(i/CITY.N)*CELL;
+  s += '<rect x="'+(x+3)+'" y="'+(y+3)+'" width="'+(CELL-6)+
+   '" height="'+(CELL-6)+'" rx="6" fill="rgba(22,139,131,'+
+   (0.08+0.65*CITY.H[i]/hmax).toFixed(2)+')" stroke="#d7e1ec"/>'+
+   '<text x="'+(x+CELL/2)+'" y="'+(y+CELL/2+3)+
+   '" font-size="9" text-anchor="middle" fill="#15243c">'+
+   Math.round(CITY.H[i])+'</text>';
+ }
+ var lastRows = CITY.luHist.slice(-6).map(function(h){
+  return '<tr><td>'+h.y+'</td><td style="text-align:center">'+
+   h.meanA.toFixed(2)+'</td><td style="text-align:center">'+
+   Math.round(h.moved)+'</td><td style="text-align:center">'+
+   h.delay.toFixed(1)+' min</td><td style="text-align:center">'+
+   h.consRes.toExponential(1)+'</td></tr>'; }).join('');
+ stage.innerHTML = '<h2>Land Use — the annual (slow) clock '+
+  '<span style="font-size:.8rem;color:var(--muted)">(review §6.4; '+
+  'mirrors tensormobility/landuse: logsum accessibility from '+
+  'CONGESTED times, capacity-rationed relocation, exact household '+
+  'conservation)</span></h2>'+
+  '<div class="grid2"><div>'+
+  '<svg class="city" viewBox="0 0 420 420">'+s+'</svg>'+
+  '<p style="text-align:center;font-size:.8rem;'+
+  'color:var(--muted)">household stock per zone (teal shading)</p>'+
+  '</div><div>'+
+  '<div class="controls">'+
+  '<button class="primary" id="yearbtn">Advance one year</button>'+
+  '<label>relocation rate <input type="range" id="rho" min="0.02" '+
+  'max="0.3" step="0.02" value="0.1"></label>'+
+  '<span class="mono" id="rhov">10%</span></div>'+
+  '<div class="card"><b>The slow loop, closed:</b> the assignment’s '+
+  'congested times price accessibility A<sub>z</sub> = logsum; a '+
+  'fraction of households relocates by logit over accessibility + '+
+  'housing headroom (rationed by zone capacity, overflow spread, '+
+  'total conserved EXACTLY); the new stocks re-weight next year’s '+
+  'tour generation; the city re-assigns. Congested years push '+
+  'households toward accessible-but-uncongested zones — watch the '+
+  'shading migrate.</div>'+
+  '<table style="width:100%;font-size:.8rem;border-collapse:'+
+  'collapse;margin-top:8px"><tr><th style="text-align:left">year'+
+  '</th><th>mean access</th><th>relocated</th><th>mean delay</th>'+
+  '<th>ΣH residual</th></tr>'+lastRows+'</table>'+
+  (CITY.luHist.length === 0 ?
+   '<div class="card" style="margin-top:8px">Year 0 — no '+
+   'transitions yet. Press <b>Advance one year</b>; at high tour '+
+   'counts the relocation visibly flees the congested CBD ring.'+
+   '</div>' : '')+
+  '</div></div>';
+ document.getElementById('rho').oninput = function(){
+  document.getElementById('rhov').textContent =
+   Math.round(this.value*100)+'%';
+ };
+ document.getElementById('yearbtn').onclick = function(){
+  var r = advanceYear(+document.getElementById('rho').value, 0.8);
+  landuseView();
+  note('Year '+CITY.year+': relocation computed, households '+
+   'conserved '+(r.conserved ? 'exactly' : 'FAILED')+
+   ', demand regenerated from new stocks, city re-assigned.');
+ };
+ setAxes([['zone z','var(--space)'],['stock H','var(--person)'],
+  ['jobs E','var(--path)'],['year y','var(--time)'],
+  ['accessibility','var(--vehicle)']]);
+ setIns('Land use is the boundary condition of demand',
+  'Annual clock wrapping the daily loop: stocks → tours → '+
+  'assignment → accessibility → relocation → stocks. Conservation '+
+  'is certified every year; the Python twin is '+
+  'tensormobility/landuse.',
+  'A<sub>z</sub> = β⁻¹ ln Σ<sub>j</sub> E<sub>j</sub> '+
+  'e<sup>β(ln E − c<sub>zj</sub><sup>cong</sup>)</sup> · '+
+  'H<sub>y+1</sub> = relocate(H<sub>y</sub>, A) with Σ H fixed',
+  CITY.luHist.length && CITY.luHist[CITY.luHist.length-1].consRes
+   < 1e-6 ? 'PASS — household conservation exact (residual '+
+   CITY.luHist[CITY.luHist.length-1].consRes.toExponential(1)+')' :
+   'PASS — no transitions yet');
+}
+
 function calibration(){
  var obs = [['06:45',58,56],['07:00',51,49],['07:15',39,43],
   ['07:30',27,31],['07:45',24,26],['08:00',32,30]];
@@ -1016,6 +1183,7 @@ document.getElementById('ask').onclick = function(){
  else if (/skim|tdsp|travel time/.test(q)) v='skims';
  else if (/iteration|convergence|msa|feedback|retim/.test(q))
   v='feedback';
+ else if (/land|housing|relocat|accessib|zoning|year/.test(q)) v='landuse';
  else if (/valid|calibr|count|speed/.test(q)) v='calibration';
  currentView = v;
  activate(v);
