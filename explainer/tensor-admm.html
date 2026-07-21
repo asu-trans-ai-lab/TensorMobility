@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tensor + ADMM Lab — TensorMobility Explainer</title>
+<style>
+  :root{
+    --ink:#0e1726; --paper:#ffffff; --muted:#5b6b7c; --line:#d8dee6;
+    --chip:#f2f5f8;
+    /* spec 22.1 color semantics */
+    --src:#2b6cb0;      /* source spatial state: blue */
+    --tgt:#1f7a8c;      /* target spatial state: teal */
+    --trans:#c77b32;    /* translated axis: orange */
+    --spect:#7286a0;    /* spectator axes: gray-blue */
+    --cons:#7c5cbf;     /* consensus: purple */
+    --pass:#3a7d44;     /* conservation pass: green */
+    --warn:#b7791f;     /* warning: amber */
+    --bad:#c0392b;      /* infeasibility: red */
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --ink:#e8edf3; --paper:#101722; --muted:#93a3b4;
+           --line:#2a3644; --chip:#1a2432; --src:#5b9bd5; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+       font:14.5px/1.5 system-ui,Segoe UI,Roboto,sans-serif}
+  .wrap{max-width:1160px;margin-inline:auto;padding:1.2rem 1rem 3rem}
+  h1{font-size:1.4rem;margin:.2rem 0 0}
+  .sub{color:var(--muted);margin:.25rem 0 .8rem;font-size:.9rem}
+  .topnav{font-size:.83rem;color:var(--muted);margin-bottom:.5rem}
+  .topnav a{color:var(--tgt)}
+  .chips{display:flex;flex-wrap:wrap;gap:.35rem;margin:.4rem 0 .8rem}
+  .chips button{font:inherit;font-size:.8rem;padding:.28rem .65rem;
+      border:1px solid var(--tgt);background:transparent;
+      color:var(--tgt);border-radius:.5rem;cursor:pointer}
+  .chips button.primary{background:var(--tgt);color:#fff}
+  .chips button.warn{border-color:var(--warn);color:var(--warn)}
+  .grid{display:grid;grid-template-columns:1.05fr 1fr 1fr;gap:.8rem}
+  @media (max-width:980px){.grid{grid-template-columns:1fr 1fr}}
+  @media (max-width:700px){.grid{grid-template-columns:1fr}}
+  .panel{border:1px solid var(--line);border-radius:.7rem;
+      background:var(--chip);padding:.7rem .8rem;min-width:0}
+  .panel h3{margin:.1rem 0 .4rem;font-size:.95rem}
+  .panel h3 .tag{font-size:.72rem;color:var(--muted);font-weight:400}
+  svg{width:100%;height:auto;display:block}
+  .narr{font-size:.85rem;border-left:3px solid var(--tgt);
+      padding-left:.6rem;margin:.6rem 0;min-height:2.2em;
+      color:var(--muted)}
+  .narr b{color:var(--ink)}
+  .mono{font-family:ui-monospace,Consolas,monospace;font-size:.82rem}
+  .eq{font-family:Georgia,serif;font-size:1rem;margin:.3rem 0;
+      overflow-x:auto}
+  .eq .s{color:var(--src)} .eq .t{color:var(--tgt)}
+  .eq .b{color:var(--trans)} .eq .z{color:var(--cons)}
+  table{border-collapse:collapse;width:100%;font-size:.8rem}
+  td,th{padding:.22rem .4rem;border-bottom:1px solid var(--line);
+      text-align:right;font-family:ui-monospace,Consolas,monospace}
+  th{color:var(--muted);font-weight:600;font-family:inherit}
+  td:first-child,th:first-child{text-align:left}
+  .axis{display:flex;align-items:center;gap:.4rem;margin:.22rem 0;
+      font-size:.82rem;flex-wrap:wrap}
+  .axis .nm{min-width:6.2rem;color:var(--muted)}
+  .axis .role{font-size:.7rem;padding:.05rem .4rem;border-radius:.35rem;
+      color:#fff}
+  .axis button{font:inherit;font-size:.78rem;padding:.12rem .5rem;
+      border:1px solid var(--line);background:var(--paper);
+      color:var(--ink);border-radius:.4rem;cursor:pointer}
+  .axis button.on{border-color:var(--src);color:var(--src);
+      font-weight:700}
+  .Bgrid{display:grid;grid-template-columns:auto repeat(4,1fr);
+      gap:.15rem;margin:.4rem 0;font-size:.78rem;align-items:center}
+  .Bgrid input{width:100%;font:inherit;font-size:.78rem;
+      text-align:right;border:1px solid var(--line);
+      border-radius:.3rem;background:var(--paper);color:var(--ink);
+      padding:.1rem .2rem}
+  .Bgrid .rl{color:var(--tgt);font-weight:700}
+  .Bgrid .cl{color:var(--src);text-align:center}
+  .csum{font-size:.72rem;text-align:center}
+  .csum.ok{color:var(--pass)} .csum.bad{color:var(--bad)}
+  .tabs{display:flex;gap:.15rem;margin:0 0 .4rem;flex-wrap:wrap}
+  .tabs button{font:inherit;font-size:.76rem;padding:.2rem .5rem;
+      border:1px solid var(--line);background:transparent;
+      color:var(--muted);border-radius:.4rem .4rem 0 0;cursor:pointer;
+      border-bottom:none}
+  .tabs button.on{color:var(--tgt);border-color:var(--tgt);
+      font-weight:700;background:var(--paper)}
+  #cbody{min-height:10rem;font-size:.84rem}
+  .ledger .pass{color:var(--pass);font-weight:700}
+  .ledger .fail{color:var(--bad);font-weight:700}
+  .ctl{display:flex;align-items:center;gap:.5rem;margin:.3rem 0;
+      font-size:.82rem}
+  .ctl label{min-width:7.5rem;color:var(--muted)}
+  .ctl input[type=range]{flex:1;accent-color:var(--cons)}
+  .ctl .val{font-family:ui-monospace,Consolas,monospace;
+      min-width:4.5rem;text-align:right}
+  .diag{display:inline-block;font-size:.74rem;padding:.08rem .5rem;
+      border-radius:.4rem;color:#fff;background:var(--muted)}
+  details.mis{border:1px solid var(--line);border-radius:.5rem;
+      background:var(--chip);margin:.35rem 0;padding:.1rem .6rem;
+      font-size:.85rem}
+  details.mis summary{cursor:pointer;padding:.3rem 0;font-weight:600}
+  .note{color:var(--muted);font-size:.82rem}
+  select{font:inherit;font-size:.8rem;background:var(--paper);
+      color:var(--ink);border:1px solid var(--line);
+      border-radius:.4rem;padding:.15rem .3rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="topnav"><a href="./">← Explainer home</a> ·
+<a href="../">TensorMobility home</a> · module 7 of the concept map
+· spec: docs/EXPLAINER_SPEC (Tensor+ADMM design v1.0)</div>
+
+<h1>Tensor Coordinate, Spatial Translation, and ADMM Explorer</h1>
+<p class="sub">One typed coordinate → its tensor layers → a
+translation of <em>only the spatial axis</em> → conservation and
+information loss → ADMM consensus across ABM, demand, and DTA. Every
+number on this page is hand-checkable.</p>
+
+<div class="chips" id="chips">
+  <button class="primary" data-a="step">Run one ADMM step</button>
+  <button data-a="conv">Run to convergence</button>
+  <button data-a="infoloss">Demonstrate information loss</button>
+  <button class="warn" data-a="break">Break conservation</button>
+  <button data-a="diagnose">Diagnose</button>
+  <button data-a="reset">Reset</button>
+</div>
+
+<div class="narr" id="narr"><b>Predict first:</b> the mapping matrix B
+moves 40% of cell s₃ into zone z₁ and 60% into z₂. If the fiber is
+[10, 14, 18, 8], what are the two zone totals — and what must they
+sum to? Then click cells, edit B, and run.</div>
+
+<div class="grid">
+
+<!-- ===================== Panel A: spatial ===================== -->
+<div class="panel">
+<h3>A · Physical spatial view
+  <span class="tag">source cells → target zones</span></h3>
+<svg id="map" viewBox="0 0 360 300"></svg>
+<div class="note">click a <span style="color:var(--src)">source
+cell</span> to select it · arrows show B-weighted mass movement for
+the active fiber · edit B below</div>
+<div class="Bgrid" id="Bgrid"></div>
+<div class="note" id="bnote"></div>
+</div>
+
+<!-- ===================== Panel B: tensor ====================== -->
+<div class="panel">
+<h3>B · Tensor coordinate &amp; layers
+  <span class="tag">axis stack · fiber · slice · unfolding</span></h3>
+<div id="axes"></div>
+<div class="mono" id="coordcard"
+  style="margin:.45rem 0;padding:.35rem .5rem;background:var(--paper);
+  border:1px solid var(--line);border-radius:.4rem"></div>
+<div id="fiberview"></div>
+<div id="sliceview"></div>
+<details style="font-size:.82rem"><summary class="note">unfolding
+X<sub>(s)×(g m τ)</sub> — arrangement changes, semantics do not
+</summary><div id="unfold" style="overflow-x:auto"></div></details>
+</div>
+
+<!-- ===================== Panel C: inspector =================== -->
+<div class="panel">
+<h3>C · Math &amp; ADMM inspector</h3>
+<div class="tabs" id="ctabs">
+  <button data-t="coord" class="on">Coordinate</button>
+  <button data-t="op">Operator</button>
+  <button data-t="cons">Conservation</button>
+  <button data-t="admm">ADMM</button>
+  <button data-t="interp">Interpretation</button>
+</div>
+<div id="cbody"></div>
+</div>
+</div>
+
+<!-- ===================== Panel D: timeline ==================== -->
+<div class="panel" style="margin-top:.8rem">
+<h3>D · Iteration &amp; diagnostic timeline
+  <span class="tag">the consensus problem at the active
+  coordinate</span> <span class="diag" id="diag">not started</span></h3>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+  <div>
+    <div class="ctl"><label>penalty ρ (log)</label>
+      <input type="range" id="rho" min="-3" max="3" step="0.1"
+        value="0"><span class="val" id="rhov">1.00</span></div>
+    <div class="ctl"><label>scenario</label>
+      <select id="scen">
+        <option value="balanced">balanced modules (17.2 / 18.6 /
+          16.9)</option>
+        <option value="conflict">strong module conflict (5 / 25 /
+          15)</option>
+      </select></div>
+    <svg id="reschart" viewBox="0 0 420 150" style="max-width:440px">
+      <line x1="40" y1="8" x2="40" y2="126" stroke="var(--line)"/>
+      <line x1="40" y1="126" x2="412" y2="126" stroke="var(--line)"/>
+      <text x="6" y="14" font-size="9" fill="var(--muted)">‖r‖</text>
+      <text x="6" y="26" font-size="9" fill="var(--muted)">(log)</text>
+      <text x="226" y="144" font-size="9" fill="var(--muted)"
+        text-anchor="middle">ADMM iteration</text>
+      <polyline id="lpri" fill="none" stroke="var(--tgt)"
+        stroke-width="2" points=""/>
+      <polyline id="ldual" fill="none" stroke="var(--cons)"
+        stroke-width="2" points=""/>
+      <text x="330" y="16" font-size="9" fill="var(--tgt)">primal
+        </text>
+      <text x="330" y="28" font-size="9" fill="var(--cons)">dual
+        </text>
+    </svg>
+  </div>
+  <div style="overflow-x:auto;max-height:15rem;overflow-y:auto">
+    <table id="ittable"><tr><th>k</th><th>x_ABM</th><th>x_dem</th>
+    <th>x_DTA</th><th style="color:var(--cons)">z</th>
+    <th>r_pri</th><th>r_dual</th></tr></table>
+  </div>
+</div>
+</div>
+
+<h3 style="margin-top:1.2rem">Misconception checks
+<span class="tag note">(spec §21 — click to test yourself)</span></h3>
+<details class="mis"><summary>“A tensor is only a larger
+matrix.”</summary>No: axes here carry roles (s is
+<span style="color:var(--trans)">translated</span>, g/m/τ are
+<span style="color:var(--spect)">spectators</span>), units
+(person-trips), and lineage. The unfolding view shows the same tensor
+as three different matrices — arrangement is computational, the typed
+semantics are the mathematics.</details>
+<details class="mis"><summary>“Every axis changes during a spatial
+translation.”</summary>Only s → z changes: 𝒴<sub>z,g,m,τ</sub> =
+Σ<sub>s</sub> B<sub>z,s</sub> 𝒳<sub>s,g,m,τ</sub>. Check the axis
+stack: g, m, τ ride along untouched. That is what spectator means.
+</details>
+<details class="mis"><summary>“Preserving totals means no information
+is lost.”</summary>Press <em>Demonstrate information loss</em>: the
+fiber [7, 20, 15, 8] maps to exactly the same zone totals [27, 23] as
+[10, 14, 18, 8], because their difference (−3, 6, −3, 0) lies in the
+null space of B. Conservation of totals ≠ preservation of spatial
+detail — rank(B) = 2 &lt; 4 source cells.</details>
+<details class="mis"><summary>“ADMM is simple averaging.”</summary>
+Set the conflict scenario and watch the table: each module first
+solves its own penalized problem (closed form here), then the
+consensus averages <em>locals plus duals</em> and projects onto the
+feasible set, then duals absorb the disagreement. The final z =
+17.532 is the <em>weight</em>-adjusted compromise
+(Σw·a/Σw), not the plain mean 17.567.</details>
+<details class="mis"><summary>“ADMM convergence guarantees
+transportation feasibility.”</summary>Convergence certifies
+<em>agreement</em>, not validity: if the modules agree on a value
+that violates a capacity or a conserved total not encoded in Ω, the
+residuals go to zero anyway. That is why the Conservation tab is a
+separate certificate from the ADMM tab — and why the diagnostic label
+can read “converged but physically invalid.”</details>
+
+<p class="note" style="margin-top:1rem">Canonical example, colors,
+panels, and misconception list follow the Tensor+ADMM offline design
+document v1.0. Engine and page are fully offline — no external
+assets.</p>
+</div>
+
+<script>
+'use strict';
+var $ = function(id){ return document.getElementById(id); };
+
+/* ================= data (spec 5) ================= */
+var SVALS = ['s1','s2','s3','s4'], ZVALS = ['z1','z2'];
+var GV = ['worker','student'], MV = ['auto','transit'],
+    TV = ['AM','PM'];
+/* full 4x2x2x2 tensor: fiber per alpha, hand-checkable */
+var FIBERS = {
+  'worker|auto|AM':    [10,14,18,8],
+  'worker|auto|PM':    [8,12,14,6],
+  'worker|transit|AM': [4,6,5,3],
+  'worker|transit|PM': [3,5,4,2],
+  'student|auto|AM':   [5,7,6,4],
+  'student|auto|PM':   [4,6,5,3],
+  'student|transit|AM':[6,8,7,5],
+  'student|transit|PM':[5,7,6,4]
+};
+var B0 = [[1.0,0.7,0.4,0.0],[0.0,0.3,0.6,1.0]];
+
+var S = {
+  s: 2, g: 0, m: 0, tau: 0,          /* active coordinate (s3,...) */
+  B: B0.map(function(r){ return r.slice(); }),
+  infoloss: false,                    /* null-space alternative on? */
+  admm: null, tab: 'coord'
+};
+function alphaKey(){ return GV[S.g]+'|'+MV[S.m]+'|'+TV[S.tau]; }
+function fiber(){
+  var f = FIBERS[alphaKey()].slice();
+  if (S.infoloss && alphaKey() === 'worker|auto|AM')
+    f = [7,20,15,8];                 /* X + 3v, v=(-1,2,-1,0) */
+  return f;
+}
+function target(){
+  var f = fiber();
+  return S.B.map(function(row){
+    return row.reduce(function(s,b,j){ return s+b*f[j]; }, 0); });
+}
+function colSums(){
+  return [0,1,2,3].map(function(j){ return S.B[0][j]+S.B[1][j]; });
+}
+function consResidual(){
+  var f = fiber(), Y = target();
+  return (Y[0]+Y[1]) - f.reduce(function(a,b){ return a+b; }, 0);
+}
+
+/* ================= ADMM engine (spec 9-10) ================= */
+var SCEN = {
+  balanced: { a: {A:17.2, D:18.6, N:16.9} },
+  conflict: { a: {A:5.0,  D:25.0, N:15.0} }
+};
+var W = {A:1.0, D:1.2, N:1.5};
+function admmInit(){
+  var a = SCEN[$('scen').value].a;
+  S.admm = { z: fiber()[S.s], u: {A:0,D:0,N:0}, a: a, k: 0,
+             hist: [], done: false };
+  $('ittable').innerHTML = '<tr><th>k</th><th>x_ABM</th>'+
+    '<th>x_dem</th><th>x_DTA</th><th style="color:var(--cons)">z</th>'+
+    '<th>r_pri</th><th>r_dual</th></tr>';
+  $('lpri').setAttribute('points','');
+  $('ldual').setAttribute('points','');
+  setDiag('not started', 'var(--muted)');
+}
+function admmStep(){
+  var st = S.admm, rho = Math.pow(10, +$('rho').value);
+  if (!st || st.done) return;
+  var x = {}, q;
+  var Q = ['A','D','N'];
+  for (var i = 0; i < 3; i++){ q = Q[i];
+    x[q] = (W[q]*st.a[q] + rho*(st.z - st.u[q]))/(W[q] + rho);
+  }
+  var zn = Math.max(0,
+    (x.A+st.u.A + x.D+st.u.D + x.N+st.u.N)/3);   /* Pi_Omega: >=0 */
+  for (i = 0; i < 3; i++){ q = Q[i]; st.u[q] += x[q] - zn; }
+  var rpri = Math.sqrt(Q.reduce(function(s,q){
+    return s + (x[q]-zn)*(x[q]-zn); }, 0));
+  var rdual = rho*Math.abs(zn - st.z);
+  st.z = zn; st.k += 1;
+  st.hist.push({ k: st.k, x: x, z: zn, rpri: rpri, rdual: rdual });
+  if (rpri < 1e-6 && rdual < 1e-6){ st.done = true; }
+  /* table row */
+  var tr = document.createElement('tr');
+  tr.innerHTML = '<td>'+st.k+'</td><td>'+x.A.toFixed(3)+'</td><td>'+
+    x.D.toFixed(3)+'</td><td>'+x.N.toFixed(3)+
+    '</td><td style="color:var(--cons)">'+zn.toFixed(3)+'</td><td>'+
+    rpri.toExponential(1)+'</td><td>'+rdual.toExponential(1)+
+    '</td>';
+  $('ittable').appendChild(tr);
+  tr.scrollIntoView({ block: 'nearest' });
+  drawResiduals();
+  updateDiag(rho);
+  if (S.tab === 'admm' || S.tab === 'interp') renderTab();
+}
+function drawResiduals(){
+  var h = S.admm.hist, n = h.length;
+  if (!n) return;
+  function pts(key){
+    var s = '';
+    for (var i = 0; i < n; i++){
+      var x = 40 + 372*(n === 1 ? 0 : i/(n-1));
+      var lg = Math.log10(Math.max(h[i][key], 1e-9));
+      var frac = Math.min(1, Math.max(0, (2 - lg)/ -(-8)));
+      /* map lg in [2,-6] -> y in [8,126] */
+      var y = 8 + 118*Math.min(1, Math.max(0, (2 - lg)/8));
+      s += x.toFixed(1) + ',' + y.toFixed(1) + ' ';
+    }
+    return s;
+  }
+  $('lpri').setAttribute('points', pts('rpri'));
+  $('ldual').setAttribute('points', pts('rdual'));
+}
+function setDiag(t, c){
+  $('diag').textContent = t;
+  $('diag').style.background = c;
+}
+function updateDiag(rho){
+  var st = S.admm, last = st.hist[st.hist.length-1];
+  if (st.done){
+    setDiag(Math.abs(consResidual()) < 1e-9 ?
+      'converged' : 'converged but conservation broken',
+      Math.abs(consResidual()) < 1e-9 ? 'var(--pass)' : 'var(--bad)');
+  } else if (rho < 0.05) setDiag('penalty too small — weak agreement '
+    + 'pressure', 'var(--warn)');
+  else if (rho > 50) setDiag('penalty too large — no local freedom',
+    'var(--warn)');
+  else if (last.rpri > 1) setDiag('primal disagreement',
+    'var(--warn)');
+  else setDiag('converging', 'var(--tgt)');
+}
+
+/* ================= Panel A render ================= */
+function renderMap(){
+  var f = fiber(), Y = target(), s = '', i, z;
+  var cy = [40, 105, 170, 235];
+  for (i = 0; i < 4; i++){
+    var sel = (i === S.s);
+    s += '<rect data-s="'+i+'" x="14" y="'+(cy[i]-24)+
+      '" width="86" height="48" rx="8" fill="var(--src)" opacity="'+
+      (sel ? '0.9' : '0.35')+'" stroke="'+
+      (sel ? 'var(--ink)' : 'none')+'" stroke-width="2" '+
+      'style="cursor:pointer"/>' +
+      '<text x="57" y="'+(cy[i]-2)+'" text-anchor="middle" '+
+      'font-size="13" fill="#fff" pointer-events="none">'+SVALS[i]+
+      ' = '+f[i]+'</text>';
+  }
+  var zy = [88, 208];
+  for (z = 0; z < 2; z++){
+    s += '<rect x="252" y="'+(zy[z]-38)+'" width="96" height="76" '+
+      'rx="10" fill="var(--tgt)" opacity="0.8"/>' +
+      '<text x="300" y="'+(zy[z]+2)+'" text-anchor="middle" '+
+      'font-size="14" fill="#fff">'+ZVALS[z]+' = '+
+      Y[z].toFixed(1)+'</text>';
+  }
+  for (i = 0; i < 4; i++) for (z = 0; z < 2; z++){
+    var b = S.B[z][i];
+    if (b <= 0) continue;
+    s += '<line x1="100" y1="'+cy[i]+'" x2="252" y2="'+zy[z]+
+      '" stroke="var(--trans)" stroke-width="'+(1+7*b*f[i]/20)+
+      '" opacity=".5" stroke-linecap="round"/>' +
+      ((i === S.s) ? '<text x="'+(176)+'" y="'+
+        ((cy[i]+zy[z])/2 - 4)+'" font-size="10" '+
+        'fill="var(--trans)">'+b.toFixed(1)+'×'+f[i]+'='+
+        (b*f[i]).toFixed(1)+'</text>' : '');
+  }
+  $('map').innerHTML = s;
+}
+function renderB(){
+  var cs = colSums(), html =
+    '<div></div><div class="cl">s1</div><div class="cl">s2</div>'+
+    '<div class="cl">s3</div><div class="cl">s4</div>';
+  for (var z = 0; z < 2; z++){
+    html += '<div class="rl">'+ZVALS[z]+'</div>';
+    for (var j = 0; j < 4; j++)
+      html += '<input type="number" step="0.1" min="0" max="1" '+
+        'data-bz="'+z+'" data-bs="'+j+'" value="'+
+        S.B[z][j].toFixed(1)+'">';
+  }
+  html += '<div class="note">Σ<sub>z</sub></div>';
+  for (var j2 = 0; j2 < 4; j2++)
+    html += '<div class="csum '+
+      (Math.abs(cs[j2]-1) < 1e-9 ? 'ok">1.0' :
+       'bad">'+cs[j2].toFixed(1))+'</div>';
+  $('Bgrid').innerHTML = html;
+  $('bnote').innerHTML = 'B columns must sum to 1 for conservation '+
+    '(spec §8.1). Method: fractional areal interpolation; try hard '+
+    'assignment by setting each column to a single 1.';
+}
+
+/* ================= Panel B render ================= */
+function roleTag(txt, color){
+  return '<span class="role" style="background:'+color+'">'+txt+
+    '</span>';
+}
+function axisRow(nm, vals, cur, setKey, role, color){
+  var h = '<div class="axis"><span class="nm">'+nm+'</span>'+
+    roleTag(role, color);
+  for (var i = 0; i < vals.length; i++)
+    h += '<button data-ax="'+setKey+'" data-v="'+i+'" class="'+
+      (i === cur ? 'on' : '')+'">'+vals[i]+'</button>';
+  return h + '</div>';
+}
+function renderAxes(){
+  $('axes').innerHTML =
+    axisRow('spatial s', SVALS, S.s, 's', 'translated',
+      'var(--trans)') +
+    axisRow('group g', GV, S.g, 'g', 'spectator', 'var(--spect)') +
+    axisRow('mode m', MV, S.m, 'm', 'spectator', 'var(--spect)') +
+    axisRow('departure τ', TV, S.tau, 'tau', 'spectator',
+      'var(--spect)');
+  var f = fiber();
+  $('coordcard').innerHTML =
+    '𝒳[<span style="color:var(--trans)">'+SVALS[S.s]+
+    '</span>, <span style="color:var(--spect)">'+GV[S.g]+', '+
+    MV[S.m]+', '+TV[S.tau]+'</span>] = <b>'+f[S.s]+
+    '</b> person-trips<br><span class="note">measure: flow · '+
+    'lineage: synthetic census × survey · role: observed source '+
+    'state</span>';
+  /* fiber bars */
+  var maxf = Math.max.apply(null, f), fb = '';
+  for (var i = 0; i < 4; i++)
+    fb += '<div style="display:flex;align-items:center;gap:.4rem;'+
+      'font-size:.78rem;margin:.12rem 0"><span class="mono" '+
+      'style="min-width:1.6rem;color:var(--src)">'+SVALS[i]+
+      '</span><div style="flex:1;background:var(--paper);'+
+      'border:1px solid var(--line);border-radius:.3rem;height:.9rem;'+
+      'overflow:hidden"><div style="height:100%;width:'+
+      (100*f[i]/maxf)+'%;background:var(--src);opacity:'+
+      (i === S.s ? 1 : 0.55)+'"></div></div>'+
+      '<span class="mono" style="min-width:1.6rem">'+f[i]+
+      '</span></div>';
+  $('fiberview').innerHTML = '<div class="note" style="margin-top:'+
+    '.4rem">spatial fiber 𝒳[:, '+GV[S.g]+', '+MV[S.m]+', '+
+    TV[S.tau]+'] — Σ = '+f.reduce(function(a,b){return a+b;},0)+
+    '</div>'+fb;
+  /* slice small multiples for fixed s */
+  var sl = '<div class="note" style="margin-top:.4rem">slice 𝒳['+
+    SVALS[S.s]+', :, :, :] — everything this cell holds</div>'+
+    '<table><tr><th></th><th>auto</th><th>transit</th></tr>';
+  for (var t = 0; t < 2; t++){
+    for (var g = 0; g < 2; g++){
+      sl += '<tr><td>'+GV[g]+' '+TV[t]+'</td>';
+      for (var m = 0; m < 2; m++){
+        var key = GV[g]+'|'+MV[m]+'|'+TV[t];
+        var vv = FIBERS[key][S.s];
+        var on = (g === S.g && m === S.m && t === S.tau);
+        sl += '<td style="'+(on ?
+          'color:var(--trans);font-weight:700' : '')+'">'+vv+'</td>';
+      }
+      sl += '</tr>';
+    }
+  }
+  $('sliceview').innerHTML = sl + '</table>';
+  /* unfolding */
+  var un = '<table><tr><th>s \\ (g,m,τ)</th>';
+  var keys = Object.keys(FIBERS);
+  for (var k = 0; k < keys.length; k++)
+    un += '<th style="font-size:.62rem">'+
+      keys[k].replace(/\|/g,',')+'</th>';
+  un += '</tr>';
+  for (var si = 0; si < 4; si++){
+    un += '<tr><td>'+SVALS[si]+'</td>';
+    for (k = 0; k < keys.length; k++){
+      var on2 = (si === S.s && keys[k] === alphaKey());
+      un += '<td style="'+(on2 ?
+        'color:var(--trans);font-weight:700' : '')+'">'+
+        FIBERS[keys[k]][si]+'</td>';
+    }
+    un += '</tr>';
+  }
+  $('unfold').innerHTML = un + '</table>';
+}
+
+/* ================= Panel C tabs ================= */
+function renderTab(){
+  var f = fiber(), Y = target(), b = S.B, body = '';
+  if (S.tab === 'coord'){
+    body = '<b>Typed coordinate</b>'+
+      '<div class="eq">𝐢 = (<span class="b">'+SVALS[S.s]+
+      '</span>, '+GV[S.g]+', '+MV[S.m]+', '+TV[S.tau]+')</div>'+
+      '<div class="note">unit person-trips · measure flow · axis '+
+      'roles: s <b style="color:var(--trans)">translated</b>; g, m, '+
+      'τ <b style="color:var(--spect)">spectators</b> · status: '+
+      'observed (source), about to be translated · admissible '+
+      'support: all 32 cells present (dense here; sparse at '+
+      'scale)</div>';
+  } else if (S.tab === 'op'){
+    var terms = '', i2;
+    for (i2 = 0; i2 < 4; i2++)
+      terms += (i2 ? ' + ' : '') + '<span class="b">'+
+        b[0][i2].toFixed(1)+'</span>(<span class="s">'+f[i2]+
+        '</span>)';
+    body = '<b>Spatial operator — only s changes</b>'+
+      '<div class="eq"><span class="t">𝒴<sub>z,g,m,τ</sub></span> = '+
+      'Σ<sub>s</sub> <span class="b">B<sub>z,s</sub></span> '+
+      '<span class="s">𝒳<sub>s,g,m,τ</sub></span></div>'+
+      '<div class="eq"><span class="t">Y<sub>z1</sub></span> = '+
+      terms+' = <b>'+Y[0].toFixed(1)+'</b></div>'+
+      '<div class="note">four faces of one operator: continuous '+
+      'kernel Y(z,α)=∫K(z,ξ)X(ξ,α)dξ · matrix product Y=BX · '+
+      'mode product 𝒴 = 𝒳 ×<sub>s</sub> B · sparse COO loop. '+
+      'Toggle a spectator axis in Panel B: the SAME B applies '+
+      'unchanged — that is what spectator means.</div>';
+  } else if (S.tab === 'cons'){
+    var sf = f.reduce(function(a2,b2){ return a2+b2; }, 0);
+    var st = Y[0]+Y[1], r = st - sf;
+    var ok = Math.abs(r) < 1e-9;
+    var csok = colSums().every(function(c){
+      return Math.abs(c-1) < 1e-9; });
+    body = '<b>Conservation ledger</b>'+
+      '<table class="ledger">'+
+      '<tr><th>quantity</th><th>value</th></tr>'+
+      '<tr><td>source total Σ<sub>s</sub>𝒳</td><td>'+
+      sf.toFixed(3)+'</td></tr>'+
+      '<tr><td>target total Σ<sub>z</sub>𝒴</td><td>'+
+      st.toFixed(3)+'</td></tr>'+
+      '<tr><td>residual</td><td>'+r.toExponential(1)+'</td></tr>'+
+      '<tr><td>column sums of B all 1</td><td class="'+
+      (csok?'pass">yes':'fail">NO')+'</td></tr>'+
+      '<tr><td>status</td><td class="'+(ok?'pass">PASS':
+      'fail">FAIL')+'</td></tr></table>'+
+      (ok ? '<div class="note">Sufficient condition: '+
+        'Σ<sub>z</sub>B<sub>z,s</sub>=1 ∀s (spec §8.1). Break it '+
+        'with the amber chip and watch which row fails first.</div>'
+        : '<div class="note" style="color:var(--bad)">Diagnose: '+
+        'find the source column whose Σ<sub>z</sub>B ≠ 1 — that '+
+        'cell’s trips are being created or destroyed.</div>');
+  } else if (S.tab === 'admm'){
+    var stt = S.admm, rho = Math.pow(10, +$('rho').value);
+    var last = stt && stt.hist.length ?
+      stt.hist[stt.hist.length-1] : null;
+    body = '<b>ADMM at the active coordinate</b>'+
+      '<div class="note">three local copies of 𝒳['+SVALS[S.s]+
+      ',…] with quadratic preferences (w: 1.0 / 1.2 / 1.5):</div>'+
+      '<table><tr><th>module</th><th>prefers a<sub>q</sub></th>'+
+      '<th>x<sub>q</sub><sup>k</sup></th>'+
+      '<th>dual u<sub>q</sub><sup>k</sup></th></tr>'+
+      ['A','D','N'].map(function(q,qi){
+        var nm = ['ABM','demand','DTA'][qi];
+        return '<tr><td>'+nm+'</td><td>'+stt.a[q].toFixed(1)+
+          '</td><td>'+(last ? last.x[q].toFixed(3) : '—')+
+          '</td><td>'+stt.u[q].toFixed(3)+'</td></tr>';
+      }).join('')+
+      '<tr><td style="color:var(--cons)"><b>consensus z</b></td>'+
+      '<td></td><td style="color:var(--cons)"><b>'+
+      stt.z.toFixed(3)+'</b></td><td></td></tr></table>'+
+      '<div class="eq">x<sub>q</sub><sup>k+1</sup> = (w<sub>q</sub>'+
+      'a<sub>q</sub> + ρ(<span class="z">z<sup>k</sup></span> − '+
+      'u<sub>q</sub><sup>k</sup>)) / (w<sub>q</sub> + ρ) · ρ = '+
+      rho.toFixed(2)+'</div>'+
+      '<div class="mono">r_pri = '+(last ?
+        last.rpri.toExponential(2) : '—')+' · r_dual = '+
+      (last ? last.rdual.toExponential(2) : '—')+
+      ' · analytic z* = Σw·a/Σw = '+
+      ((W.A*stt.a.A+W.D*stt.a.D+W.N*stt.a.N)/(W.A+W.D+W.N))
+        .toFixed(3)+'</div>';
+  } else {
+    var stt2 = S.admm;
+    body = '<b>Interpretation</b>'+
+      '<div class="note">ABM prefers '+stt2.a.A.toFixed(1)+
+      ' trips, demand balancing prefers '+stt2.a.D.toFixed(1)+
+      ', DTA prefers '+stt2.a.N.toFixed(1)+'. ADMM does not simply '+
+      'average: each module solves a penalized local problem, the '+
+      'consensus averages locals <em>plus duals</em> and projects '+
+      'onto Ω (here: nonnegativity), and the duals accumulate '+
+      'disagreement as a price. ρ trades local freedom against '+
+      'agreement pressure — drag it to 10⁻³ or 10³ and watch the '+
+      'diagnostic label.</div>'+
+      '<div class="note" style="color:var(--warn)">Warning (spec '+
+      '§9.8): ADMM convergence certifies agreement, not '+
+      'transportation validity — the Conservation tab is a separate '+
+      'certificate.</div>';
+  }
+  $('cbody').innerHTML = body;
+  document.querySelectorAll('#ctabs button').forEach(function(bt){
+    bt.classList.toggle('on', bt.getAttribute('data-t') === S.tab);
+  });
+}
+
+/* ================= wiring ================= */
+function renderAll(){
+  renderMap(); renderB(); renderAxes(); renderTab();
+}
+document.querySelectorAll('#ctabs button').forEach(function(b){
+  b.addEventListener('click', function(){
+    S.tab = this.getAttribute('data-t'); renderTab();
+  });
+});
+$('map').addEventListener('click', function(ev){
+  var si = ev.target.getAttribute('data-s');
+  if (si !== null){ S.s = +si; renderAll(); }
+});
+$('axes').addEventListener('click', function(ev){
+  var ax = ev.target.getAttribute('data-ax');
+  if (!ax) return;
+  var v = +ev.target.getAttribute('data-v');
+  if (ax === 's') S.s = v;
+  if (ax === 'g') S.g = v;
+  if (ax === 'm') S.m = v;
+  if (ax === 'tau') S.tau = v;
+  S.infoloss = false;
+  renderAll();
+});
+$('Bgrid').addEventListener('change', function(ev){
+  var z = ev.target.getAttribute('data-bz');
+  if (z === null) return;
+  S.B[+z][+ev.target.getAttribute('data-bs')] =
+    Math.max(0, Math.min(1, +ev.target.value || 0));
+  renderAll();
+});
+$('rho').addEventListener('input', function(){
+  $('rhov').textContent =
+    Math.pow(10, +this.value).toExponential(1).replace('e+0','e');
+});
+$('scen').addEventListener('change', function(){ admmInit();
+  renderTab(); });
+$('chips').addEventListener('click', function(ev){
+  var a = ev.target.getAttribute('data-a');
+  if (!a) return;
+  if (a === 'step'){ admmStep(); }
+  else if (a === 'conv'){
+    var n = 0;
+    var t = setInterval(function(){
+      admmStep(); n++;
+      if (S.admm.done || n > 400){ clearInterval(t); }
+    }, 30);
+  }
+  else if (a === 'infoloss'){
+    S.g = 0; S.m = 0; S.tau = 0;
+    S.infoloss = !S.infoloss;
+    renderAll();
+    $('narr').innerHTML = S.infoloss ?
+      '<b>Information loss:</b> the fiber is now [7, 20, 15, 8] — '+
+      'different in every interior cell — yet the zones still read '+
+      '[27.0, 23.0]. The difference (−3, +6, −3, 0) lies in '+
+      'Null(B): B(X+v) = BX. Conservation of totals does not imply '+
+      'preservation of spatial information (rank B = 2 &lt; 4).' :
+      '<b>Restored</b> the original fiber [10, 14, 18, 8]. Same '+
+      'zone totals either way — that is the point.';
+  }
+  else if (a === 'break'){
+    S.B[0][S.s] = Math.min(1, S.B[0][S.s] + 0.2);
+    renderAll();
+    S.tab = 'cons'; renderTab();
+    $('narr').innerHTML = '<b>Broken:</b> B<sub>z1,'+SVALS[S.s]+
+      '</sub> was increased without renormalizing, so column '+
+      SVALS[S.s]+' of B now sums to more than 1 — trips are being '+
+      'manufactured. The Conservation tab shows the failure; fix '+
+      'the column or press Reset.';
+  }
+  else if (a === 'diagnose'){
+    var cs = colSums(), bad = -1;
+    for (var j = 0; j < 4; j++)
+      if (Math.abs(cs[j]-1) > 1e-9){ bad = j; break; }
+    $('narr').innerHTML = bad < 0 ?
+      '<b>Diagnose:</b> all invariants hold — column sums 1, '+
+      'residual 0, totals match. Nothing to fix.' :
+      '<b>Diagnose:</b> first failed invariant: Σ<sub>z</sub>'+
+      'B<sub>z,'+SVALS[bad]+'</sub> = '+cs[bad].toFixed(1)+
+      ' ≠ 1. Cell '+SVALS[bad]+'’s trips are not conserved.';
+    S.tab = 'cons'; renderTab();
+  }
+  else if (a === 'reset'){
+    S.B = B0.map(function(r){ return r.slice(); });
+    S.infoloss = false; S.s = 2; S.g = 0; S.m = 0; S.tau = 0;
+    admmInit(); renderAll();
+    $('narr').innerHTML = '<b>Reset.</b> Predict again: with B '+
+      'restored, what fraction of s₂’s 14 trips lands in z₂?';
+  }
+});
+admmInit();
+renderAll();
+</script>
+</body>
+</html>

@@ -36,7 +36,8 @@ asu-trans-ai-lab.github.io/TensorMobility/explainer/), **partial**,
 | 5.4 Conservation Lab | **live (core)** | the ledger (demand, link-loading, node flow) with live residuals; queue-storage and activity-time panels + challenge mode planned |
 | 5.5 ABM Lab | partial | schedule-delay departure card (home); household/vehicle/tour timeline planned |
 | 5.6 BN-DTA Lab | live (static face) | fixed-point iteration timeline, residual (gap) dashboard, MSA-stall lesson; time-space diagram, cumulative curves, queue-cell reverse trace planned |
-| 5.7–5.13 | blocked | full spec text pending from the author (received text ends mid-§5.6) |
+| 5.7 ADMM Consensus (Tensor + ADMM Lab) | **live (MVP-1–3)** | dedicated code-ready spec received (`tensormobility_tensor_admm_offline_design`, archived as this repo's governing doc for module 7); implemented at `explainer/tensor-admm.html`: canonical 4-cell→2-zone example, editable B with column-sum checks, fiber/slice/unfolding views, axis-role stack, conservation ledger + break/diagnose chips, null-space information-loss lesson, per-coordinate ADMM (closed-form locals, projected consensus, duals, primal/dual residual chart, ρ slider, balanced/conflict scenarios, diagnostic labels incl. "converged but conservation broken"); MVP-4 prompt parser + instructor mode and MVP-5 TRMG2 super-zone example pending |
+| 5.8–5.13 | blocked | full spec text of the master document pending from the author (received text ends mid-§5.6) |
 
 ## Next build order (recommended)
 
