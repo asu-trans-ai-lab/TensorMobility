@@ -1,0 +1,63 @@
+# TensorMobility workflow registry (source of truth).
+# docs/workflow.html is the rendered view; CI, notebooks, and the CLI
+# resolve workflow and pipeline names from this file.
+version: 0.7.0
+conventions:
+  interchange: GMNS CSV folders            # the only inter-tool contract
+  certificate_sidecar: certificates.json   # lab-wide, rendered by gui4gmns
+  path_schema: route_assignment.csv        # GMNS path/route exchange file
+
+workflows:
+  W1:
+    name: generate
+    summary: self-contained networks (grid) and registry networks (SF, Chicago, corridors)
+    stages: [case_spec, unified_loader, gmns_folder]
+    outputs: [node.csv, link.csv, demand.csv]
+    certificates: [contract_validation]
+  W2:
+    name: assign
+    summary: certified DTA core (column generation + engine ladder)
+    stages: [gmns_folder, column_generation, full_space_pricing_audit, outputs]
+    outputs: [route_assignment.csv, link_performance.csv, certificates.json]
+    certificates: [relative_gap_full_space, conservation, engine_escalation_log]
+  W3:
+    name: import
+    summary: external kernel audit (TAPLite4MPO / DTALite)
+    stages: [kernel_run, parse_outputs, audit, path_acquisition]
+    path_acquisition:
+      primary: route_assignment.csv        # native TAPLite kernel output (verified in kernel/src/TAPLite.cpp)
+      fallback: reprice_columns            # warm-start pricing at kernel times (scipy or networkx)
+    certificates: [kernel_gap_at_kernel_times, conservation, flow_correlation_vs_internal, column_coverage]
+  W4:
+    name: calibrate
+    summary: dynamic ODME profile (departure profile + bounded low-rank OD)
+    stages: [observations, observability_gate, typed_chain_gradient, estimates]
+    certificates: [observability_rank, fd_gradient_check, synthetic_recovery_gate]
+  W5:
+    name: visualize
+    summary: gui4gmns dashboards with certificate panel
+    stages: [run_folder, export_gmns, gui4gmns, dashboard]
+    certificates: [certificate_panel_rendered]
+  W6:
+    name: teach
+    summary: executable notebook ladder T1-T7 (Colab/nbviewer badged)
+    stages: [notebook, run_certify_explain, ci_nbmake]
+  W7:
+    name: profile
+    summary: layered equilibria (Rx<=Sy, MAGE, multilayer freight)
+    stages: [extension_axes, block_price_sync, equilibrium, certificates]
+    certificates: [complementarity, feasibility, multi_start_spread, duality_gap_reported]
+
+pipelines:
+  quickstart: [W1, W2, W5]
+  mpo:        [W1, W3, W5]
+  corridor:   [W1, W3, W4, W5]
+  research:   [W1, W7, W5]
+  classroom:  [W6]
+
+corridors:
+  spr790:                                   # first registry entry (author decision)
+    description: I-17 SPR-790 corridor line
+    gmns: ${TENSORMOBILITY_SPR790_GMNS}     # private agency data stays local
+    attributes: ${TENSORMOBILITY_SPR790_ATTR}
+    pipeline: corridor

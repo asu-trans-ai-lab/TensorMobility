@@ -180,7 +180,24 @@ case notebook that CI can re-run.
 | 5 | corridor registry + one real corridor end-to-end | 2, 4 |
 | 6 | certificate panel proposal to gui4gmns | 1 |
 
-## 5. Open questions for the author
+## 5. Author decisions (2026-07-21) — CLOSED
+
+1. **TAPLite paths**: the kernel already writes `route_assignment.csv`
+   (verified in `kernel/src/TAPLite.cpp`) — that native output is the
+   PRIMARY path source for W3; adapter-side re-pricing (scipy or
+   networkx shortest paths, whichever is simpler to interact with) is
+   the fallback for kernels without route output.
+2. **`certificates.json` is the lab-wide sidecar convention**, to be
+   consumed and rendered by gui4gmns (certificate panel).
+3. **First corridor: the I-17 SPR-790 line** (`corridors.spr790` in
+   `workflow.yml`; private agency data stays local via env vars).
+4. **Notebooks get Colab/nbviewer badges**, and their visualization
+   cells emit gui4gmns-style self-contained HTML.
+
+Workflow names are registered machine-readably in **`workflow.yml`**
+(source of truth); `workflow.html` is its rendered view.
+
+## 6. Superseded open questions
 
 1. TAPLite path output: adapter-side re-pricing (P3, no upstream
    change) vs adding a native `path.csv` dump to TAPLite4MPO — do both?
