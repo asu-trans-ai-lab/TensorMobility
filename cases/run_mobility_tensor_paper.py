@@ -120,13 +120,18 @@ def figure_grid_tours(
     case: MobilityTensorCase, scenario: Scenario, flow: np.ndarray, path: Path
 ) -> None:
     """Figure 3: the grid, the measured opportunity field U, and the
-    highest-flow complete HWH and HWSH columns."""
+    highest-flow complete HWH and HWSH columns.
+
+    The grid keeps the original demo styling (crisp edges, solid
+    nodes); tour columns run as thin parallel lines OFFSET beside the
+    arcs -- transit-map style -- so the network itself stays legible.
+    """
     pos = {node: (node[1], -node[0]) for node in case.graph.nodes()}
     fig, ax = plt.subplots(figsize=(7.4, 6.4))
     nx.draw_networkx_edges(case.graph, pos, ax=ax, arrows=False, width=0.8,
-                           alpha=0.4)
-    nx.draw_networkx_nodes(case.graph, pos, ax=ax, node_size=120,
-                           node_color="#c9d4de", linewidths=0.6)
+                           alpha=0.5)
+    nx.draw_networkx_nodes(case.graph, pos, ax=ax, node_size=150,
+                           linewidths=0.8)
 
     U = case.opportunity_supply_tensor(scenario).data
     markers = {"H": "o", "W": "s", "S": "^"}
@@ -136,31 +141,39 @@ def figure_grid_tours(
             for j in range(case.config.columns):
                 if U[i, j, m_idx] > 0:
                     nodes.append((i + 1, j + 1))
-                    sizes.append(170 + 0.35 * U[i, j, m_idx])
+                    sizes.append(160 + 0.35 * U[i, j, m_idx])
         if nodes:
             xy = np.array([pos[node] for node in nodes])
             ax.scatter(xy[:, 0], xy[:, 1], s=sizes, marker=markers[m],
                        label=f"U supply: {m}", zorder=3)
 
-    colors = {"HWH": "#c0392b", "HWSH": "#2471a3"}
-    for tour_type in ("HWH", "HWSH"):
+    # Offset each tour to its own parallel track so no line ever
+    # covers a grid arc or the other tour.
+    tracks = {"HWH": ("#c0392b", 0.10), "HWSH": ("#2471a3", -0.10)}
+    for tour_type, (color, shift) in tracks.items():
         candidates = [c for c in case.columns if c.tour_type == tour_type]
         best = max(candidates, key=lambda c: flow[c.column_id])
         for leg in best.legs:
-            xy = np.array([pos[node] for node in leg])
-            ax.plot(xy[:, 0], xy[:, 1], color=colors[tour_type], linewidth=2.4,
-                    alpha=0.85, zorder=2,
+            xy = np.array([pos[node] for node in leg], dtype=float)
+            xy += shift
+            ax.plot(xy[:, 0], xy[:, 1], color=color, linewidth=1.8,
+                    alpha=0.9, zorder=1.5, solid_joinstyle="round",
                     label=f"top {tour_type} column ({flow[best.column_id]:.0f} p)"
                     if leg is best.legs[0] else None)
 
     ax.set_title(f"Complete activity-tour-path columns on the measured "
                  f"U field: {scenario.name}")
-    ax.set_xlabel("grid column j")
-    ax.set_ylabel("grid row i")
+    ax.set_xlabel("Grid column j")
+    ax.set_ylabel("Grid row i")
     handles, labels = ax.get_legend_handles_labels()
     unique = dict(zip(labels, handles))
-    ax.legend(unique.values(), unique.keys(), frameon=False, fontsize=9)
+    ax.legend(unique.values(), unique.keys(), frameon=False, fontsize=9,
+              markerscale=0.45, ncol=3, loc="upper center",
+              bbox_to_anchor=(0.5, -0.08))
     ax.set_aspect("equal")
+    # networkx disables tick labels; restore them for the grid axes.
+    ax.tick_params(axis="both", which="both", bottom=True, left=True,
+                   labelbottom=True, labelleft=True)
     ax.set_xticks(range(1, case.config.columns + 1))
     ax.set_yticks([-i for i in range(1, case.config.rows + 1)],
                   range(1, case.config.rows + 1))

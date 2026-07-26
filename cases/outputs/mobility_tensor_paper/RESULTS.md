@@ -34,10 +34,10 @@ Remainder decay: median |exact - second-order| ratio 8.10 when the step doubles 
 
 | network        |   nodes |   links |   od_pairs |   columns |   full_space_gap |   feasibility |    wall_s |
 |:---------------|--------:|--------:|-----------:|----------:|-----------------:|--------------:|----------:|
-| grid 10x10     |     100 |     360 |         20 |       280 |         8e-05    |             0 |  0.384283 |
-| grid 20x20     |     400 |    1520 |         60 |      2750 |         9.8e-05  |             0 |  2.75466  |
-| grid 50x50     |    2500 |    9800 |        200 |     16041 |         0.000244 |             0 | 46.8043   |
-| Chicago Sketch |     933 |    2950 |      93135 |    198683 |         9.8e-05  |             0 | 12.2979   |
+| grid 10x10     |     100 |     360 |         20 |       280 |         8e-05    |             0 |  0.472989 |
+| grid 20x20     |     400 |    1520 |         60 |      2750 |         9.8e-05  |             0 |  3.88955  |
+| grid 50x50     |    2500 |    9800 |        200 |     16041 |         0.000244 |             0 | 51.6041   |
+| Chicago Sketch |     933 |    2950 |      93135 |    198683 |         9.8e-05  |             0 | 12.8105   |
 
 External-data note: TRMG2 regional and IEEE corridor rows require locally held datasets (TENSORMOBILITY_TRMG2_DATA / TENSORMOBILITY_TFB_DATA) and are quoted in the paper as optional evidence only.
 
