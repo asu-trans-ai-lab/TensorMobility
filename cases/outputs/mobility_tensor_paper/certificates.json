@@ -1,0 +1,110 @@
+{
+  "Base measured land use": [
+    {
+      "name": "class_demand_conservation",
+      "residual": 5.684341886080801e-13,
+      "passed": true
+    },
+    {
+      "name": "nonnegative_flow",
+      "residual": -0.0,
+      "passed": true
+    },
+    {
+      "name": "kkt_equal_gradient_spread",
+      "residual": 1.341802310150797e-06,
+      "scale": 16.80141754055033,
+      "passed": true
+    },
+    {
+      "name": "hessian_positive_semidefinite",
+      "min_eigenvalue": -3.0009386186426233e-16,
+      "passed": true
+    }
+  ],
+  "Employment shifted to W2": [
+    {
+      "name": "class_demand_conservation",
+      "residual": 5.684341886080802e-14,
+      "passed": true
+    },
+    {
+      "name": "nonnegative_flow",
+      "residual": -0.0,
+      "passed": true
+    },
+    {
+      "name": "kkt_equal_gradient_spread",
+      "residual": 4.80545292447232e-08,
+      "scale": 16.699940361614193,
+      "passed": true
+    },
+    {
+      "name": "hessian_positive_semidefinite",
+      "min_eigenvalue": -9.433275579976313e-16,
+      "passed": true
+    }
+  ],
+  "Central capacity -40%": [
+    {
+      "name": "class_demand_conservation",
+      "residual": 6.821210263296962e-13,
+      "passed": true
+    },
+    {
+      "name": "nonnegative_flow",
+      "residual": -0.0,
+      "passed": true
+    },
+    {
+      "name": "kkt_equal_gradient_spread",
+      "residual": 2.003301595721041e-07,
+      "scale": 16.872908827436806,
+      "passed": true
+    },
+    {
+      "name": "hessian_positive_semidefinite",
+      "min_eigenvalue": -3.3744174988961597e-16,
+      "passed": true
+    }
+  ],
+  "pricing": [
+    {
+      "name": "second_order_improves_first_order_mae",
+      "first_order_mae": 1.14499879203397,
+      "second_order_mae": 0.004068251335512736,
+      "passed": true
+    },
+    {
+      "name": "remainder_decays_cubically",
+      "median_ratio_on_step_doubling": 8.100673207867528,
+      "passed": true
+    }
+  ],
+  "scaling": [
+    {
+      "name": "grid_10x10_full_space_gap",
+      "relative_gap": 8.005659494767139e-05,
+      "feasibility_residual": 1.7053025658242404e-13,
+      "passed": true
+    },
+    {
+      "name": "grid_20x20_full_space_gap",
+      "relative_gap": 9.792925524227746e-05,
+      "feasibility_residual": 3.410605131648481e-13,
+      "passed": true
+    },
+    {
+      "name": "grid_50x50_full_space_gap",
+      "relative_gap": 0.0002440942159671157,
+      "feasibility_residual": 3.979039320256561e-13,
+      "passed": true
+    },
+    {
+      "name": "chicago_sketch_full_space_gap",
+      "relative_gap": 9.761961359144832e-05,
+      "feasibility_residual": 9.094947017729282e-13,
+      "passed": true
+    }
+  ]
+}

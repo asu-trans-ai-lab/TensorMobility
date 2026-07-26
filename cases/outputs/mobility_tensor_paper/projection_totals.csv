@@ -1,0 +1,5 @@
+projection,axis,size,total
+y = E f,tour_alternative,8,1000.0000000000007
+q = R f,tour_leg_od,12,2433.5584970582804
+x = Delta f,grid_arc,80,9093.36125172933
+X = Gamma f,cell_row x cell_col x activity,75,2433.558497058281
