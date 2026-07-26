@@ -7,5 +7,12 @@ dist/
 research_papers/*.aux
 research_papers/*.log
 research_papers/*.out
+research_papers/**/*.aux
+research_papers/**/*.log
+research_papers/**/*.out
+research_papers/**/*.bbl
+research_papers/**/*.bcf
+research_papers/**/*.blg
+research_papers/**/*.run.xml
 dev_internal_research_paper/*
 !dev_internal_research_paper/README.md

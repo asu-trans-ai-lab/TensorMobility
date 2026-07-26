@@ -7,6 +7,7 @@ and the certified results of the main suite.
 
 | # | case | teaches | package anchor |
 |---|---|---|---|
+| T0 | the mobility-tensor paper case (**runnable now**: `python cases/run_mobility_tensor_paper.py`) | complete activity-tour-path columns; typed projections y=Ef, q=Rf, x=Δf, X=Γf; measured opportunity supply U[i,j,m]; the joint Hessian and second-order column pricing verified against exact finite moves | `optimization.mobility_tensor_case`, `optimization.quadratic_pricing` |
 | T1 | FTT chain by hand | mode contraction, transpose-symmetry gradients, the 4-OD micro-example | `core.flow_through`, `core.tensor_contracts` |
 | T2 | logit ↔ UE ladder | entropy-master KKT = logit; τ→0 limit; self-consistency residuals | `dta.special_cases.solve_case_1` |
 | T3 | fluid queue pulse | cumulative counts, closed-form peak/clearing/delay, causality | `dynamics.fluid_queue` |
@@ -21,3 +22,11 @@ certificates mean and what breaks without them. T4, T5, and T7 are
 deliberate *failure-mode* lessons — the pool that degrades, the
 compression that cannot pay, the iteration that cycles — because the
 diagnosis discipline is the curriculum.
+
+T0 is the first fully runnable rung: the 5×5 grid case of the TRB
+paper draft (`research_papers/trb_mobility_tensor/`), hand-checkable
+end to end, CI-tested (`tests/test_quadratic_pricing.py`,
+`tests/test_landuse_activity_dta_integration.py`), and exporting its
+own `certificates.json`. Every number in the paper comes from that one
+script — the teaching case and the paper evidence are the same
+artifact, so neither can rot without the other noticing.
